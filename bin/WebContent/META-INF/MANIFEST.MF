@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1350461992085
+Build-Jdk: 1.6.0_35
+Built-By: matteocantarelli
+Bundle-ClassPath: .,target/dependency/org.neuroml.model-1.0.0-SNAPSHOT.j
+ ar,target/dependency/org.apache.servicemix.bundles.protobuf-java-2.4.1_
+ 1.jar,target/dependency/servlet-api-2.5.jar
+Bundle-ManifestVersion: 2
+Bundle-Name: NeuroML Visualiser
+Bundle-SymbolicName: org.neuroml.visualiser
+Bundle-Version: 1.0.0
+Created-By: Apache Maven Bundle Plugin
+Embed-Dependency: *;scope=compile|runtime;inline=false
+Embed-Directory: target/dependency
+Embed-StripGroup: true
+Embedded-Artifacts: target/dependency/org.neuroml.model-1.0.0-SNAPSHOT.j
+ ar;g="org.neuroml.model";a="org.neuroml.model";v="1.0.0-SNAPSHOT",targe
+ t/dependency/org.apache.servicemix.bundles.protobuf-java-2.4.1_1.jar;g=
+ "org.apache.servicemix.bundles";a="org.apache.servicemix.bundles.protob
+ uf-java";v="2.4.1_1",target/dependency/servlet-api-2.5.jar;g="javax.ser
+ vlet";a="servlet-api";v="2.5"
+Export-Package: org.neuroml.visualiser.core;uses:="org.neuroml.visualise
+ r.model";version="1.0.0",org.neuroml.visualiser.model;version="1.0.0",o
+ rg.neuroml.visualiser.services;uses:="org.neuroml.visualiser.model,org.
+ neuroml.visualiser.core";version="1.0.0"
+Import-Package: javax.xml.bind,javax.xml.bind.annotation,javax.xml.names
+ pace,org.w3c.dom
+Tool: Bnd-1.50.0

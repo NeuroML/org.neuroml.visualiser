@@ -57,3 +57,10 @@ message Point {
 	required double z=3;
 }
 
+message NeuroMLURL{
+	required string url = 1;
+}
+
+service AGet3DSceneService {
+  rpc get3DScene (NeuroMLURL) returns (Scene);
+}
