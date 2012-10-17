@@ -1,0 +1,6 @@
+===NOTE===
+
+Ideally there wouldn't be any embedded libraries here.
+But not all libraries we need are available in an OSGi compatible version in a Maven repository.
+Hence here there will be OSGi wrapped JARs which were not available elsewhere.
+As soon as one of the libraries becomes available in an OSGi version in a Maven repo then it should be mode to POM.xml.
