@@ -5,10 +5,6 @@
 	<artifactId>org.neuroml.visualiser</artifactId>
 	<version>1.0.0</version>
 	<name>NeuroML Visualiser</name>
-	<properties>
-		<bundle.symbolicName>org.neuroml.visualiser</bundle.symbolicName>
-		<bundle.namespace>org.neuroml.visualiser</bundle.namespace>
-	</properties>
 	<packaging>bundle</packaging>
 	<build>
 		<pluginManagement>
@@ -62,6 +58,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<configuration>
+					<supportedProjectTypes>
+						<supportedProjectType>war</supportedProjectType>
+						<supportedProjectType>bundle</supportedProjectType>
+					</supportedProjectTypes>
 					<outputDirectory>${project.build.outputDirectory}/lib</outputDirectory>
 					<includeScope>runtime</includeScope>
 					<excludeScope>provided</excludeScope>
@@ -75,6 +75,17 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<packagingExcludes>WEB-INF/lib/*.jar</packagingExcludes>
+					<warName>org.neuroml.model.visualiser</warName>
+					<archive>
+						<manifestFile>WebContent/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -96,18 +107,19 @@
 		<dependency>
 			<groupId>org.neuroml.model</groupId>
 			<artifactId>org.neuroml.model</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.protobuf-java</artifactId>
-			<version>2.4.1_1</version>
-		</dependency> -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google</groupId>
+			<artifactId>protobuf</artifactId>
+			<version>2.4.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/WebContent/lib/protobuf-java-2.4.1.jar</systemPath>
+		</dependency>
 	</dependencies>
-
 </project>
