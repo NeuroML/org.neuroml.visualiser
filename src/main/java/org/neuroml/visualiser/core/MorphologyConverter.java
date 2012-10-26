@@ -3,19 +3,23 @@
  */
 package org.neuroml.visualiser.core;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.neuroml.model.BiophysicalProperties;
 import org.neuroml.model.Cell;
 import org.neuroml.model.Morphology;
 import org.neuroml.model.Neuroml;
 import org.neuroml.model.Point3DWithDiam;
 import org.neuroml.model.Segment;
-import org.neuroml.visualiser.model.MorphologyProtos.Cylinder;
-import org.neuroml.visualiser.model.MorphologyProtos.Entity;
-import org.neuroml.visualiser.model.MorphologyProtos.Geometry;
-import org.neuroml.visualiser.model.MorphologyProtos.Geometry.Type;
-import org.neuroml.visualiser.model.MorphologyProtos.Point;
-import org.neuroml.visualiser.model.MorphologyProtos.Scene;
+import org.neuroml.visualiser.model.AGeometry;
+import org.neuroml.visualiser.model.Cylinder;
+import org.neuroml.visualiser.model.Entity;
+import org.neuroml.visualiser.model.Metadata;
+import org.neuroml.visualiser.model.Point;
+import org.neuroml.visualiser.model.Scene;
+import org.neuroml.visualiser.model.Sphere;
 
 /**
  * @author matteocantarelli
@@ -23,65 +27,124 @@ import org.neuroml.visualiser.model.MorphologyProtos.Scene;
  */
 public class MorphologyConverter {
 
-	public Scene getSceneFromNeuroML(Neuroml neuroML) {
-		Scene.Builder sceneB = Scene.newBuilder();
-		List<Morphology> morphologies = neuroML.getMorphology();
-		if (morphologies != null) {
-			for (Morphology m : morphologies) {
-				sceneB.addEntity(getEntityFromMorphology(m));
+	public Scene getSceneFromNeuroML(List<Neuroml> neuromls) {
+		Scene scene = new Scene();
+		for (Neuroml neuroml : neuromls) {
+			List<Morphology> morphologies = neuroml.getMorphology();
+			if (morphologies != null) {
+				for (Morphology m : morphologies) {
+					Entity entity = getEntityFromMorphology(m);
+					scene.getEntities().add(entity);
+				}
 			}
-		}
-		List<Cell> cells = neuroML.getCell();
-		if (cells != null) {
-			for (Cell c : cells) {
-				Morphology cellmorphology = c.getMorphology();
-				if (cellmorphology != null) {
-					sceneB.addEntity(getEntityFromMorphology(cellmorphology));
+			List<Cell> cells = neuroml.getCell();
+			if (cells != null) {
+				for (Cell c : cells) {
+					Morphology cellmorphology = c.getMorphology();
+					if (cellmorphology != null) {
+						Entity entity = getEntityFromMorphology(cellmorphology);
+						augmentWithMetaData(entity,
+								c.getBiophysicalProperties());
+						scene.getEntities().add(entity);
+					}
 				}
 			}
 		}
-		return sceneB.build();
+		return scene;
+	}
+
+	private void augmentWithMetaData(Entity entity,
+			BiophysicalProperties biophysicalProperties) {
+		try {
+			entity.setMetadata(new Metadata());
+			entity.getMetadata().setAdditionalProperties(
+					"condDensity",
+					biophysicalProperties.getMembraneProperties()
+							.getChannelDensity().get(0).getCondDensity());
+			entity.getMetadata().setAdditionalProperties(
+					"spikeThresh",
+					biophysicalProperties.getMembraneProperties()
+							.getSpikeThresh().get(0).getValue());
+			entity.getMetadata().setAdditionalProperties(
+					"specificCapacitance",
+					biophysicalProperties.getMembraneProperties()
+							.getSpecificCapacitance().get(0).getValue());
+			entity.getMetadata().setAdditionalProperties(
+					"initMembPotential",
+					biophysicalProperties.getMembraneProperties()
+							.getInitMembPotential().get(0).getValue());
+			entity.getMetadata().setAdditionalProperties(
+					"resistivity",
+					biophysicalProperties.getIntracellularProperties()
+							.getResistivity().get(0).getValue());
+		} catch (NullPointerException ex) {
+
+		}
 	}
 
 	private Entity getEntityFromMorphology(Morphology morphology) {
-		Entity.Builder entityB = Entity.newBuilder();
+		Entity entity = new Entity();
+		Map<String, Point3DWithDiam> distalPoints = new HashMap<String, Point3DWithDiam>();
 		for (Segment s : morphology.getSegment()) {
-			entityB.addGeometry(getCylinderFromSegment(s));
+			String idSegmentParent = null;
+			Point3DWithDiam parentDistal = null;
+			if (s.getParent() != null) {
+				idSegmentParent = s.getParent().getSegment().toString();
+			}
+			if (distalPoints.containsKey(idSegmentParent)) {
+				parentDistal = distalPoints.get(idSegmentParent);
+			}
+			entity.getGeometries().add(getCylinderFromSegment(s, parentDistal));
+			distalPoints.put(s.getId(), s.getDistal());
 		}
-		return entityB.build();
+		return entity;
 	}
 
-	private Geometry getCylinderFromSegment(Segment s) {
-		Geometry.Builder geometryP = Geometry.newBuilder();
-		geometryP.setType(Type.Cylinder);
+	private boolean samePoint(Point3DWithDiam p1, Point3DWithDiam p2) {
+		return p1.getX() == p2.getX() && p1.getY() == p2.getY()
+				&& p1.getZ() == p2.getZ()
+				&& p1.getDiameter() == p2.getDiameter();
+	}
 
-		Cylinder.Builder cylB = Cylinder.newBuilder();
-		if (s.getDistal() != null) {
-			cylB.setDistal(getPoint(s.getDistal()));
-			cylB.setRadiusBottom(s.getDistal().getDiameter() / 2);
+	private AGeometry getCylinderFromSegment(Segment s,
+			Point3DWithDiam parentDistal) {
+
+		Point3DWithDiam proximal = s.getProximal() == null ? parentDistal : s
+				.getProximal();
+		Point3DWithDiam distal = s.getDistal();
+
+		if (samePoint(proximal, distal)) // ideally an equals but the objects
+											// are generated. hassle postponed.
+		{
+			Sphere sphere = new Sphere();
+			sphere.setRadius(proximal.getDiameter() / 2);
+			sphere.setPosition(getPoint(proximal));
+			return sphere;
 		} else {
-			cylB.setDistal(Point.newBuilder().setX(0d).setY(0d).setZ(0d).build());
-			cylB.setRadiusBottom(0d);
-		}
-		if (s.getProximal() != null) {
-			cylB.setRadiusTop(s.getProximal().getDiameter() / 2);
-		} else {
-			cylB.setRadiusTop(0d);
+			Cylinder cyl = new Cylinder();
 
-		}
-		cylB.setA1(0f);
-		cylB.setA2(0f);
-		cylB.setHeight(10);
-		geometryP.setExtension(Cylinder.geometry, cylB.build());
+			if (proximal != null) {
+				cyl.setPosition(getPoint(proximal));
+				cyl.setRadiusBottom(proximal.getDiameter() / 2);
+			}
 
-		return geometryP.build();
+			if (distal != null) {
+				cyl.setRadiusTop(s.getDistal().getDiameter() / 2);
+				cyl.setA1(0d);
+				cyl.setA2(0d);
+				cyl.setDistal(getPoint(distal));
+				cyl.setHeight(0d);
+			}
+			return cyl;
+		}
+
 	}
 
 	private Point getPoint(Point3DWithDiam distal) {
-		Point.Builder pointB = Point.newBuilder();
-		pointB.setX(distal.getX());
-		pointB.setY(distal.getY());
-		pointB.setZ(distal.getZ());
-		return pointB.build();
+		Point point = new Point();
+		point.setX(distal.getX());
+		point.setY(distal.getY());
+		point.setZ(distal.getZ());
+		return point;
 	}
 }
