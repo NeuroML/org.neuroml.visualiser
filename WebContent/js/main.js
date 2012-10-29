@@ -1,55 +1,60 @@
-function get3DScene() {
-	$
-			.ajax({
-				type : 'POST',
-				url : '/org.neuroml.visualiser/Get3DSceneServlet',
-				data : {
-					 url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-					// url :"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
-//				 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/"
-				// url :"https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+function get3DScene()
+{
+	$.ajax({
+		type : 'POST',
+		url : '/org.neuroml.visualiser/Get3DSceneServlet',
+		data : {
+			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
+			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
+			 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/"
+			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+			// url :"https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+				 // url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+		// url:"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
+// url:"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 
-				},
-				timeout : 1000000,
-				success : function(data, textStatus) {
-					jsonscene=data;
-					init();
-					animate();
-				},
-				error : function(xhr, textStatus, errorThrown) {
-					alert("Error getting scene!" + textStatus + " ET "
-							+ errorThrown);
-				}
-			});
+		},
+		timeout : 1000000,
+		success : function(data, textStatus)
+		{
+			jsonscene = data;
+			init();
+			animate();
+		},
+		error : function(xhr, textStatus, errorThrown)
+		{
+			alert("Error getting scene!" + textStatus + " ET " + errorThrown);
+		}
+	});
 }
 
-$(document).ready(function() {
+$(document).ready(function()
+{
 	get3DScene();
 });
 
-function getThreeObjectFromJSONGeometry(g, material) {
+function getThreeObjectFromJSONGeometry(g, material)
+{
 	var threeObject;
-	switch (g.type) {
+	switch (g.type)
+	{
 	case "Particle":
 		break;
 	case "Cylinder":
 		var lookAtV = new THREE.Vector3(g.distal.x, g.distal.y, g.distal.z);
-		var positionV = new THREE.Vector3(g.position.x, g.position.y,
-				g.position.z);
-		threeObject = getCylinder(positionV, lookAtV, g.radiusTop,
-				g.radiusBottom, material);
+		var positionV = new THREE.Vector3(g.position.x, g.position.y, g.position.z);
+		threeObject = getCylinder(positionV, lookAtV, g.radiusTop, g.radiusBottom, material);
 		break;
 	case "Sphere":
-		threeObject = new THREE.Mesh(
-				new THREE.SphereGeometry(g.radius, 10, 10), material);
+		threeObject = new THREE.Mesh(new THREE.SphereGeometry(g.radius, 10, 10), material);
 		threeObject.position.set(g.position.x, g.position.y, g.position.z);
 		break;
 	}
 	return threeObject;
 }
 
-function getCylinder(bottomBasePos, topBasePos, radiusTop, radiusBottom,
-		material) {
+function getCylinder(bottomBasePos, topBasePos, radiusTop, radiusBottom, material)
+{
 
 	var cylinderAxis = new THREE.Vector3();
 	cylinderAxis.sub(topBasePos, bottomBasePos);
@@ -60,8 +65,7 @@ function getCylinder(bottomBasePos, topBasePos, radiusTop, radiusBottom,
 	midPoint.add(bottomBasePos, topBasePos);
 	midPoint.multiplyScalar(0.5);
 
-	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 4,
-			false);
+	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 5, false);
 	threeObject = new THREE.Mesh(c, material);
 
 	lookAt(threeObject, cylinderAxis);
@@ -71,7 +75,8 @@ function getCylinder(bottomBasePos, topBasePos, radiusTop, radiusBottom,
 }
 
 // Orients an objetc obj so that it looks at a point in space
-function lookAt(obj, point) {
+function lookAt(obj, point)
+{
 
 	// Y Coordinate axis
 	var yAxis = new THREE.Vector3(0, 1, 0);
@@ -99,15 +104,15 @@ function lookAt(obj, point) {
 }
 
 // Print a point coordinates on console
-function printPoint(string, point) {
-	console
-			.log(string + " (" + point.x + ", " + point.y + ", " + point.z
-					+ ")");
+function printPoint(string, point)
+{
+	console.log(string + " (" + point.x + ", " + point.y + ", " + point.z + ")");
 }
 
 // Angle between x axis and the projection of the position vector on the XZ
 // plane
-function compTheta(proj) {
+function compTheta(proj)
+{
 	var v = proj;
 
 	v.normalize();
@@ -121,24 +126,31 @@ function compTheta(proj) {
 	// Correct the fact that the reference system is right handed
 	// and that acos returns only values between 0 and PI
 	// ignoring angles in the third and fourth quadrant
-	if (sign != 0) {
+	if (sign != 0)
+	{
 		if ((cos >= 0 && sign >= 0) || (cos < 0 && sign < 0))
 			return -angle;
 		else if (cos < 0 && sign >= 0)
 			return (angle + Math.PI);
 		else if (cos >= 0 && sign < 0)
 			return angle;
-	} else {
-		if (v.z > 0 || v.x < 0) {
+	}
+	else
+	{
+		if (v.z > 0 || v.x < 0)
+		{
 			return -angle;
-		} else if (v.x >= 0 || v.z < 0) {
+		}
+		else if (v.x >= 0 || v.z < 0)
+		{
 			return angle;
 		}
 	}
 }
 
 // Angle between the position vetor and the Y axis
-function compPhi(point) {
+function compPhi(point)
+{
 	var v = point;
 	v.normalize();
 
@@ -159,25 +171,28 @@ var projector, mouse = {
 }, INTERSECTED;
 var keyboard = new THREEx.KeyboardState();
 
-function getThreeSceneFromJSONScene() {
+function getThreeSceneFromJSONScene()
+{
 	scene = new THREE.Scene();
 
 	var entities = jsonscene.entities;
 
-	for ( var eindex in entities) {
+	for ( var eindex in entities)
+	{
 		var geometries = entities[eindex].geometries;
-		var entity = new THREE.Object3D();
-		var material = new THREE.MeshLambertMaterial();
-		material.color.setHex('0x'
-				+ (Math.random() * 0xFFFFFF << 0).toString(16));
 
-		for ( var gindex in geometries) {
-			var threeObject = getThreeObjectFromJSONGeometry(
-					geometries[gindex], material);
-			threeObject.eindex=eindex;
-			entity.add(threeObject);
+		var material = new THREE.MeshLambertMaterial();
+		material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+		var combined = new THREE.Geometry();
+		for ( var gindex in geometries)
+		{
+			var threeObject = getThreeObjectFromJSONGeometry(geometries[gindex], material);
+			THREE.GeometryUtils.merge(combined, threeObject);
 		}
-		scene.add(entity);
+		var entityMesh = new THREE.Mesh(combined, material);
+		scene.add(entityMesh);
+		entityMesh.eindex = eindex;
+		scene.add(entityMesh);
 	}
 
 	return scene;
@@ -229,56 +244,81 @@ function setupStats()
 	stats.domElement.style.position = 'absolute';
 	stats.domElement.style.bottom = '0px';
 	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	container.appendChild(stats.domElement);
 	projector = new THREE.Projector();
 }
 
 function setupLights()
 {
 	// Lights
-	
+
 	light = new THREE.DirectionalLight(0xffffff);
 	light.position.set(1, 1, 1);
 	scene.add(light);
-	light = new THREE.DirectionalLight(0x002288);
+	light = new THREE.DirectionalLight(0xffffff);
 	light.position.set(-1, -1, -1);
 	scene.add(light);
 	light = new THREE.AmbientLight(0x222222);
 	scene.add(light);
 }
 
-var metadata = 
-{
-		condDensity:"-",
-		spikeThresh:"-",
-		specificCapacitance:"-",
-		initMembPotential:"-",
-		resistivity:"-"
-		
-};
+var metadata = {};
 
 function setupGUI()
 {
-	// GUI
-	gui = new dat.GUI();
+	var data = false;
+	for ( var m in metadata)
+	{
+		data = true;
+		break;
+	}
 
-	this.color1 = "#43ccee";
-		this.color2="#88aa00";
-	var folder1 = gui.addFolder('Membrane Properties');
-	var condDensity = folder1.add(metadata, 'condDensity',color1 ).name('Condunctance density'); //channelDensity
-	guiToUpdate.push(condDensity);
-	var spikeThresh = folder1.add(metadata, 'spikeThresh',color1 ).name('Spike Threshold' );
-	guiToUpdate.push(spikeThresh);
-	var specificCapacitance = folder1.add(metadata, 'specificCapacitance',color1 ).name( 'Specific Capacitance' );
-	guiToUpdate.push(specificCapacitance);
-	var initMembPotential = folder1.add(metadata, 'initMembPotential',color1).name( 'Initial Membrane Potential' );
-	guiToUpdate.push(initMembPotential);
-	
-	var folder2 = gui.addFolder('Intracellular Properties');
-	var resistivity = folder2.add(metadata, 'resistivity',color2 ).name( 'Resistivity' );
-	guiToUpdate.push(resistivity);
-	folder1.open();
-	folder2.open();
+	// GUI
+	if (!gui && data)
+	{
+		gui = new dat.GUI();
+		addControls(gui, metadata);
+	}
+
+}
+
+function updateMetaData(metadatatoupdate, metadatanew)
+{
+	for ( var m in metadatanew)
+	{
+		if (typeof metadatanew[m] == "object")
+		{
+			updateMetaData(metadatatoupdate[m], metadatanew[m]);
+		}
+		else
+		{
+			metadatatoupdate[m] = metadatanew[m];
+		}
+	}
+}
+
+function addControls(gui, metadatap)
+{
+	if (metadatap.hasOwnProperty("ID"))
+	{
+		gui.add(metadatap, "ID").listen();
+	}
+	for ( var m in metadatap)
+	{
+		if (m != "ID")
+		{
+			if (typeof metadatap[m] == "object")
+			{
+				folder = gui.addFolder(m);
+				addControls(folder, metadatap[m]);
+				folder.open();
+			}
+			else
+			{
+				gui.add(metadatap, m).listen();
+			}
+		}
+	}
 }
 
 function setupRenderer()
@@ -286,7 +326,7 @@ function setupRenderer()
 	// and the CanvasRenderer figures out what the
 	// stuff in the scene looks like and draws it!
 	renderer = new THREE.WebGLRenderer({
-		antialias : false
+		antialias : true
 	});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -305,30 +345,33 @@ function setupListeners()
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
-var camera, controls, scene, renderer,stats, gui;
-var guiToUpdate=[];
+var camera, controls, scene, renderer, stats, gui;
+var guiToUpdate = [];
 var jsonscene;
+var TOGGLE_N = true;
 var TOGGLE_Z = false;
 
-//*********Init Function*********
+// *********Init Function*********
 
-function init() {
+function init()
+{
 	setupScene();
 	setupContainer();
 	setupCamera();
 	setupControls();
 	setupLights();
 	setupStats();
-	setupGUI();
 	setupRenderer();
 	setupListeners();
 };
 
-function render() {
+function render()
+{
 	renderer.render(scene, camera);
 }
 
-function onDocumentMouseMove(event) {
+function onDocumentMouseMove(event)
+{
 	// the following line would stop any other event handler from firing
 	// (such as the mouse's TrackballControls)
 	// event.preventDefault();
@@ -338,84 +381,140 @@ function onDocumentMouseMove(event) {
 	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function animate() {
+function animate()
+{
 	requestAnimationFrame(animate);
 	render();
 	update();
 }
 
-function updateGUI(){
-	for (var i in guiToUpdate) {
+function updateGUI()
+{
+	for ( var i in guiToUpdate)
+	{
 		guiToUpdate[i].updateDisplay();
-	  }	
+	}
 }
 
-function update() {
+// var highlightMaterial = new THREE.MeshLambertMaterial();
+// highlightMaterial.color.setHex(0xFFFF00);
+// highlightMaterial.opacity = 1;
+// highlightMaterial.emissive.setHex(0xFFFFFF);
+
+var highlightMaterial = new THREE.MeshLambertMaterial({
+	color : 0x666666,
+	emissive : 0xff0000,
+	ambient : 0x000000,
+	shading : THREE.SmoothShading
+});
+
+var standardMaterial = new THREE.MeshLambertMaterial();
+standardMaterial.color.setHex(0xaaaaaa);
+standardMaterial.opacity = 0.4;
+
+function update()
+{
 	// find intersections
 
-	// create a Ray with origin at the mouse position
-	// and direction into the scene (camera direction)
-	var vector = new THREE.Vector3(mouse.x, mouse.y, 1);
-	projector.unprojectVector(vector, camera);
-	var ray = new THREE.Ray(camera.position, vector.subSelf(camera.position)
-			.normalize());
-
-	// create an array containing all objects in the scene with which the ray
-	// intersects
-	var intersects = ray.intersectObjects(scene.children, true);
-
-	// INTERSECTED = the object in the scene currently closest to the camera
-	// and intersected by the Ray projected from the mouse position
-
-	// if there is one (or more) intersections
-	if (intersects.length > 0) {
-		// if the closest object intersected is not the currently stored
-		// intersection object
-		if (intersects[0].object != INTERSECTED) {
-			// restore previous intersection object (if it exists) to its
-			// original color
-			if (INTERSECTED)
-				INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-			// store reference to closest object as current intersection object
-			INTERSECTED = intersects[0].object;
-			// store color of closest object (for later restoration)
-			INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
-			// set a new color for closest object
-			INTERSECTED.material.color.setHex(0xffff00);
-			
-			//metadata=jsonscene.entities[INTERSECTED.eindex].metadata;
-			newm=jsonscene.entities[INTERSECTED.eindex].metadata;
-			 for(var key in metadata)
-				 metadata[key] = newm[key];   
-			updateGUI();
-		}
-	} else // there are no intersections
+	if (TOGGLE_Z)
 	{
-		// restore previous intersection object (if it exists) to its original
-		// color
-		if (INTERSECTED)
-			INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
-		// remove previous intersection object reference
-		// by setting current intersection object to "nothing"
-		INTERSECTED = null;
+		// create a Ray with origin at the mouse position
+		// and direction into the scene (camera direction)
+		var vector = new THREE.Vector3(mouse.x, mouse.y, 1);
+		projector.unprojectVector(vector, camera);
+		var ray = new THREE.Ray(camera.position, vector.subSelf(camera.position).normalize());
+
+		// create an array containing all objects in the scene with which the
+		// ray
+		// intersects
+		var intersects = ray.intersectObjects(scene.children, true);
+
+		// INTERSECTED = the object in the scene currently closest to the camera
+		// and intersected by the Ray projected from the mouse position
+
+		// if there is one (or more) intersections
+		if (intersects.length > 0)
+		{
+			// if the closest object intersected is not the currently stored
+			// intersection object
+			if (intersects[0].object != INTERSECTED)
+			{
+				// restore previous intersection object (if it exists) to its
+				// original color
+				if (INTERSECTED)
+					INTERSECTED.material = standardMaterial;
+				// store reference to closest object as current intersection
+				// object
+				INTERSECTED = intersects[0].object;
+				// store color of closest object (for later restoration)
+				// set a new color for closest object
+				INTERSECTED.material = highlightMaterial;
+
+				if (!gui)
+				{
+					metadata = jsonscene.entities[INTERSECTED.eindex].metadata;
+					setupGUI();
+				}
+				else
+				{
+					updateMetaData(metadata, jsonscene.entities[INTERSECTED.eindex].metadata);
+					updateGUI();
+				}
+
+			}
+		}
+		else
+		// there are no intersections
+		{
+			// restore previous intersection object (if it exists) to its
+			// original
+			// color
+			if (INTERSECTED)
+			{
+				INTERSECTED.material = standardMaterial;
+			}
+			// remove previous intersection object reference
+			// by setting current intersection object to "nothing"
+			INTERSECTED = null;
+		}
 	}
 
-	if (keyboard.pressed("z")) {
-		if (TOGGLE_Z) {
-			THREE.SceneUtils.traverseHierarchy(scene, function(child) {
-				if (child.hasOwnProperty("material")) {
-					child.material.color.setHex(0xffff00);
-				}
-			}); 
-		} else {
-			THREE.SceneUtils.traverseHierarchy(scene, function(child) {
-				if (child.hasOwnProperty("material")) {
-					child.material.color.setHex(0xaaaaaa);
-				}
-			});
-		}
-		TOGGLE_Z = !TOGGLE_Z;
+	if (keyboard.pressed("z") && !TOGGLE_Z)
+	{
 
+		TOGGLE_Z = true;
+		TOGGLE_N = false;
+		setupGUI();
+		renderer.setClearColorHex(0x000000, 1);
+		THREE.SceneUtils.traverseHierarchy(scene, function(child)
+		{
+			if (child.hasOwnProperty("material"))
+			{
+				child.material = standardMaterial;
+			}
+		});
+
+	}
+	if (keyboard.pressed("n") && !TOGGLE_N)
+	{
+		TOGGLE_Z = false;
+		TOGGLE_N = true;
+		if (gui)
+		{
+			gui.domElement.parentNode.removeChild(gui.domElement);
+			gui = null;
+		}
+		metadata = {};
+		renderer.setClearColorHex(0xffffff, 1);
+		THREE.SceneUtils.traverseHierarchy(scene, function(child)
+		{
+			if (child.hasOwnProperty("material"))
+			{
+				var material = new THREE.MeshLambertMaterial();
+				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+				child.material = material;
+			}
+		});
 	}
 	stats.update();
 	controls.update();
