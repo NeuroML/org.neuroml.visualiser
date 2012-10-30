@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.neuroml.model.Neuroml;
 import org.neuroml.model.util.NeuroMLConverter;
 import org.neuroml.visualiser.core.MorphologyConverter;
-import org.neuroml.visualiser.model.Scene;
+import org.openworm.simulationengine.core.visualisation.model.Scene;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -88,22 +88,6 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>com.googlecode.jsonschema2pojo</groupId>
-				<artifactId>jsonschema2pojo-maven-plugin</artifactId>
-				<version>0.3.3</version>
-				<configuration>
-					<sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
-					<targetPackage>org.neuroml.visualiser.model</targetPackage>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -119,24 +103,14 @@
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.openworm</groupId>
+			<artifactId>simulationengine.core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.0.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.1.0</version>
 		</dependency>
 	</dependencies>
 </project>

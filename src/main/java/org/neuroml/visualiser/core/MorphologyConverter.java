@@ -12,13 +12,13 @@ import org.neuroml.model.Morphology;
 import org.neuroml.model.Neuroml;
 import org.neuroml.model.Point3DWithDiam;
 import org.neuroml.model.Segment;
-import org.neuroml.visualiser.model.AGeometry;
-import org.neuroml.visualiser.model.Cylinder;
-import org.neuroml.visualiser.model.Entity;
-import org.neuroml.visualiser.model.Metadata;
-import org.neuroml.visualiser.model.Point;
-import org.neuroml.visualiser.model.Scene;
-import org.neuroml.visualiser.model.Sphere;
+import org.openworm.simulationengine.core.visualisation.model.AGeometry;
+import org.openworm.simulationengine.core.visualisation.model.Cylinder;
+import org.openworm.simulationengine.core.visualisation.model.Entity;
+import org.openworm.simulationengine.core.visualisation.model.Metadata;
+import org.openworm.simulationengine.core.visualisation.model.Point;
+import org.openworm.simulationengine.core.visualisation.model.Scene;
+import org.openworm.simulationengine.core.visualisation.model.Sphere;
 
 /**
  * @author matteocantarelli
@@ -137,8 +137,6 @@ public class MorphologyConverter
 			if (distal != null)
 			{
 				cyl.setRadiusTop(s.getDistal().getDiameter() / 2);
-				cyl.setA1(0d);
-				cyl.setA2(0d);
 				cyl.setDistal(getPoint(distal));
 				cyl.setHeight(0d);
 			}
