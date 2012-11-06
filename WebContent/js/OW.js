@@ -14,7 +14,7 @@ var OW = OW || {};
  * Global variables
  */
 OW.camera = null;
-OW.container=null;
+OW.container = null;
 OW.controls = null;
 OW.scene = null;
 OW.renderer = null;
@@ -24,21 +24,25 @@ OW.projector = null;
 OW.keyboard = new THREEx.KeyboardState();
 OW.guiToUpdate = [];
 OW.jsonscene = null;
+OW.needsUpdate = false;
 OW.metadata = {};
-OW.customUpdate=null;
+OW.customUpdate = null;
+OW.mouseClickListener = null;
+OW.rotationMode = false;
 OW.mouse = {
 	x : 0,
 	y : 0
 };
+OW.geometriesMap = {};
 
 /**
  * Initialize the engine
  */
-OW.init = function(containerp,jsonscenep,updatep)
+OW.init = function(containerp, jsonscenep, updatep)
 {
-	OW.container=containerp;
+	OW.container = containerp;
 	OW.jsonscene = jsonscenep;
-	OW.customUpdate=update;
+	OW.customUpdate = update;
 	OW.setupScene();
 	OW.setupCamera();
 	OW.setupControls();
@@ -46,6 +50,25 @@ OW.init = function(containerp,jsonscenep,updatep)
 	OW.setupStats();
 	OW.setupRenderer();
 	OW.setupListeners();
+};
+
+/**
+ * Set a listener for mouse clicks
+ * 
+ * @param listener
+ */
+OW.setMouseClickListener = function(listener)
+{
+	OW.mouseClickListener = listener;
+};
+
+/**
+ * Remove the mouse listener (it's expensive don't add it when you don't need
+ * it!)
+ */
+OW.removeMouseClickListener = function()
+{
+	OW.mouseClickListener = null;
 };
 
 /**
@@ -61,6 +84,10 @@ OW.getThreeObjectFromJSONGeometry = function(g, material)
 	switch (g.type)
 	{
 	case "Particle":
+		threeObject = new THREE.Vector3();
+		threeObject.x = g.position.x;
+		threeObject.y = g.position.y;
+		threeObject.z = g.position.z;
 		break;
 	case "Cylinder":
 		var lookAtV = new THREE.Vector3(g.distal.x, g.distal.y, g.distal.z);
@@ -72,7 +99,69 @@ OW.getThreeObjectFromJSONGeometry = function(g, material)
 		threeObject.position.set(g.position.x, g.position.y, g.position.z);
 		break;
 	}
+	// add the geometry to a map indexed by the geometry id so we can find it
+	// for updating purposes
+	OW.geometriesMap[g.id] = threeObject;
 	return threeObject;
+};
+
+/**
+ * Updates the scene
+ */
+OW.updateScene = function()
+{
+	if (OW.needsUpdate)
+	{
+		var entities = OW.jsonscene.entities;
+
+		for ( var eindex in entities)
+		{
+			var geometries = entities[eindex].geometries;
+
+			for ( var gindex in geometries)
+			{
+				OW.updateGeometry(geometries[gindex]);
+			}
+
+			var entityGeometry = OW.geometriesMap[entities[eindex].id];
+			if (entityGeometry)
+			{
+				// if an entity is represented by a particle system we need to
+				// mark it as dirty for it to be updated
+				if (entityGeometry instanceof THREE.ParticleSystem)
+				{
+					entityGeometry.geometry.verticesNeedUpdate = true;
+				}
+			}
+		}
+		OW.needsUpdate = false;
+	}
+};
+
+/**
+ * Updates a THREE geometry from the json one
+ * 
+ * @param g
+ *            the update json geometry
+ */
+OW.updateGeometry = function(g)
+{
+	var threeObject = OW.geometriesMap[g.id];
+	if (threeObject)
+	{
+		if (threeObject instanceof THREE.Vector3)
+		{
+			threeObject.x = g.position.x;
+			threeObject.y = g.position.y;
+			threeObject.z = g.position.z;
+		}
+		else
+		{
+			// update the position
+			threeObject.position.set(g.position.x, g.position.y, g.position.z);
+		}
+	}
+
 };
 
 /**
@@ -225,23 +314,144 @@ OW.setupScene = function()
 
 	for ( var eindex in entities)
 	{
-		var geometries = entities[eindex].geometries;
-
-		var material = new THREE.MeshLambertMaterial();
-		material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
-		var combined = new THREE.Geometry();
-		for ( var gindex in geometries)
-		{
-			var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
-			THREE.GeometryUtils.merge(combined, threeObject);
-		}
-		var entityMesh = new THREE.Mesh(combined, material);
-		OW.scene.add(entityMesh);
-		entityMesh.eindex = eindex;
-		OW.scene.add(entityMesh);
+		OW.scene.add(OW.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
 	}
 };
 
+/**
+ * @param entity
+ * @returns the subentities in which the entity was decomposed
+ */
+OW.divideEntity = function(entity)
+{
+	var jsonEntities = OW.jsonscene.entities;
+	var jsonEntity = jsonEntities[entity.eindex];
+	var newEntities = [];
+	OW.scene.remove(entity);
+
+	var entityObject = OW.getThreeObjectFromJSONEntity(jsonEntity, entity.eindex, false);
+	if (entityObject instanceof Array)
+	{
+		for ( var e in entityObject)
+		{
+			OW.scene.add(entityObject[e]);
+			newEntities.push(entityObject[e]);
+		}
+	}
+	else
+	{
+		OW.scene.add(entityObject);
+		newEntities.push(entityObject);
+	}
+
+	return newEntities;
+};
+
+/**
+ * @param entities
+ *            the subentities
+ * @returns the resulting parent entity in which the subentities were assembled
+ */
+OW.mergeEntities = function(entities)
+{
+	var entityObject = null;
+	if (entities[0].hasOwnProperty("parentEntityIndex"))
+	{
+		var jsonEntities = OW.jsonscene.entities;
+		var entityIndex = entities[0].parentEntityIndex;
+
+		for ( var e in entities)
+		{
+			OW.scene.remove(entities[e]);
+		}
+
+		entityObject = OW.getThreeObjectFromJSONEntity(jsonEntities[entityIndex], entityIndex, true);
+		OW.scene.add(entityObject);
+	}
+	return entityObject;
+};
+
+/**
+ * @param jsonEntity
+ *            the json entity
+ * @param eindex
+ *            the entity index within the json scene
+ * @param mergeSubentities
+ *            true if subentities have to be merged
+ * @returns the resulting parent entity in which the subentities were assembled
+ */
+OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
+{
+	var entityObject = null;
+	if (jsonEntity.subentities && jsonEntity.subentities.length > 0)
+	{
+		// this entity is made of many subentities
+		if (mergeSubentities)
+		{
+			// if mergeSubentities is true then only one resulting entity is
+			// created
+			// by merging all geometries of the different subentities together
+			var material = new THREE.MeshLambertMaterial();
+			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+			var combined = new THREE.Geometry();
+			for ( var seindex in jsonEntity.subentities)
+			{
+				var threeObject = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
+				THREE.GeometryUtils.merge(combined, threeObject);
+			}
+			entityObject = new THREE.Mesh(combined, material);
+			entityObject.eindex = eindex;
+		}
+		else
+		{
+			entityObject = [];
+			for ( var seindex in jsonEntity.subentities)
+			{
+				subentity = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
+				subentity.parentEntityIndex = eindex;
+				entityObject.push(subentity);
+			}
+		}
+	}
+	else
+	{
+		// leaf entity it only contains geometries
+		var geometries = jsonEntity.geometries;
+		if (geometries[0].type == "Particle")
+		{
+			// assumes there are no particles mixed with other kind of
+			// geometrie hence if the first one is a particle then they all are
+			var material = new THREE.ParticleBasicMaterial({
+				size : 1
+			});
+			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+			geometry = new THREE.Geometry();
+			for ( var gindex in geometries)
+			{
+				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
+				geometry.vertices.push(threeObject);
+			}
+			entityObject = new THREE.ParticleSystem(geometry, material);
+			entityObject.eid=jsonEntity.id;
+			OW.geometriesMap[entity.id] = entityObject;
+		}
+		else
+		{
+			var material = new THREE.MeshLambertMaterial();
+			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+			var combined = new THREE.Geometry();
+			for ( var gindex in geometries)
+			{
+				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
+				THREE.GeometryUtils.merge(combined, threeObject);
+			}
+			entityObject = new THREE.Mesh(combined, material);
+			entityObject.eindex = eindex;
+			entityObject.eid=jsonEntity.id;
+		}
+	}
+	return entityObject;
+};
 /**
  * 
  */
@@ -269,7 +479,7 @@ OW.setupControls = function()
 	OW.controls.noZoom = false;
 	OW.controls.noPan = false;
 	OW.controls.staticMoving = true;
-	OW.controls.dynamicDampingFactor = 0;
+	OW.controls.dynamicDampingFactor = 0.3;
 	OW.controls.keys = [ 65, 83, 68 ];
 	OW.controls.addEventListener('change', OW.render);
 };
@@ -321,7 +531,7 @@ OW.setupGUI = function()
 	if (!OW.gui && data)
 	{
 		OW.gui = new dat.GUI();
-		OW.addGUIControls(OW.gui,OW.metadata);
+		OW.addGUIControls(OW.gui, OW.metadata);
 	}
 
 };
@@ -341,7 +551,7 @@ OW.updateGUI = function()
  * @param gui
  * @param metadatap
  */
-OW.addGUIControls = function(parent,current_metadata)
+OW.addGUIControls = function(parent, current_metadata)
 {
 	if (current_metadata.hasOwnProperty("ID"))
 	{
@@ -354,7 +564,7 @@ OW.addGUIControls = function(parent,current_metadata)
 			if (typeof current_metadata[m] == "object")
 			{
 				folder = OW.gui.addFolder(m);
-				//recursive call to populate the GUI with sub-metadata
+				// recursive call to populate the GUI with sub-metadata
 				OW.addGUIControls(folder, current_metadata[m]);
 				folder.open();
 			}
@@ -420,6 +630,7 @@ OW.setupListeners = function()
 {
 	// when the mouse moves, call the given function
 	document.addEventListener('mousemove', OW.onDocumentMouseMove, false);
+	document.addEventListener('mousedown', OW.onDocumentMouseDown, false);
 };
 
 /**
@@ -444,6 +655,20 @@ OW.onDocumentMouseMove = function(event)
 	// update the mouse variable
 	OW.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 	OW.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+};
+
+/**
+ * If a listener for click events was defined we call it
+ * 
+ * @param event
+ */
+OW.onDocumentMouseDown = function(event)
+{
+	if (OW.mouseClickListener)
+	{
+		OW.mouseClickListener(OW.getIntersectedObjects(), event.which);
+	}
 };
 
 /**
@@ -453,7 +678,7 @@ OW.getIntersectedObjects = function()
 {
 	// create a Ray with origin at the mouse position and direction into the
 	// scene (camera direction)
-	var vector = new THREE.Vector3(OW.mouse.x,OW.mouse.y, 1);
+	var vector = new THREE.Vector3(OW.mouse.x, OW.mouse.y, 1);
 	OW.projector.unprojectVector(vector, OW.camera);
 	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
 
@@ -481,24 +706,60 @@ OW.showMetadataForEntity = function(entityIndex)
 	if (!OW.gui)
 	{
 		OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
+		OW.metadata.ID=OW.jsonscene.entities[entityIndex].id;
 		OW.setupGUI();
 	}
 	else
 	{
-		OW.updateMetaData(OW.metadata, OW.jsonscene.entities[entityIndex].metadata);
-		OW.updateGUI();
+		if (OW.jsonscene.entities[entityIndex])
+		{
+			OW.updateMetaData(OW.metadata, OW.jsonscene.entities[entityIndex].metadata);
+			OW.metadata.ID=OW.jsonscene.entities[entityIndex].id;
+			OW.updateGUI();
+		}
 	}
 };
 
+/**
+ * @param newJSONScene
+ *            the id of the entity for which we want to display metadata
+ */
+OW.updateJSONScene = function(newJSONScene)
+{
+	OW.jsonscene = newJSONScene;
+	OW.needsUpdate = true;
+};
 
 /**
  * 
  */
 OW.animate = function()
 {
-	requestAnimationFrame(OW.animate);
-	OW.render();
+	OW.updateScene();
 	OW.customUpdate();
 	OW.stats.update();
 	OW.controls.update();
+	requestAnimationFrame(OW.animate);
+	if (OW.rotationMode)
+	{
+		var timer = new Date().getTime() * 0.0005;
+		OW.camera.position.x = Math.floor(Math.cos(timer) * 200);
+		OW.camera.position.z = Math.floor(Math.sin(timer) * 200);
+	}
+	OW.render();
+};
+
+OW.enterRotationMode = function(aroundObject)
+
+{
+	OW.rotationMode = true;
+	if (aroundObject)
+	{
+		OW.camera.lookAt(aroundObject);
+	}
+};
+
+OW.exitRotationMode = function()
+{
+	OW.rotationMode = false;
 };
