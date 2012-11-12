@@ -42,7 +42,7 @@ OW.init = function(containerp, jsonscenep, updatep)
 {
 	OW.container = containerp;
 	OW.jsonscene = jsonscenep;
-	OW.customUpdate = update;
+	OW.customUpdate = updatep;
 	OW.setupScene();
 	OW.setupCamera();
 	OW.setupControls();
@@ -63,8 +63,7 @@ OW.setMouseClickListener = function(listener)
 };
 
 /**
- * Remove the mouse listener (it's expensive don't add it when you don't need
- * it!)
+ * Remove the mouse listener (it's expensive don't add it when you don't need it!)
  */
 OW.removeMouseClickListener = function()
 {
@@ -172,8 +171,7 @@ OW.updateGeometry = function(g)
  * @param radiusTop
  * @param radiusBottom
  * @param material
- * @returns a Cylinder translated and rotated in the scene according to the
- *          cartesian coordinated that describe it
+ * @returns a Cylinder translated and rotated in the scene according to the cartesian coordinated that describe it
  */
 OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, material)
 {
@@ -243,8 +241,7 @@ OW.printPoint = function(string, point)
 /**
  * 
  * @param proj
- * @returns Angle between x axis and the projection of the position vector on
- *          the XZ plane
+ * @returns Angle between x axis and the projection of the position vector on the XZ plane
  */
 OW.compTheta = function(proj)
 {
@@ -311,7 +308,6 @@ OW.setupScene = function()
 	OW.scene = new THREE.Scene();
 
 	var entities = OW.jsonscene.entities;
-
 	for ( var eindex in entities)
 	{
 		OW.scene.add(OW.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
@@ -401,6 +397,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			}
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
+			entityObject.eid = jsonEntity.id;
 		}
 		else
 		{
@@ -421,19 +418,28 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 		{
 			// assumes there are no particles mixed with other kind of
 			// geometrie hence if the first one is a particle then they all are
-			var material = new THREE.ParticleBasicMaterial({
-				size : 1
+			// create the particle variables
+			var pMaterial = new THREE.ParticleBasicMaterial({
+				color : 0x81b621,
+				size : 5,
+				map : THREE.ImageUtils.loadTexture("images/ball.png"),
+				blending : THREE.AdditiveBlending,
+				transparent : true
 			});
-			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+
 			geometry = new THREE.Geometry();
 			for ( var gindex in geometries)
 			{
-				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
+				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
 				geometry.vertices.push(threeObject);
 			}
-			entityObject = new THREE.ParticleSystem(geometry, material);
-			entityObject.eid=jsonEntity.id;
-			OW.geometriesMap[entity.id] = entityObject;
+			entityObject = new THREE.ParticleSystem(geometry, pMaterial);
+			entityObject.eid = jsonEntity.id;
+			// also update the particle system to
+			// sort the particles which enables
+			// the behaviour we want
+			entityObject.sortParticles = true;
+			OW.geometriesMap[jsonEntity.id] = entityObject;
 		}
 		else
 		{
@@ -447,7 +453,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			}
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
-			entityObject.eid=jsonEntity.id;
+			entityObject.eid = jsonEntity.id;
 		}
 	}
 	return entityObject;
@@ -577,9 +583,7 @@ OW.addGUIControls = function(parent, current_metadata)
 };
 
 /**
- * This method updates the available metadata. This method is required since to
- * update a GUI element we have to overwrite the properties in the same object
- * without changing the object itself.
+ * This method updates the available metadata. This method is required since to update a GUI element we have to overwrite the properties in the same object without changing the object itself.
  * 
  * @param metadatatoupdate
  * @param metadatanew
@@ -682,9 +686,18 @@ OW.getIntersectedObjects = function()
 	OW.projector.unprojectVector(vector, OW.camera);
 	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
 
+	var visibleChildren=[];
+	THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+	{
+		if (child.visible)
+		{
+			visibleChildren.push(child);
+		}
+	});
+
 	// returns an array containing all objects in the scene with which the ray
 	// intersects
-	return ray.intersectObjects(OW.scene.children, true);
+	return ray.intersectObjects(visibleChildren, true);
 };
 
 /**
@@ -706,7 +719,7 @@ OW.showMetadataForEntity = function(entityIndex)
 	if (!OW.gui)
 	{
 		OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
-		OW.metadata.ID=OW.jsonscene.entities[entityIndex].id;
+		OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
 		OW.setupGUI();
 	}
 	else
@@ -714,7 +727,7 @@ OW.showMetadataForEntity = function(entityIndex)
 		if (OW.jsonscene.entities[entityIndex])
 		{
 			OW.updateMetaData(OW.metadata, OW.jsonscene.entities[entityIndex].metadata);
-			OW.metadata.ID=OW.jsonscene.entities[entityIndex].id;
+			OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
 			OW.updateGUI();
 		}
 	}
@@ -762,4 +775,55 @@ OW.enterRotationMode = function(aroundObject)
 OW.exitRotationMode = function()
 {
 	OW.rotationMode = false;
+};
+
+OW.getThreeReferencedObjectsFrom = function(entityId)
+{
+	var entity = OW.getJSONEntityFromId(entityId);
+	var referencedIDs = [];
+	var threeObjects = [];
+	for (r in entity.references)
+	{
+		referencedIDs.push(entity.references[r].entityId);
+	}
+
+	THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+	{
+		if (child.hasOwnProperty("eid"))
+		{
+			if (OW.isIn(child.eid, referencedIDs))
+			{
+				threeObjects.push(child);
+				var index = referencedIDs.indexOf(child.eid);
+				referencedIDs.splice(index, 1);
+			}
+		}
+	});
+
+	return threeObjects;
+};
+
+OW.getJSONEntityFromId = function(entityId)
+{
+	for (e in OW.jsonscene.entities)
+	{
+		if (OW.jsonscene.entities[e].id == entityId)
+		{
+			return OW.jsonscene.entities[e];
+		}
+	}
+};
+
+OW.isIn = function(e, array)
+{
+	var found = false;
+	for ( var i = 0; i < array.length; i++)
+	{
+		if (array[i] == e)
+		{
+			found = true;
+			break;
+		}
+	}
+	return found;
 };

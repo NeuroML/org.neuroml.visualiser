@@ -3,7 +3,10 @@
  */
 package org.neuroml.visualiser.core;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,15 +15,20 @@ import org.neuroml.model.Cell;
 import org.neuroml.model.Include;
 import org.neuroml.model.Member;
 import org.neuroml.model.Morphology;
+import org.neuroml.model.Network;
 import org.neuroml.model.Neuroml;
 import org.neuroml.model.Point3DWithDiam;
+import org.neuroml.model.Population;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
+import org.neuroml.model.SynapticConnection;
+import org.neuroml.model.util.NeuroMLConverter;
 import org.openworm.simulationengine.core.visualisation.model.AGeometry;
 import org.openworm.simulationengine.core.visualisation.model.Cylinder;
 import org.openworm.simulationengine.core.visualisation.model.Entity;
 import org.openworm.simulationengine.core.visualisation.model.Metadata;
 import org.openworm.simulationengine.core.visualisation.model.Point;
+import org.openworm.simulationengine.core.visualisation.model.Reference;
 import org.openworm.simulationengine.core.visualisation.model.Scene;
 import org.openworm.simulationengine.core.visualisation.model.Sphere;
 
@@ -28,10 +36,10 @@ import org.openworm.simulationengine.core.visualisation.model.Sphere;
  * @author matteocantarelli
  * 
  */
-public class MorphologyConverter
+public class NeuroMLModelInterpreter
 {
 
-	private static final String ID_PROPERTY = "ID";
+	private NeuroMLConverter _neuromlConverter = null;
 	private static final String GROUP_PROPERTY = "group";
 
 	// neuroml hardcoded concepts
@@ -40,43 +48,158 @@ public class MorphologyConverter
 	private static final String SOMA_GROUP = "soma_group";
 
 	/**
+	 * 
+	 */
+	public NeuroMLModelInterpreter()
+	{
+		super();
+		try
+		{
+			_neuromlConverter = new NeuroMLConverter();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * @param neuromls
 	 * @return
 	 */
-	public Scene getSceneFromNeuroML(List<Neuroml> neuromls)
+	public Scene getSceneFromNeuroML(List<URL> neuromlURLs)
 	{
 		Scene scene = new Scene();
-		for (Neuroml neuroml : neuromls)
+		for (URL url : neuromlURLs)
 		{
-			List<Morphology> morphologies = neuroml.getMorphology();
-			if (morphologies != null)
+			Neuroml neuroml;
+			try
 			{
-				for (Morphology m : morphologies)
-				{
-					Entity entity = getEntityFromMorphology(m);
-					scene.getEntities().add(entity);
-				}
+				neuroml = _neuromlConverter.urlToNeuroML(url);
+				scene.getEntities().addAll(getEntitiesFromMorphologies(neuroml)); // if there's any morphology
+				scene.getEntities().addAll(getEntitiesFromNetwork(neuroml, url)); // if a population is described -> network
 			}
-			List<Cell> cells = neuroml.getCell();
-			if (cells != null)
+			catch (Exception e)
 			{
-				for (Cell c : cells)
-				{
-					Morphology cellmorphology = c.getMorphology();
-					if (cellmorphology != null)
-					{
-						Entity cell = new Entity();
-						cell.setSubentities(getEntitiesFromMorphologyBySegmentGroup(cellmorphology,c.getId()));
-						cell.setId(c.getId());
-						augmentWithMetaData(cell, c);
-						scene.getEntities().add(cell);
-					}
-				}
+				e.printStackTrace();
 			}
 		}
 		return scene;
 	}
 
+	/**
+	 * @param neuroml
+	 * @return
+	 */
+	public List<Entity> getEntitiesFromMorphologies(Neuroml neuroml)
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		List<Morphology> morphologies = neuroml.getMorphology();
+		if (morphologies != null)
+		{
+			for (Morphology m : morphologies)
+			{
+				Entity entity = getEntityFromMorphology(m);
+				entities.add(entity);
+			}
+		}
+		List<Cell> cells = neuroml.getCell();
+		if (cells != null)
+		{
+			for (Cell c : cells)
+			{
+				Morphology cellmorphology = c.getMorphology();
+				if (cellmorphology != null)
+				{
+					Entity cell = new Entity();
+					cell.setSubentities(getEntitiesFromMorphologyBySegmentGroup(cellmorphology, c.getId()));
+					cell.setId(c.getId());
+					augmentWithMetaData(cell, c);
+					entities.add(cell);
+				}
+			}
+		}
+		return entities;
+	}
+
+	/**
+	 * @param neuroml
+	 * @param scene
+	 * @param url
+	 * @throws Exception 
+	 */
+	private Collection<Entity> getEntitiesFromNetwork(Neuroml neuroml, URL url) throws Exception
+	{
+		Map<String, Entity> entities = new HashMap<String, Entity>();
+		String baseURL = url.getFile();
+		if (url.getFile().endsWith("nml"))
+		{
+			baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
+		}
+		List<Network> networks = neuroml.getNetwork();
+		for (Network n : networks)
+		{
+			for (Population p : n.getPopulation())
+			{
+				Neuroml neuromlComponent = null;
+				String component = p.getComponent();
+				try
+				{
+					URL componentURL = new URL(url.getProtocol() + "://" + baseURL + component + ".nml");
+					neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
+
+				}
+				catch (MalformedURLException e)
+				{
+					e.printStackTrace();
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+
+				int size = p.getSize().intValue();
+				
+				for (int i = 0; i < size; i++)
+				{
+					// FIXME the position of the population within the network needs to be specified in neuroml
+					List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
+					for (Entity e : localEntities)
+					{
+						e.setId(e.getId()+"["+i+"]");
+						entities.put(e.getId(), e);
+					}
+				}
+				// FIXME what's the purpose of the id here?
+				String id = p.getId();
+
+			}
+			for (SynapticConnection c : n.getSynapticConnection())
+			{
+				String from = c.getFrom();
+				String to = c.getTo();
+				Metadata m = new Metadata();
+				m.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
+				Reference r = new Reference();
+				r.setEntityId(to);
+				r.setMetadata(m);
+				if (entities.containsKey(from))
+				{
+					entities.get(from).getReferences().add(r);
+				}
+				else
+				{
+					throw new Exception("Reference not found." + from + " was not found in the path of the network file");
+				}
+			}
+		}
+		return entities.values();
+	}
+
+	/**
+	 * @param entity
+	 * @param c
+	 */
 	private void augmentWithMetaData(Entity entity, Cell c)
 	{
 		try
@@ -100,6 +223,10 @@ public class MorphologyConverter
 		}
 	}
 
+	/**
+	 * @param morphology
+	 * @return
+	 */
 	private Entity getEntityFromMorphology(Morphology morphology)
 	{
 		return getEntityFromListOfSegments(morphology.getSegment());
@@ -107,7 +234,7 @@ public class MorphologyConverter
 
 	/**
 	 * @param morphology
-	 * @param cellId 
+	 * @param cellId
 	 * @return
 	 */
 	private List<Entity> getEntitiesFromMorphologyBySegmentGroup(Morphology morphology, String cellId)
@@ -145,20 +272,20 @@ public class MorphologyConverter
 
 		if (somaGroup != null)
 		{
-			Entity entity=createEntityForMacroGroup(somaGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId,somaGroup.getId()));
+			Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries);
+			entity.setId(getGroupId(cellId, somaGroup.getId()));
 			entities.add(entity);
 		}
 		if (axonGroup != null)
 		{
-			Entity entity=createEntityForMacroGroup(axonGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId,axonGroup.getId()));
+			Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries);
+			entity.setId(getGroupId(cellId, axonGroup.getId()));
 			entities.add(entity);
 		}
 		if (dendriteGroup != null)
 		{
-			Entity entity=createEntityForMacroGroup(dendriteGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId,dendriteGroup.getId()));
+			Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries);
+			entity.setId(getGroupId(cellId, dendriteGroup.getId()));
 			entities.add(entity);
 		}
 
@@ -168,15 +295,20 @@ public class MorphologyConverter
 			Entity entity = new Entity();
 			entity.getGeometries().addAll(segmentGeometries.get(sgId));
 			entity.setAdditionalProperties(GROUP_PROPERTY, sgId);
-			entity.setId(getGroupId(cellId,sgId));
+			entity.setId(getGroupId(cellId, sgId));
 			entities.add(entity);
 		}
 		return entities;
 	}
 
+	/**
+	 * @param cellId
+	 * @param segmentGroupId
+	 * @return
+	 */
 	private String getGroupId(String cellId, String segmentGroupId)
 	{
-		return cellId+" "+segmentGroupId;
+		return cellId + " " + segmentGroupId;
 	}
 
 	/**
@@ -305,4 +437,5 @@ public class MorphologyConverter
 		point.setZ(distal.getZ());
 		return point;
 	}
+
 }
