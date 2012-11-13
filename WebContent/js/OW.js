@@ -762,6 +762,10 @@ OW.animate = function()
 	OW.render();
 };
 
+/**
+ * @param aroundObject
+ *            the object around which the rotation will happen
+ */
 OW.enterRotationMode = function(aroundObject)
 
 {
@@ -772,11 +776,18 @@ OW.enterRotationMode = function(aroundObject)
 	}
 };
 
+/**
+ * 
+ */
 OW.exitRotationMode = function()
 {
 	OW.rotationMode = false;
 };
 
+/**
+ * @param entityId
+ *            the entity id 
+ */
 OW.getThreeReferencedObjectsFrom = function(entityId)
 {
 	var entity = OW.getJSONEntityFromId(entityId);
@@ -803,6 +814,10 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
 	return threeObjects;
 };
 
+/**
+ * @param entityId
+ *            the entity id 
+ */
 OW.getJSONEntityFromId = function(entityId)
 {
 	for (e in OW.jsonscene.entities)
@@ -814,6 +829,12 @@ OW.getJSONEntityFromId = function(entityId)
 	}
 };
 
+/**
+ * @param e
+ *            the element to be checked
+ * @param array
+ *            the array to be checked
+ */
 OW.isIn = function(e, array)
 {
 	var found = false;

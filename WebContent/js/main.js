@@ -19,6 +19,7 @@ function get3DScene()
 		{
 			OW.init(createContainer(), data, update);
 			OW.animate();
+			document.addEventListener("keydown", keyPressed, false);
 		},
 		error : function(xhr, textStatus, errorThrown)
 		{
@@ -233,6 +234,11 @@ var update = function()
 			INTERSECTED = null;
 		}
 	}
+
+};
+
+function keyPressed()
+{
 	// R enters rotation mode
 	if (OW.isKeyPressed("r"))
 	{
@@ -310,4 +316,4 @@ var update = function()
 			}
 		});
 	}
-};
+}
