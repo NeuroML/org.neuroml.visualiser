@@ -94,7 +94,7 @@ OW.getThreeObjectFromJSONGeometry = function(g, material)
 		threeObject = OW.getCylinder(positionV, lookAtV, g.radiusTop, g.radiusBottom, material);
 		break;
 	case "Sphere":
-		threeObject = new THREE.Mesh(new THREE.SphereGeometry(g.radius, 10, 10), material);
+		threeObject = new THREE.Mesh(new THREE.SphereGeometry(g.radius, 20, 20), material);
 		threeObject.position.set(g.position.x, g.position.y, g.position.z);
 		break;
 	}
@@ -184,7 +184,7 @@ OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, ma
 	midPoint.add(bottomBasePos, topBasePos);
 	midPoint.multiplyScalar(0.5);
 
-	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 5, false);
+	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, false);
 	threeObject = new THREE.Mesh(c, material);
 
 	OW.lookAt(threeObject, cylinderAxis);
@@ -387,7 +387,8 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			// if mergeSubentities is true then only one resulting entity is
 			// created
 			// by merging all geometries of the different subentities together
-			var material = new THREE.MeshLambertMaterial();
+//			var material = new THREE.MeshLambertMaterial();
+			var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 50, shading: THREE.SmoothShading });
 			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 			var combined = new THREE.Geometry();
 			for ( var seindex in jsonEntity.subentities)
@@ -443,7 +444,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 		}
 		else
 		{
-			var material = new THREE.MeshLambertMaterial();
+			var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 50, shading: THREE.SmoothShading });
 			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 			var combined = new THREE.Geometry();
 			for ( var gindex in geometries)
@@ -519,6 +520,7 @@ OW.setupLights = function()
 	OW.scene.add(light);
 	light = new THREE.AmbientLight(0x222222);
 	OW.scene.add(light);
+	
 };
 
 /**

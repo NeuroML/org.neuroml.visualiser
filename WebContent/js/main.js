@@ -46,49 +46,61 @@ $(document).ready(function()
 	get3DScene();
 });
 
-var highlightMaterial = new THREE.MeshLambertMaterial({
-	color : 0x666666,
-	emissive : 0xff0000,
-	ambient : 0x000000,
+
+var highlightMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
+	color : 0xff0000,
 	shading : THREE.SmoothShading
 });
 
-var selectedMaterial = new THREE.MeshLambertMaterial({
-	color : 0x666666,
-	emissive : 0x00ff00,
-	ambient : 0x000000,
+
+var connectedMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
+	color : 0xffffff,
 	shading : THREE.SmoothShading
 });
 
-var connectedMaterial = new THREE.MeshLambertMaterial({
-	color : 0xaaaaaa,
-	emissive : 0xaaaaaa,
-	ambient : 0x000000,
-	shading : THREE.SmoothShading
-});
 
-var somaMaterial = new THREE.MeshLambertMaterial({
+var somaMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
 	color : 0x37abc8,
-	emissive : 0x37abc8,
-	ambient : 0x000000,
 	shading : THREE.SmoothShading
 });
 
-var axonMaterial = new THREE.MeshLambertMaterial({
+var axonMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
 	color : 0xff6600,
-	emissive : 0xff6600,
-	ambient : 0x000000,
 	shading : THREE.SmoothShading
 });
 
-var dendriteMaterial = new THREE.MeshLambertMaterial({
+var dendriteMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
 	color : 0x88aa00,
-	emissive : 0x88aa00,
-	ambient : 0x000000,
 	shading : THREE.SmoothShading
 });
 
-var standardMaterial = new THREE.MeshLambertMaterial();
+var standardMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
+	shading : THREE.SmoothShading
+});
 standardMaterial.color.setHex(0xaaaaaa);
 standardMaterial.opacity = 0.4;
 
@@ -260,7 +272,7 @@ function keyPressed()
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
 		OW.setMouseClickListener(onClick);
-		OW.renderer.setClearColorHex(0x000000, 1);
+		OW.renderer.setClearColorHex(0x00003a, 1);
 		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
 		{
 			if (child.hasOwnProperty("material"))
@@ -293,7 +305,7 @@ function keyPressed()
 		{
 			if (child.hasOwnProperty("material"))
 			{
-				var material = new THREE.MeshLambertMaterial();
+				var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 2, shading: THREE.SmoothShading });
 				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 				child.material = material;
 				child.visible = true;
