@@ -178,18 +178,37 @@ public class NeuroMLModelInterpreter
 			{
 				String from = c.getFrom();
 				String to = c.getTo();
-				Metadata m = new Metadata();
-				m.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
-				Reference r = new Reference();
-				r.setEntityId(to);
-				r.setMetadata(m);
+				
+				Metadata mPost = new Metadata();
+				mPost.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
+				mPost.setAdditionalProperties(Resources.CONNECTION_TYPE.get(), Resources.POST_SYNAPTIC.get());
+				Reference rPost = new Reference();
+				rPost.setEntityId(to);
+				rPost.setMetadata(mPost);
+				
+				Metadata mPre = new Metadata();
+				mPre.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
+				mPre.setAdditionalProperties(Resources.CONNECTION_TYPE.get(), Resources.PRE_SYNAPTIC.get());
+				Reference rPre = new Reference();
+				rPre.setEntityId(from);
+				rPre.setMetadata(mPre);
+				
 				if (entities.containsKey(from))
 				{
-					entities.get(from).getReferences().add(r);
+					entities.get(from).getReferences().add(rPost);
 				}
 				else
 				{
 					throw new Exception("Reference not found." + from + " was not found in the path of the network file");
+				}
+				
+				if (entities.containsKey(to))
+				{
+					entities.get(to).getReferences().add(rPre);
+				}
+				else
+				{
+					throw new Exception("Reference not found." + to + " was not found in the path of the network file");
 				}
 			}
 		}

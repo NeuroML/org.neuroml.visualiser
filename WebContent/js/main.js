@@ -17,6 +17,7 @@ function get3DScene()
 		timeout : 1000000,
 		success : function(data, textStatus)
 		{
+			preprocessMetadata(data);
 			OW.init(createContainer(), data, update);
 			OW.animate();
 			document.addEventListener("keydown", keyPressed, false);
@@ -27,11 +28,6 @@ function get3DScene()
 		}
 	});
 }
-
-var TOGGLE_N = true;
-var TOGGLE_Z = false;
-var TOGGLE_R = false;
-var TOGGLE_S = false;
 
 function createContainer()
 {
@@ -46,7 +42,6 @@ $(document).ready(function()
 	get3DScene();
 });
 
-
 var highlightMaterial = new THREE.MeshPhongMaterial({
 	opacity : 1,
 	ambient : 0x777777,
@@ -56,8 +51,25 @@ var highlightMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
+var preConnectedMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
+	color : 0x334000,
+	shading : THREE.SmoothShading
+});
 
-var connectedMaterial = new THREE.MeshPhongMaterial({
+var postConnectedMaterial = new THREE.MeshPhongMaterial({
+	opacity : 1,
+	ambient : 0x777777,
+	specular : 0xbbbb9b,
+	shininess : 50,
+	color : 0x682a00,
+	shading : THREE.SmoothShading
+});
+
+var prePostConnectedMaterial = new THREE.MeshPhongMaterial({
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -65,7 +77,6 @@ var connectedMaterial = new THREE.MeshPhongMaterial({
 	color : 0xffffff,
 	shading : THREE.SmoothShading
 });
-
 
 var somaMaterial = new THREE.MeshPhongMaterial({
 	opacity : 1,
@@ -107,6 +118,8 @@ standardMaterial.opacity = 0.4;
 var INTERSECTED; // the object in the scene currently closest to the camera and intersected by the Ray projected from the mouse position
 var SELECTED = [];
 var REFERENCED = [];
+var INPUT = [];
+var OUTPUT = [];
 
 var onClick = function(objectsClicked, button)
 {
@@ -145,6 +158,8 @@ var onClick = function(objectsClicked, button)
 								REFERENCED[r].material = standardMaterial;
 							}
 							REFERENCED = [];
+							INPUT = [];
+							OUTPUT = [];
 						}
 					}
 					else
@@ -172,18 +187,54 @@ var onClick = function(objectsClicked, button)
 								}
 							}
 							REFERENCED = [];
+							INPUT = [];
+							OUTPUT = [];
 						}
 						// process new selection
 						// 1)show metadata for what we clicked on
 						// 2)decompose selected entity in subentities
 						// 3)show references and change their material
 						OW.showMetadataForEntity(SELECTED[0].eindex);
-						REFERENCED = OW.getThreeReferencedObjectsFrom(SELECTED[0].eid);
-						for (r in REFERENCED)
+
+						var entity = OW.getJSONEntityFromId(SELECTED[0].eid);
+						var preIDs = [];
+						var postIDs = [];
+						if (entity.metadata.hasOwnProperty("Input"))
 						{
-							REFERENCED[r].material = connectedMaterial;
-							REFERENCED[r].visible = true;
+							preIDs = Object.keys(entity.metadata["Input"]);
 						}
+						if (entity.metadata.hasOwnProperty("Output"))
+						{
+							postIDs = Object.keys(entity.metadata["Output"]);
+						}
+						THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+						{
+							if (child.hasOwnProperty("eid"))
+							{
+								if (TOGGLE_I && OW.isIn(child.eid, preIDs))
+								{
+									REFERENCED.push(child);
+									INPUT.push(child);
+									child.material = preConnectedMaterial;
+									child.visible = true;
+								}
+								if (TOGGLE_O && OW.isIn(child.eid, postIDs))
+								{
+									REFERENCED.push(child);
+									OUTPUT.push(child);
+									child.material = postConnectedMaterial;
+									child.visible = true;
+								}
+								if (TOGGLE_I && TOGGLE_O && OW.isIn(child.eid, postIDs) && OW.isIn(child.eid, preIDs))
+								{
+									REFERENCED.push(child);
+									child.material = prePostConnectedMaterial;
+									child.visible = true;
+								}
+
+							}
+						});
+
 						SELECTED = OW.divideEntity(SELECTED[0]);
 						for (s in SELECTED)
 						{
@@ -204,6 +255,26 @@ var onClick = function(objectsClicked, button)
 				}
 			}
 		}
+	}
+};
+
+var preprocessMetadata = function(data)
+{
+	for (d in data.entities)
+	{
+		var m = data.entities[d];
+
+		for (r in m.references)
+		{
+			var connectionType = m.references[r].metadata["Connection Type"];
+			delete m.references[r].metadata["Connection Type"];
+			if (!m.metadata[connectionType])
+			{
+				m.metadata[connectionType] = {};
+			}
+			m.metadata[connectionType][m.references[r].entityId] = m.references[r].metadata;
+		}
+
 	}
 };
 
@@ -249,6 +320,13 @@ var update = function()
 
 };
 
+var TOGGLE_N = true;
+var TOGGLE_Z = false;
+var TOGGLE_R = false;
+var TOGGLE_S = false;
+var TOGGLE_I = true;
+var TOGGLE_O = true;
+
 function keyPressed()
 {
 	// R enters rotation mode
@@ -265,6 +343,42 @@ function keyPressed()
 			OW.enterRotationMode(SELECTED);
 		}
 	}
+	if (OW.isKeyPressed("i"))
+	{
+		TOGGLE_I = !TOGGLE_I;
+		for (i in INPUT)
+		{
+			var refMaterial = preConnectedMaterial;
+			if (TOGGLE_S)
+			{
+				INPUT[i].visible = TOGGLE_I;
+			}
+			if (OW.isIn(INPUT[i], OUTPUT))
+			{
+				refMaterial = prePostConnectedMaterial;
+			}
+			INPUT[i].material = TOGGLE_I ? refMaterial : standardMaterial;
+		}
+	}
+
+	if (OW.isKeyPressed("o"))
+	{
+		TOGGLE_O = !TOGGLE_O;
+		for (o in OUTPUT)
+		{
+			var refMaterial = postConnectedMaterial;
+			if (TOGGLE_S)
+			{
+				OUTPUT[o].visible = TOGGLE_O;
+			}
+			if (OW.isIn(OUTPUT[o], INPUT))
+			{
+				refMaterial = prePostConnectedMaterial;
+
+			}
+			OUTPUT[o].material = TOGGLE_O ? refMaterial : standardMaterial;
+		}
+	}
 	// Z enters selection mode
 	if (OW.isKeyPressed("z") && !TOGGLE_Z)
 	{
@@ -272,7 +386,7 @@ function keyPressed()
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
 		OW.setMouseClickListener(onClick);
-		OW.renderer.setClearColorHex(0x00003a, 1);
+		OW.renderer.setClearColorHex(0x000000, 1);
 		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
 		{
 			if (child.hasOwnProperty("material"))
@@ -305,7 +419,13 @@ function keyPressed()
 		{
 			if (child.hasOwnProperty("material"))
 			{
-				var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 2, shading: THREE.SmoothShading });
+				var material = new THREE.MeshPhongMaterial({
+					opacity : 1,
+					ambient : 0x777777,
+					specular : 0xbbbb9b,
+					shininess : 2,
+					shading : THREE.SmoothShading
+				});
 				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 				child.material = material;
 				child.visible = true;

@@ -14,7 +14,10 @@ public enum Resources
 	RESISTIVITY("Resistivity"),
 	MEMBRANE_P("Membrane Properties"),
 	INTRACELLULAR_P("Intracellular Properties"), 
-	SYNAPSE("Synapse Type");
+	SYNAPSE("Synapse Type"), 
+	CONNECTION_TYPE("Connection Type"),
+	PRE_SYNAPTIC("Input"),
+	POST_SYNAPTIC("Output");
 	
 	private String _value;
 	

@@ -22,7 +22,6 @@ OW.stat = null;
 OW.gui = null;
 OW.projector = null;
 OW.keyboard = new THREEx.KeyboardState();
-OW.guiToUpdate = [];
 OW.jsonscene = null;
 OW.needsUpdate = false;
 OW.metadata = {};
@@ -387,8 +386,14 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			// if mergeSubentities is true then only one resulting entity is
 			// created
 			// by merging all geometries of the different subentities together
-//			var material = new THREE.MeshLambertMaterial();
-			var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 50, shading: THREE.SmoothShading });
+			// var material = new THREE.MeshLambertMaterial();
+			var material = new THREE.MeshPhongMaterial({
+				opacity : 1,
+				ambient : 0x777777,
+				specular : 0xbbbb9b,
+				shininess : 50,
+				shading : THREE.SmoothShading
+			});
 			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 			var combined = new THREE.Geometry();
 			for ( var seindex in jsonEntity.subentities)
@@ -444,7 +449,13 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 		}
 		else
 		{
-			var material = new THREE.MeshPhongMaterial( { opacity:1, ambient: 0x777777, specular: 0xbbbb9b, shininess: 50, shading: THREE.SmoothShading });
+			var material = new THREE.MeshPhongMaterial({
+				opacity : 1,
+				ambient : 0x777777,
+				specular : 0xbbbb9b,
+				shininess : 50,
+				shading : THREE.SmoothShading
+			});
 			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 			var combined = new THREE.Geometry();
 			for ( var gindex in geometries)
@@ -520,7 +531,7 @@ OW.setupLights = function()
 	OW.scene.add(light);
 	light = new THREE.AmbientLight(0x222222);
 	OW.scene.add(light);
-	
+
 };
 
 /**
@@ -541,18 +552,12 @@ OW.setupGUI = function()
 		OW.gui = new dat.GUI();
 		OW.addGUIControls(OW.gui, OW.metadata);
 	}
-
-};
-
-/**
- * Updates the GUI controls
- */
-OW.updateGUI = function()
-{
-	for ( var i in OW.guiToUpdate)
+	for(f in OW.gui.__folders)
 	{
-		guiToUpdate[i].updateDisplay();
+		// opens only the root folders
+		OW.gui.__folders[f].open();
 	}
+
 };
 
 /**
@@ -563,7 +568,7 @@ OW.addGUIControls = function(parent, current_metadata)
 {
 	if (current_metadata.hasOwnProperty("ID"))
 	{
-		OW.gui.add(current_metadata, "ID").listen();
+		parent.add(current_metadata, "ID").listen();
 	}
 	for ( var m in current_metadata)
 	{
@@ -571,10 +576,9 @@ OW.addGUIControls = function(parent, current_metadata)
 		{
 			if (typeof current_metadata[m] == "object")
 			{
-				folder = OW.gui.addFolder(m);
+				folder = parent.addFolder(m);
 				// recursive call to populate the GUI with sub-metadata
 				OW.addGUIControls(folder, current_metadata[m]);
-				folder.open();
 			}
 			else
 			{
@@ -584,26 +588,46 @@ OW.addGUIControls = function(parent, current_metadata)
 	}
 };
 
-/**
- * This method updates the available metadata. This method is required since to update a GUI element we have to overwrite the properties in the same object without changing the object itself.
- * 
- * @param metadatatoupdate
- * @param metadatanew
- */
-OW.updateMetaData = function(metadatatoupdate, metadatanew)
-{
-	for ( var m in metadatanew)
-	{
-		if (typeof metadatanew[m] == "object")
-		{
-			OW.updateMetaData(metadatatoupdate[m], metadatanew[m]);
-		}
-		else
-		{
-			metadatatoupdate[m] = metadatanew[m];
-		}
-	}
-};
+///**
+// * This method updates the available metadata. This method is required since to update a GUI element we have to overwrite the properties in the same object without changing the object itself.
+// * 
+// * @param metadatatoupdate
+// * @param metadatanew
+// */
+//OW.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
+//{
+//	for ( var m in metadatanew)
+//	{
+//		if (typeof metadatanew[m] == "object")
+//		{
+//			var currentparentGUI = parentGUI.__folders[m];
+//			if (!currentparentGUI)
+//			{
+//				currentparentGUI = parentGUI;
+//			}
+//
+//			if (!metadatatoupdate[m])
+//			{
+//				metadatatoupdate[m] = metadatanew[m];
+//			}
+//			else
+//			{
+//				OW.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
+//			}
+//		}
+//		else
+//		{
+//			metadatatoupdate[m] = metadatanew[m];
+//		}
+//	}
+//	for ( var m in metadatatoupdate)
+//	{
+//		if (!metadatanew[m])
+//		{
+//			delete metadatatoupdate[m];
+//		}
+//	}
+//};
 
 /**
  * 
@@ -688,7 +712,7 @@ OW.getIntersectedObjects = function()
 	OW.projector.unprojectVector(vector, OW.camera);
 	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
 
-	var visibleChildren=[];
+	var visibleChildren = [];
 	THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
 	{
 		if (child.visible)
@@ -718,21 +742,17 @@ OW.isKeyPressed = function(key)
  */
 OW.showMetadataForEntity = function(entityIndex)
 {
-	if (!OW.gui)
+	if (OW.gui)
 	{
-		OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
-		OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
-		OW.setupGUI();
+		OW.gui.domElement.parentNode.removeChild(OW.gui.domElement);
+		OW.gui=null;
 	}
-	else
-	{
-		if (OW.jsonscene.entities[entityIndex])
-		{
-			OW.updateMetaData(OW.metadata, OW.jsonscene.entities[entityIndex].metadata);
-			OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
-			OW.updateGUI();
-		}
-	}
+
+	OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
+	OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
+
+	OW.setupGUI();
+
 };
 
 /**
@@ -788,7 +808,7 @@ OW.exitRotationMode = function()
 
 /**
  * @param entityId
- *            the entity id 
+ *            the entity id
  */
 OW.getThreeReferencedObjectsFrom = function(entityId)
 {
@@ -818,7 +838,7 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
 
 /**
  * @param entityId
- *            the entity id 
+ *            the entity id
  */
 OW.getJSONEntityFromId = function(entityId)
 {
