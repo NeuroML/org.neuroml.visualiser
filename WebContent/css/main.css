@@ -1,0 +1,88 @@
+.dg .cr.string {
+
+	border-color: #43ccee;
+}
+.dg .cr.string input[type="text"] {
+	color: #9FC701;
+}
+#position_toolbar {
+	margin-left: 10px;
+	margin-top: 10px;
+	position: absolute;
+	width: 100px;
+	height: 150px;
+}
+
+#toolbar {
+	position: absolute;
+	left: 100px;
+	top: 10px;
+	width: 300px;
+	height: 100px;
+}
+
+button.ui-button-icon-only {
+	position: absolute;
+	height: 25px;
+	width: 25px;
+}
+
+.ui-button-text-only .ui-button-text {
+	width: 115px;
+	height: 15px;
+	font-size: 10px;
+}
+
+#w {
+	left: 0px;
+	top: 25px;
+}
+#n {
+	left: 25px;
+	top: 0px;
+}
+#h {
+	left: 25px;
+	top: 25px;
+}
+#e {
+	left: 50px;
+	top: 25px;
+}
+#s {
+	left: 25px;
+	top: 50px;
+}
+
+#mode {
+	left: 150px;
+	margin-bottom: 10px;
+}
+
+#io {
+	width: 60px;
+	float: left;
+}
+
+.square {
+	height: 25px;
+	width: 25px;
+}
+
+#rotationmode {
+	float: left;
+}
+
+
+#spinner{
+	width:42px;
+	height:42px;
+	position:absolute;
+	margin-top:-21px;
+	margin-left:-21px;
+	top:50%;
+	left:50%;
+	background-image: URL("../images/ajax-loader.gif");
+	z-index:10;
+	
+}

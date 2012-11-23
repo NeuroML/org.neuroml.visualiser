@@ -552,7 +552,7 @@ OW.setupGUI = function()
 		OW.gui = new dat.GUI();
 		OW.addGUIControls(OW.gui, OW.metadata);
 	}
-	for(f in OW.gui.__folders)
+	for (f in OW.gui.__folders)
 	{
 		// opens only the root folders
 		OW.gui.__folders[f].open();
@@ -588,46 +588,46 @@ OW.addGUIControls = function(parent, current_metadata)
 	}
 };
 
-///**
+// /**
 // * This method updates the available metadata. This method is required since to update a GUI element we have to overwrite the properties in the same object without changing the object itself.
-// * 
+// *
 // * @param metadatatoupdate
 // * @param metadatanew
 // */
-//OW.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
-//{
-//	for ( var m in metadatanew)
-//	{
-//		if (typeof metadatanew[m] == "object")
-//		{
-//			var currentparentGUI = parentGUI.__folders[m];
-//			if (!currentparentGUI)
-//			{
-//				currentparentGUI = parentGUI;
-//			}
+// OW.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
+// {
+// for ( var m in metadatanew)
+// {
+// if (typeof metadatanew[m] == "object")
+// {
+// var currentparentGUI = parentGUI.__folders[m];
+// if (!currentparentGUI)
+// {
+// currentparentGUI = parentGUI;
+// }
 //
-//			if (!metadatatoupdate[m])
-//			{
-//				metadatatoupdate[m] = metadatanew[m];
-//			}
-//			else
-//			{
-//				OW.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
-//			}
-//		}
-//		else
-//		{
-//			metadatatoupdate[m] = metadatanew[m];
-//		}
-//	}
-//	for ( var m in metadatatoupdate)
-//	{
-//		if (!metadatanew[m])
-//		{
-//			delete metadatatoupdate[m];
-//		}
-//	}
-//};
+// if (!metadatatoupdate[m])
+// {
+// metadatatoupdate[m] = metadatanew[m];
+// }
+// else
+// {
+// OW.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
+// }
+// }
+// else
+// {
+// metadatatoupdate[m] = metadatanew[m];
+// }
+// }
+// for ( var m in metadatatoupdate)
+// {
+// if (!metadatanew[m])
+// {
+// delete metadatatoupdate[m];
+// }
+// }
+// };
 
 /**
  * 
@@ -639,6 +639,7 @@ OW.setupRenderer = function()
 	OW.renderer = new THREE.WebGLRenderer({
 		antialias : true
 	});
+	OW.renderer.setClearColorHex(0xffffff, 1);
 	OW.renderer.setSize(window.innerWidth, window.innerHeight);
 
 	OW.container.appendChild(OW.renderer.domElement);
@@ -661,6 +662,17 @@ OW.setupListeners = function()
 	// when the mouse moves, call the given function
 	document.addEventListener('mousemove', OW.onDocumentMouseMove, false);
 	document.addEventListener('mousedown', OW.onDocumentMouseDown, false);
+	window.addEventListener('resize', OW.onWindowResize, false);
+};
+
+OW.onWindowResize = function()
+{
+
+	OW.camera.aspect = window.innerWidth / window.innerHeight;
+	OW.camera.updateProjectionMatrix();
+
+	OW.renderer.setSize(window.innerWidth, window.innerHeight);
+
 };
 
 /**
@@ -745,7 +757,7 @@ OW.showMetadataForEntity = function(entityIndex)
 	if (OW.gui)
 	{
 		OW.gui.domElement.parentNode.removeChild(OW.gui.domElement);
-		OW.gui=null;
+		OW.gui = null;
 	}
 
 	OW.metadata = OW.jsonscene.entities[entityIndex].metadata;

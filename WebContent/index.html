@@ -16,6 +16,32 @@
         <script src="js/THREEx.KeyboardState.js"></script>
         <script src="js/OW.js"></script>
         <script src="js/main.js"></script>
-
-    </body>
+    	<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>   
+    	<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/overcast/jquery-ui.css" />
+    	<link rel="stylesheet" href="css/main.css" />
+    	
+		<div id="content">
+			<div id="controls">
+		 		<div id="position_toolbar">
+					<button id="w"></button>
+					<button id="n"></button>
+					<button id="e"></button>
+					<button id="s"></button>
+					<button id="h"></button>
+				</div>
+				<div id="toolbar">
+					<div id="mode">
+				        <input type="radio" id="normalMode" name="radio" checked="checked"/><label for="normalMode">Normal mode</label>
+				        <input type="radio" id="selectionMode" name="radio"  /><label for="selectionMode">Selection mode</label>
+				    </div>
+				    <div id="io">
+					    <input type="checkbox" id="showinputs"  checked="checked"/><label class="square" for="showinputs">Show inputs</label>
+					    <input type="checkbox" id="showoutputs"  checked="checked"/><label class="square"  for="showoutputs">Show outputs</label>
+				    </div>
+				    <input type="checkbox" id="rotationmode"/><label class="square" for="rotationmode">Rotation mode</label>
+				</div>
+			</div>
+			<div id="spinner"></div>
+		</div>
+	</body>
 </html>

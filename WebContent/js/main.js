@@ -1,15 +1,17 @@
 function get3DScene()
 {
+	$("#controls").hide();
+	$("#spinner").show();
 	$.ajax({
 		type : 'POST',
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
-			url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-		// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
-		// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-		// url :"http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+//			url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
 		// url :"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 
@@ -17,10 +19,13 @@ function get3DScene()
 		timeout : 1000000,
 		success : function(data, textStatus)
 		{
+			setupUI();
 			preprocessMetadata(data);
 			OW.init(createContainer(), data, update);
 			OW.animate();
 			document.addEventListener("keydown", keyPressed, false);
+			$("#controls").show();
+			$("#spinner").hide();
 		},
 		error : function(xhr, textStatus, errorThrown)
 		{
@@ -31,10 +36,7 @@ function get3DScene()
 
 function createContainer()
 {
-	// create the container
-	container = document.createElement('div');
-	document.body.appendChild(container);
-	return container;
+	return document.getElementById('content');
 }
 
 $(document).ready(function()
@@ -199,42 +201,45 @@ var onClick = function(objectsClicked, button)
 						var entity = OW.getJSONEntityFromId(SELECTED[0].eid);
 						var preIDs = [];
 						var postIDs = [];
-						if (entity.metadata.hasOwnProperty("Input"))
+						if (entity.metadata.hasOwnProperty("Connections"))
 						{
-							preIDs = Object.keys(entity.metadata["Input"]);
-						}
-						if (entity.metadata.hasOwnProperty("Output"))
-						{
-							postIDs = Object.keys(entity.metadata["Output"]);
-						}
-						THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
-						{
-							if (child.hasOwnProperty("eid"))
+							if (entity.metadata["Connections"].hasOwnProperty("Input"))
 							{
-								if (TOGGLE_I && OW.isIn(child.eid, preIDs))
-								{
-									REFERENCED.push(child);
-									INPUT.push(child);
-									child.material = preConnectedMaterial;
-									child.visible = true;
-								}
-								if (TOGGLE_O && OW.isIn(child.eid, postIDs))
-								{
-									REFERENCED.push(child);
-									OUTPUT.push(child);
-									child.material = postConnectedMaterial;
-									child.visible = true;
-								}
-								if (TOGGLE_I && TOGGLE_O && OW.isIn(child.eid, postIDs) && OW.isIn(child.eid, preIDs))
-								{
-									REFERENCED.push(child);
-									child.material = prePostConnectedMaterial;
-									child.visible = true;
-								}
-
+								preIDs = Object.keys(entity.metadata["Connections"]["Input"]);
 							}
-						});
+							if (entity.metadata["Connections"].hasOwnProperty("Output"))
+							{
+								postIDs = Object.keys(entity.metadata["Connections"]["Output"]);
+							}
 
+							THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+							{
+								if (child.hasOwnProperty("eid"))
+								{
+									if (TOGGLE_I && OW.isIn(child.eid, preIDs))
+									{
+										REFERENCED.push(child);
+										INPUT.push(child);
+										child.material = preConnectedMaterial;
+										child.visible = true;
+									}
+									if (TOGGLE_O && OW.isIn(child.eid, postIDs))
+									{
+										REFERENCED.push(child);
+										OUTPUT.push(child);
+										child.material = postConnectedMaterial;
+										child.visible = true;
+									}
+									if (TOGGLE_I && TOGGLE_O && OW.isIn(child.eid, postIDs) && OW.isIn(child.eid, preIDs))
+									{
+										REFERENCED.push(child);
+										child.material = prePostConnectedMaterial;
+										child.visible = true;
+									}
+
+								}
+							});
+						}
 						SELECTED = OW.divideEntity(SELECTED[0]);
 						for (s in SELECTED)
 						{
@@ -263,16 +268,16 @@ var preprocessMetadata = function(data)
 	for (d in data.entities)
 	{
 		var m = data.entities[d];
-
+		var mcon = m.metadata["Connections"] = {};
 		for (r in m.references)
 		{
 			var connectionType = m.references[r].metadata["Connection Type"];
 			delete m.references[r].metadata["Connection Type"];
-			if (!m.metadata[connectionType])
+			if (!mcon[connectionType])
 			{
-				m.metadata[connectionType] = {};
+				mcon[connectionType] = {};
 			}
-			m.metadata[connectionType][m.references[r].entityId] = m.references[r].metadata;
+			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
 		}
 
 	}
@@ -327,77 +332,61 @@ var TOGGLE_S = false;
 var TOGGLE_I = true;
 var TOGGLE_O = true;
 
-function keyPressed()
+function toggleRotationMode()
 {
-	// R enters rotation mode
-	if (OW.isKeyPressed("r"))
+	if (TOGGLE_R)
 	{
-		if (TOGGLE_R)
-		{
-			TOGGLE_R = false;
-			OW.exitRotationMode();
-		}
-		else
-		{
-			TOGGLE_R = true;
-			OW.enterRotationMode(SELECTED);
-		}
+		TOGGLE_R = false;
+		OW.exitRotationMode();
 	}
-	if (OW.isKeyPressed("i"))
+	else
 	{
-		TOGGLE_I = !TOGGLE_I;
-		for (i in INPUT)
+		TOGGLE_R = true;
+		OW.enterRotationMode(SELECTED);
+	}
+}
+
+function toggleOutputs()
+{
+	TOGGLE_O = !TOGGLE_O;
+	for (o in OUTPUT)
+	{
+		var refMaterial = postConnectedMaterial;
+		if (TOGGLE_S)
 		{
-			var refMaterial = preConnectedMaterial;
-			if (TOGGLE_S)
-			{
-				INPUT[i].visible = TOGGLE_I;
-			}
-			if (OW.isIn(INPUT[i], OUTPUT))
-			{
-				refMaterial = prePostConnectedMaterial;
-			}
-			INPUT[i].material = TOGGLE_I ? refMaterial : standardMaterial;
+			OUTPUT[o].visible = TOGGLE_O;
 		}
+		if (TOGGLE_I && OW.isIn(OUTPUT[o], INPUT))
+		{
+			refMaterial = prePostConnectedMaterial;
+
+		}
+		OUTPUT[o].material = TOGGLE_O ? refMaterial : standardMaterial;
 	}
 
-	if (OW.isKeyPressed("o"))
-	{
-		TOGGLE_O = !TOGGLE_O;
-		for (o in OUTPUT)
-		{
-			var refMaterial = postConnectedMaterial;
-			if (TOGGLE_S)
-			{
-				OUTPUT[o].visible = TOGGLE_O;
-			}
-			if (OW.isIn(OUTPUT[o], INPUT))
-			{
-				refMaterial = prePostConnectedMaterial;
+}
 
-			}
-			OUTPUT[o].material = TOGGLE_O ? refMaterial : standardMaterial;
+function toggleInputs()
+{
+	TOGGLE_I = !TOGGLE_I;
+	for (i in INPUT)
+	{
+		var refMaterial = preConnectedMaterial;
+		if (TOGGLE_S)
+		{
+			INPUT[i].visible = TOGGLE_I;
 		}
-	}
-	// Z enters selection mode
-	if (OW.isKeyPressed("z") && !TOGGLE_Z)
-	{
-
-		TOGGLE_Z = true;
-		TOGGLE_N = false;
-		OW.setMouseClickListener(onClick);
-		OW.renderer.setClearColorHex(0x000000, 1);
-		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+		if (TOGGLE_O && OW.isIn(INPUT[i], OUTPUT))
 		{
-			if (child.hasOwnProperty("material"))
-			{
-				child.material = standardMaterial;
-			}
-		});
-
+			refMaterial = prePostConnectedMaterial;
+		}
+		INPUT[i].material = TOGGLE_I ? refMaterial : standardMaterial;
 	}
-	// N exits selection mode and switches to standard view
-	if (OW.isKeyPressed("n") && !TOGGLE_N)
+}
+
+function toggleNormalMode()
+{
+	if (!TOGGLE_N)
 	{
 		TOGGLE_Z = false;
 		TOGGLE_N = true;
@@ -431,10 +420,31 @@ function keyPressed()
 				child.visible = true;
 			}
 		});
-
 	}
-	// S hides the non selected entities
-	if (OW.isKeyPressed("s") && !TOGGLE_N && SELECTED.length > 0)
+}
+
+function toggleSelectionMode()
+{
+	if (!TOGGLE_Z)
+	{
+		TOGGLE_Z = true;
+		TOGGLE_N = false;
+		OW.setMouseClickListener(onClick);
+		OW.renderer.setClearColorHex(0x000000, 1);
+		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+		{
+			if (child.hasOwnProperty("material"))
+			{
+				child.material = standardMaterial;
+			}
+		});
+	}
+	;
+}
+
+function toggleHideNonSelected()
+{
+	if (!TOGGLE_N && SELECTED.length > 0)
 	{
 		TOGGLE_S = !TOGGLE_S;
 		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
@@ -448,4 +458,142 @@ function keyPressed()
 			}
 		});
 	}
+}
+
+function keyPressed()
+{
+	// R enters rotation mode
+	if (OW.isKeyPressed("r"))
+	{
+		toggleRotationMode();
+	}
+	// I shows/hides inputs
+	if (OW.isKeyPressed("i"))
+	{
+		toggleInputs();
+	}
+	// O shows/hides outputs
+	if (OW.isKeyPressed("o"))
+	{
+		toggleOutputs();
+	}
+	// Z enters selection mode
+	if (OW.isKeyPressed("z"))
+	{
+		toggleSelectionMode();
+	}
+	// N exits selection mode and switches to standard view
+	if (OW.isKeyPressed("n") && !TOGGLE_N)
+	{
+		toggleNormalMode();
+	}
+	// S hides the non selected entities
+	if (OW.isKeyPressed("s"))
+	{
+		toggleHideNonSelected();
+	}
+	if (OW.isKeyPressed("w"))
+	{
+		window.open( OW.renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
+	}
+	
+	if (OW.isKeyPressed("h"))
+	{
+		OW.camera.position.x = OW.camera.position.x +10;
+	}
+	if (OW.isKeyPressed("j"))
+	{
+		OW.camera.position.x = OW.camera.position.x -10;
+	}
+	if (OW.isKeyPressed("y"))
+	{
+		OW.camera.position.z = OW.camera.position.z +10;
+	}
+	if (OW.isKeyPressed("n"))
+	{
+		OW.camera.position.z = OW.camera.position.z -10;
+	}
+	if (OW.isKeyPressed("b"))
+	{
+		OW.camera.position.y = OW.camera.position.y +10;
+	}
+	if (OW.isKeyPressed("m"))
+	{
+		OW.camera.position.y = OW.camera.position.y -10;
+	}
+}
+
+function setupUI()
+{
+	$(function()
+	{
+		$("button:first").button({
+			icons : {
+				primary : "ui-icon-triangle-1-w"
+			},
+			text : false
+		}).next().button({
+			icons : {
+				primary : "ui-icon-triangle-1-n"
+			},
+			text : false
+		}).next().button({
+			icons : {
+				primary : "ui-icon-triangle-1-e"
+			},
+			text : false
+		}).next().button({
+			icons : {
+				primary : "ui-icon-triangle-1-s"
+			},
+			text : false
+		}).next().button({
+			icons : {
+				primary : "ui-icon-home"
+			},
+			text : false
+		});
+
+		$("#showinputs").button({
+			icons : {
+				primary : "ui-icon-arrowthick-1-s"
+			},
+			text : false
+		}).click(function(event)
+		{
+			toggleInputs();
+		});
+		;
+		$("#showoutputs").button({
+			icons : {
+				primary : "ui-icon-arrowthick-1-n"
+			},
+			text : false
+		}).click(function(event)
+		{
+			toggleOutputs();
+		});
+		;
+		$("#rotationmode").button({
+			icons : {
+				primary : "ui-icon-arrowrefresh-1-s"
+			},
+			text : false
+		}).click(function(event)
+		{
+			toggleRotationMode();
+		});
+		;
+		$("#io").buttonset();
+		$("#normalMode").click(function(event)
+		{
+			toggleNormalMode();
+		});
+		$("#selectionMode").click(function(event)
+		{
+			toggleSelectionMode();
+		});
+		$("#mode").buttonset();
+	});
+
 }
