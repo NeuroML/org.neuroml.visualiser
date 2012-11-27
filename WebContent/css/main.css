@@ -78,22 +78,19 @@ button.ui-button-icon-only {
 }
 
 #loadinglbl {
-	width: 600px;
+	width: 650px;
 	margin: 0 auto;
-	margin-top: 250px;
+	margin-top: 20px;
 	text-align: center;
 	font-family: Trebuchet MS, Helvetica, Arial, sans-serif;
 	font-size: 14px;
 }
-#spinner {
-	width: 42px;
-	height: 42px;
-	position: absolute;
-	margin-top: 20px;
-	margin-left: -21px;
-	left: 50%;
-	background-image: URL("../images/ajax-loader.gif");
-	z-index: 10;
+#canvasloader-container {
+	width: 100px;
+	height: 100px;
+	margin:0 auto;
+	margin-top: 200px;
+
 }
 
 #help {

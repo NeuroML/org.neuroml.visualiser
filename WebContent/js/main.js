@@ -2,7 +2,7 @@ function get3DScene(neuromlurl)
 {
 	$("#controls").hide();
 	$("#loadinglbl").show();
-	$("#spinner").show();
+	$("#canvasloader-container").show();
 	$.ajax({
 		type : 'POST',
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
@@ -29,13 +29,13 @@ function get3DScene(neuromlurl)
 				document.addEventListener("keydown", keyPressed, false);
 				$("#controls").show();
 				$("#loadinglbl").hide();
-				$("#spinner").hide();
+				$("#canvasloader-container").hide();
 			}
 			else
 			{
 				// initialisation failed
 				$("#loadinglbl").hide();
-				$("#spinner").hide();
+				$("#canvasloader-container").hide();
 			}
 
 		},
@@ -668,6 +668,16 @@ function setupUI()
 		{
 			toggleHelp();
 		});
+		
+		var cl = new CanvasLoader('canvasloader-container');
+		cl.setColor('#389dc9'); // default is '#000000'
+		cl.setShape('spiral'); // default is 'oval'
+		cl.setDiameter(100); // default is 40
+		cl.setDensity(17); // default is 40
+		cl.setRange(0.9); // default is 1.3
+		cl.setSpeed(1); // default is 2
+		cl.setFPS(30); // default is 24
+		cl.show(); // Hidden by default
 	});
 
 }
