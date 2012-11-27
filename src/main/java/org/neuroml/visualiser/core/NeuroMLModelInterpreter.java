@@ -145,7 +145,7 @@ public class NeuroMLModelInterpreter
 				String component = p.getComponent();
 				try
 				{
-					URL componentURL = new URL(url.getProtocol() + "://" + baseURL + component + ".nml");
+					URL componentURL = new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".nml");
 					neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
 
 				}

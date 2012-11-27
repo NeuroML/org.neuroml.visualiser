@@ -1,6 +1,7 @@
-function get3DScene()
+function get3DScene(neuromlurl)
 {
 	$("#controls").hide();
+	$("#loadinglbl").show();
 	$("#spinner").show();
 	$.ajax({
 		type : 'POST',
@@ -8,12 +9,13 @@ function get3DScene()
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
-			 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
 			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-//			url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-		// url :"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
+			// url :"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			url : neuromlurl
 
 		},
 		timeout : 1000000,
@@ -21,11 +23,21 @@ function get3DScene()
 		{
 			setupUI();
 			preprocessMetadata(data);
-			OW.init(createContainer(), data, update);
-			OW.animate();
-			document.addEventListener("keydown", keyPressed, false);
-			$("#controls").show();
-			$("#spinner").hide();
+			if (OW.init(createContainer(), data, update))
+			{
+				OW.animate();
+				document.addEventListener("keydown", keyPressed, false);
+				$("#controls").show();
+				$("#loadinglbl").hide();
+				$("#spinner").hide();
+			}
+			else
+			{
+				// initialisation failed
+				$("#loadinglbl").hide();
+				$("#spinner").hide();
+			}
+
 		},
 		error : function(xhr, textStatus, errorThrown)
 		{
@@ -41,7 +53,14 @@ function createContainer()
 
 $(document).ready(function()
 {
-	get3DScene();
+	$( "#help" ).dialog({
+        autoOpen: false,
+        show: "side",
+        hide: "fade",
+        width: "650px"
+    });
+	vars = getUrlVars();
+	get3DScene(decodeURIComponent(vars.url));
 });
 
 var highlightMaterial = new THREE.MeshPhongMaterial({
@@ -331,6 +350,23 @@ var TOGGLE_R = false;
 var TOGGLE_S = false;
 var TOGGLE_I = true;
 var TOGGLE_O = true;
+var TOGGLE_H = false;
+
+
+function toggleHelp()
+{
+	if (TOGGLE_H)
+	{
+		TOGGLE_H = false;
+		$( "#help" ).dialog( "close" );
+	}
+	else
+	{
+		TOGGLE_H = true;
+		$( "#help" ).dialog( "open" );
+	}
+}
+
 
 function toggleRotationMode()
 {
@@ -487,6 +523,11 @@ function keyPressed()
 	{
 		toggleNormalMode();
 	}
+	// H exits selection mode and switches to standard view
+	if (OW.isKeyPressed("H"))
+	{
+		toggleHelp();
+	}
 	// S hides the non selected entities
 	if (OW.isKeyPressed("s"))
 	{
@@ -494,33 +535,33 @@ function keyPressed()
 	}
 	if (OW.isKeyPressed("w"))
 	{
-		window.open( OW.renderer.domElement.toDataURL( 'image/png' ), 'screenshot' );
+		window.open(OW.renderer.domElement.toDataURL('image/png'), 'screenshot');
 	}
-	
-	if (OW.isKeyPressed("h"))
-	{
-		OW.camera.position.x = OW.camera.position.x +10;
-	}
-	if (OW.isKeyPressed("j"))
-	{
-		OW.camera.position.x = OW.camera.position.x -10;
-	}
-	if (OW.isKeyPressed("y"))
-	{
-		OW.camera.position.z = OW.camera.position.z +10;
-	}
-	if (OW.isKeyPressed("n"))
-	{
-		OW.camera.position.z = OW.camera.position.z -10;
-	}
-	if (OW.isKeyPressed("b"))
-	{
-		OW.camera.position.y = OW.camera.position.y +10;
-	}
-	if (OW.isKeyPressed("m"))
-	{
-		OW.camera.position.y = OW.camera.position.y -10;
-	}
+
+//	if (OW.isKeyPressed("h"))
+//	{
+//		OW.camera.position.x = OW.camera.position.x + 10;
+//	}
+//	if (OW.isKeyPressed("j"))
+//	{
+//		OW.camera.position.x = OW.camera.position.x - 10;
+//	}
+//	if (OW.isKeyPressed("y"))
+//	{
+//		OW.camera.position.z = OW.camera.position.z + 10;
+//	}
+//	if (OW.isKeyPressed("n"))
+//	{
+//		OW.camera.position.z = OW.camera.position.z - 10;
+//	}
+//	if (OW.isKeyPressed("b"))
+//	{
+//		OW.camera.position.y = OW.camera.position.y + 10;
+//	}
+//	if (OW.isKeyPressed("m"))
+//	{
+//		OW.camera.position.y = OW.camera.position.y - 10;
+//	}
 }
 
 function setupUI()
@@ -594,6 +635,28 @@ function setupUI()
 			toggleSelectionMode();
 		});
 		$("#mode").buttonset();
+		
+		$("#helpbutton").button({
+			icons : {
+				primary : "ui-icon-help"
+			},
+			text : false
+		}).click(function(event){
+			toggleHelp();
+		});
 	});
 
+}
+
+function getUrlVars()
+{
+	var vars = [], hash;
+	var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	for ( var i = 0; i < hashes.length; i++)
+	{
+		hash = hashes[i].split('=');
+		vars.push(hash[0]);
+		vars[hash[0]] = hash[1];
+	}
+	return vars;
 }

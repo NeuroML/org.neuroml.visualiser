@@ -39,16 +39,25 @@ OW.geometriesMap = {};
  */
 OW.init = function(containerp, jsonscenep, updatep)
 {
-	OW.container = containerp;
-	OW.jsonscene = jsonscenep;
-	OW.customUpdate = updatep;
-	OW.setupScene();
-	OW.setupCamera();
-	OW.setupControls();
-	OW.setupLights();
-	OW.setupStats();
-	OW.setupRenderer();
-	OW.setupListeners();
+	if (!Detector.webgl)
+	{
+		Detector.addGetWebGLMessage();
+		return false;
+	}
+	else
+	{
+		OW.container = containerp;
+		OW.jsonscene = jsonscenep;
+		OW.customUpdate = updatep;
+		OW.setupScene();
+		OW.setupCamera();
+		OW.setupControls();
+		OW.setupLights();
+		OW.setupStats();
+		OW.setupRenderer();
+		OW.setupListeners();
+		return true;
+	}
 };
 
 /**

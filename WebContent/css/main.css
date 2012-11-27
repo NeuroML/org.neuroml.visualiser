@@ -33,6 +33,10 @@ button.ui-button-icon-only {
 	font-size: 10px;
 }
 
+.ui-widget {
+	font-size: 10px;
+}
+
 #w {
 	left: 0px;
 	top: 25px;
@@ -73,16 +77,56 @@ button.ui-button-icon-only {
 	float: left;
 }
 
-
-#spinner{
-	width:42px;
-	height:42px;
-	position:absolute;
-	margin-top:-21px;
-	margin-left:-21px;
-	top:50%;
-	left:50%;
+#loadinglbl {
+	width: 600px;
+	margin: 0 auto;
+	margin-top: 250px;
+	text-align: center;
+	font-family: Trebuchet MS, Helvetica, Arial, sans-serif;
+	font-size: 14px;
+}
+#spinner {
+	width: 42px;
+	height: 42px;
+	position: absolute;
+	margin-top: 20px;
+	margin-left: -21px;
+	left: 50%;
 	background-image: URL("../images/ajax-loader.gif");
-	z-index:10;
-	
+	z-index: 10;
+}
+
+#help {
+	font-size: 12px;
+}
+
+.soma {
+	color: #37abc8;
+}
+.axons {
+	color: #ff6600;
+}
+.dendrites {
+	color: #88aa00;
+}
+.red {
+	color: red;
+}
+.inputs {
+	color: #334000;
+}
+.outputs {
+	color: #682a00;
+}
+.io {
+	color: white;
+}
+.helptitle {
+	font-size: 14px;
+}
+
+#helpbutton {
+	margin-left: 10px;
+	height: 27px;
+	width: 27px;
 }
