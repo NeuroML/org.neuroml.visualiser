@@ -21,7 +21,7 @@ function get3DScene(neuromlurl)
 		timeout : 1000000,
 		success : function(data, textStatus)
 		{
-			setupUI();
+
 			preprocessMetadata(data);
 			if (OW.init(createContainer(), data, update))
 			{
@@ -53,12 +53,7 @@ function createContainer()
 
 $(document).ready(function()
 {
-	$( "#help" ).dialog({
-        autoOpen: false,
-        show: "side",
-        hide: "fade",
-        width: "650px"
-    });
+	setupUI();
 	vars = getUrlVars();
 	get3DScene(decodeURIComponent(vars.url));
 });
@@ -352,21 +347,19 @@ var TOGGLE_I = true;
 var TOGGLE_O = true;
 var TOGGLE_H = false;
 
-
 function toggleHelp()
 {
 	if (TOGGLE_H)
 	{
 		TOGGLE_H = false;
-		$( "#help" ).dialog( "close" );
+		$("#help").dialog("close");
 	}
 	else
 	{
 		TOGGLE_H = true;
-		$( "#help" ).dialog( "open" );
+		$("#help").dialog("open");
 	}
 }
-
 
 function toggleRotationMode()
 {
@@ -478,7 +471,7 @@ function toggleSelectionMode()
 	;
 }
 
-function toggleHideNonSelected()
+function toggleHideDeselected()
 {
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
@@ -496,78 +489,98 @@ function toggleHideNonSelected()
 	}
 }
 
+function switchButton(id,status) {
+    var radio = $('#' + id);
+    radio[0].checked = status;
+    radio.button("refresh");
+}
+
 function keyPressed()
 {
 	// R enters rotation mode
 	if (OW.isKeyPressed("r"))
 	{
 		toggleRotationMode();
+		switchButton("rotationMode",TOGGLE_R);
 	}
 	// I shows/hides inputs
 	if (OW.isKeyPressed("i"))
 	{
 		toggleInputs();
+		switchButton("showinputs",TOGGLE_I);
 	}
 	// O shows/hides outputs
 	if (OW.isKeyPressed("o"))
 	{
 		toggleOutputs();
+		switchButton("showoutputs",TOGGLE_O);
 	}
 	// Z enters selection mode
 	if (OW.isKeyPressed("z"))
 	{
 		toggleSelectionMode();
+		switchButton("selectionMode",TOGGLE_Z);
 	}
 	// N exits selection mode and switches to standard view
 	if (OW.isKeyPressed("n") && !TOGGLE_N)
 	{
 		toggleNormalMode();
+		switchButton("normalMode",TOGGLE_N);
 	}
 	// H exits selection mode and switches to standard view
 	if (OW.isKeyPressed("H"))
 	{
 		toggleHelp();
+		switchButton("helpbutton",TOGGLE_H);
 	}
 	// S hides the non selected entities
 	if (OW.isKeyPressed("s"))
 	{
-		toggleHideNonSelected();
+		toggleHideDeselected();
+		switchButton("showdeselected",TOGGLE_S);
 	}
 	if (OW.isKeyPressed("w"))
 	{
 		window.open(OW.renderer.domElement.toDataURL('image/png'), 'screenshot');
 	}
 
-//	if (OW.isKeyPressed("h"))
-//	{
-//		OW.camera.position.x = OW.camera.position.x + 10;
-//	}
-//	if (OW.isKeyPressed("j"))
-//	{
-//		OW.camera.position.x = OW.camera.position.x - 10;
-//	}
-//	if (OW.isKeyPressed("y"))
-//	{
-//		OW.camera.position.z = OW.camera.position.z + 10;
-//	}
-//	if (OW.isKeyPressed("n"))
-//	{
-//		OW.camera.position.z = OW.camera.position.z - 10;
-//	}
-//	if (OW.isKeyPressed("b"))
-//	{
-//		OW.camera.position.y = OW.camera.position.y + 10;
-//	}
-//	if (OW.isKeyPressed("m"))
-//	{
-//		OW.camera.position.y = OW.camera.position.y - 10;
-//	}
+	// if (OW.isKeyPressed("h"))
+	// {
+	// OW.camera.position.x = OW.camera.position.x + 10;
+	// }
+	// if (OW.isKeyPressed("j"))
+	// {
+	// OW.camera.position.x = OW.camera.position.x - 10;
+	// }
+	// if (OW.isKeyPressed("y"))
+	// {
+	// OW.camera.position.z = OW.camera.position.z + 10;
+	// }
+	// if (OW.isKeyPressed("n"))
+	// {
+	// OW.camera.position.z = OW.camera.position.z - 10;
+	// }
+	// if (OW.isKeyPressed("b"))
+	// {
+	// OW.camera.position.y = OW.camera.position.y + 10;
+	// }
+	// if (OW.isKeyPressed("m"))
+	// {
+	// OW.camera.position.y = OW.camera.position.y - 10;
+	// }
 }
 
 function setupUI()
 {
 	$(function()
 	{
+		$("#help").dialog({
+			autoOpen : false,
+			show : "side",
+			hide : "fade",
+			width : "650px"
+		});
+
 		$("button:first").button({
 			icons : {
 				primary : "ui-icon-triangle-1-w"
@@ -595,6 +608,16 @@ function setupUI()
 			text : false
 		});
 
+		$("#showdeselected").button({
+			icons : {
+				primary : "ui-icon-grip-dotted-vertical"
+			},
+			text : false
+		}).click(function(event)
+		{
+			toggleHideDeselected();
+		});
+
 		$("#showinputs").button({
 			icons : {
 				primary : "ui-icon-arrowthick-1-s"
@@ -615,7 +638,7 @@ function setupUI()
 			toggleOutputs();
 		});
 		;
-		$("#rotationmode").button({
+		$("#rotationMode").button({
 			icons : {
 				primary : "ui-icon-arrowrefresh-1-s"
 			},
@@ -635,13 +658,14 @@ function setupUI()
 			toggleSelectionMode();
 		});
 		$("#mode").buttonset();
-		
+
 		$("#helpbutton").button({
 			icons : {
 				primary : "ui-icon-help"
 			},
 			text : false
-		}).click(function(event){
+		}).click(function(event)
+		{
 			toggleHelp();
 		});
 	});
