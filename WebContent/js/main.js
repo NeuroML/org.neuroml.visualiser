@@ -9,13 +9,13 @@ function get3DScene(neuromlurl)
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
-			 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
 			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			// url :"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-//			url : neuromlurl
+			url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+		// url : neuromlurl
 
 		},
 		timeout : 1000000,
@@ -129,7 +129,7 @@ var standardMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 standardMaterial.color.setHex(0x555555);
-//standardMaterial.opacity = 0.4;
+// standardMaterial.opacity = 0.4;
 
 var INTERSECTED; // the object in the scene currently closest to the camera and intersected by the Ray projected from the mouse position
 var SELECTED = [];
@@ -158,7 +158,7 @@ var onClick = function(objectsClicked, button)
 					if (OW.isIn(SELECTED[0], oldSelected))
 					{
 						// the object we clicked on was previously selected
-						if (TOGGLE_S)
+						if (TOGGLE_S || singleEntity())
 						{
 							// do nothing we don't want everything to disappear
 						}
@@ -302,7 +302,7 @@ var checkIntersectionPeriod = 0;
 var update = function()
 {
 	// if we are in selection mode (Z) checks for intersections
-	if (TOGGLE_Z && SELECTED.length == 0)
+	if (TOGGLE_Z && SELECTED.length == 0 && !singleEntity())
 	{
 		if (checkIntersectionPeriod == 0)
 		{
@@ -331,12 +331,12 @@ var update = function()
 			{
 				deselectSelection();
 			}
-			
+
 		}
 		checkIntersectionPeriod++;
-		if (checkIntersectionPeriod > 25) //the higher the smaller the frequency
+		if (checkIntersectionPeriod > 25) // the higher the smaller the frequency
 		{
-			checkIntersectionPeriod=0;
+			checkIntersectionPeriod = 0;
 		}
 	}
 
@@ -474,15 +474,47 @@ function toggleSelectionMode()
 	{
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
-		OW.setMouseClickListener(onClick);
 		OW.renderer.setClearColorHex(0x000000, 1);
-		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+
+		if (singleEntity())
 		{
-			if (child.hasOwnProperty("material"))
+			THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
 			{
-				child.material = standardMaterial;
-			}
-		});
+				if (child.hasOwnProperty("eid") && child.eid == OW.jsonscene.entities[0].id)
+				{
+					SELECTED = OW.divideEntity(child);
+					for (s in SELECTED)
+					{
+						if (SELECTED[s].eid.indexOf("soma_group") != -1)
+						{
+							SELECTED[s].material = somaMaterial;
+						}
+						else if (SELECTED[s].eid.indexOf("axon_group") != -1)
+						{
+							SELECTED[s].material = axonMaterial;
+						}
+						else if (SELECTED[s].eid.indexOf("dendrite_group") != -1)
+						{
+							SELECTED[s].material = dendriteMaterial;
+						}
+					}
+					OW.showMetadataForEntity(0);
+				}
+			});
+		}
+		else
+		{
+
+			OW.setMouseClickListener(onClick);
+
+			THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+			{
+				if (child.hasOwnProperty("material"))
+				{
+					child.material = standardMaterial;
+				}
+			});
+		}
 	}
 	;
 }
@@ -697,6 +729,11 @@ function setupUI()
 		cl.show(); // Hidden by default
 	});
 
+}
+
+function singleEntity()
+{
+	return OW.jsonscene.entities.length == 1;
 }
 
 function getUrlVars()
