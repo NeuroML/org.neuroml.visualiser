@@ -9,13 +9,13 @@ function get3DScene(neuromlurl)
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/"
-			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
 			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
 			// url :"http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-			url : neuromlurl
+//			url : neuromlurl
 
 		},
 		timeout : 1000000,
@@ -128,8 +128,8 @@ var standardMaterial = new THREE.MeshPhongMaterial({
 	shininess : 50,
 	shading : THREE.SmoothShading
 });
-standardMaterial.color.setHex(0xaaaaaa);
-standardMaterial.opacity = 0.4;
+standardMaterial.color.setHex(0x555555);
+//standardMaterial.opacity = 0.4;
 
 var INTERSECTED; // the object in the scene currently closest to the camera and intersected by the Ray projected from the mouse position
 var SELECTED = [];
@@ -180,6 +180,7 @@ var onClick = function(objectsClicked, button)
 					}
 					else
 					{
+						deselectSelection();
 						// we clicked on a different object
 						// 1)merge the entity
 						// 2)make it invisible if S
@@ -297,47 +298,62 @@ var preprocessMetadata = function(data)
 	}
 };
 
+var checkIntersectionPeriod = 0;
 var update = function()
 {
 	// if we are in selection mode (Z) checks for intersections
 	if (TOGGLE_Z && SELECTED.length == 0)
 	{
-		var intersects = OW.getIntersectedObjects();
-		// if there is one (or more) intersections
-		if (intersects.length > 0)
+		if (checkIntersectionPeriod == 0)
 		{
-			// if the closest object intersected is not the currently stored
-			// intersection object
-			if (intersects[0].object != INTERSECTED)
+			var intersects = OW.getIntersectedObjects();
+			// if there is one (or more) intersections
+			if (intersects.length > 0)
 			{
-				// restore previous intersection object (if it exists) to its
-				// original material
-				if (INTERSECTED)
-					INTERSECTED.material = standardMaterial;
-				// store reference to closest object as current intersection
-				// object
-				INTERSECTED = intersects[0].object;
-				INTERSECTED.material = highlightMaterial;
+				// if the closest object intersected is not the currently stored
+				// intersection object
+				if (intersects[0].object != INTERSECTED)
+				{
+					// restore previous intersection object (if it exists) to its
+					// original material
+					if (INTERSECTED)
+						INTERSECTED.material = standardMaterial;
+					// store reference to closest object as current intersection
+					// object
+					INTERSECTED = intersects[0].object;
+					INTERSECTED.material = highlightMaterial;
 
-				OW.showMetadataForEntity(INTERSECTED.eindex);
+					OW.showMetadataForEntity(INTERSECTED.eindex);
+				}
 			}
-		}
-		else
-		// there are no intersections
-		{
-			// restore previous intersection object (if it exists) to its
-			// original material
-			if (INTERSECTED)
+			else
+			// there are no intersections
 			{
-				INTERSECTED.material = standardMaterial;
+				deselectSelection();
 			}
-			// remove previous intersection object reference by setting current
-			// intersection object to "nothing"
-			INTERSECTED = null;
+			
+		}
+		checkIntersectionPeriod++;
+		if (checkIntersectionPeriod > 25) //the higher the smaller the frequency
+		{
+			checkIntersectionPeriod=0;
 		}
 	}
 
 };
+
+function deselectSelection()
+{
+	// restore previous intersection object (if it exists) to its
+	// original material
+	if (INTERSECTED)
+	{
+		INTERSECTED.material = standardMaterial;
+	}
+	// remove previous intersection object reference by setting current
+	// intersection object to "nothing"
+	INTERSECTED = null;
+}
 
 var TOGGLE_N = true;
 var TOGGLE_Z = false;
@@ -441,7 +457,7 @@ function toggleNormalMode()
 					opacity : 1,
 					ambient : 0x777777,
 					specular : 0xbbbb9b,
-					shininess : 2,
+					shininess : 50,
 					shading : THREE.SmoothShading
 				});
 				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
@@ -489,10 +505,11 @@ function toggleHideDeselected()
 	}
 }
 
-function switchButton(id,status) {
-    var radio = $('#' + id);
-    radio[0].checked = status;
-    radio.button("refresh");
+function switchButton(id, status)
+{
+	var radio = $('#' + id);
+	radio[0].checked = status;
+	radio.button("refresh");
 }
 
 function keyPressed()
@@ -501,43 +518,43 @@ function keyPressed()
 	if (OW.isKeyPressed("r"))
 	{
 		toggleRotationMode();
-		switchButton("rotationMode",TOGGLE_R);
+		switchButton("rotationMode", TOGGLE_R);
 	}
 	// I shows/hides inputs
 	if (OW.isKeyPressed("i"))
 	{
 		toggleInputs();
-		switchButton("showinputs",TOGGLE_I);
+		switchButton("showinputs", TOGGLE_I);
 	}
 	// O shows/hides outputs
 	if (OW.isKeyPressed("o"))
 	{
 		toggleOutputs();
-		switchButton("showoutputs",TOGGLE_O);
+		switchButton("showoutputs", TOGGLE_O);
 	}
 	// Z enters selection mode
 	if (OW.isKeyPressed("z"))
 	{
 		toggleSelectionMode();
-		switchButton("selectionMode",TOGGLE_Z);
+		switchButton("selectionMode", TOGGLE_Z);
 	}
 	// N exits selection mode and switches to standard view
 	if (OW.isKeyPressed("n") && !TOGGLE_N)
 	{
 		toggleNormalMode();
-		switchButton("normalMode",TOGGLE_N);
+		switchButton("normalMode", TOGGLE_N);
 	}
 	// H exits selection mode and switches to standard view
 	if (OW.isKeyPressed("H"))
 	{
 		toggleHelp();
-		switchButton("helpbutton",TOGGLE_H);
+		switchButton("helpbutton", TOGGLE_H);
 	}
 	// S hides the non selected entities
 	if (OW.isKeyPressed("s"))
 	{
 		toggleHideDeselected();
-		switchButton("showdeselected",TOGGLE_S);
+		switchButton("showdeselected", TOGGLE_S);
 	}
 	if (OW.isKeyPressed("w"))
 	{
@@ -668,7 +685,7 @@ function setupUI()
 		{
 			toggleHelp();
 		});
-		
+
 		var cl = new CanvasLoader('canvasloader-container');
 		cl.setColor('#389dc9'); // default is '#000000'
 		cl.setShape('spiral'); // default is 'oval'
