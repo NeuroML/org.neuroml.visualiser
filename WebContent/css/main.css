@@ -1,8 +1,15 @@
+body{
+	font-family: "CabinRegular";
+}
+.dg {
+	font-family: "CabinRegular";
+}
 .dg .cr.string {
-
+	font-family: "CabinRegular";
 	border-color: #43ccee;
 }
 .dg .cr.string input[type="text"] {
+	font-family: "CabinRegular";
 	color: #9FC701;
 }
 #position_toolbar {
@@ -22,18 +29,21 @@
 }
 
 button.ui-button-icon-only {
+	font-family: "CabinRegular";
 	position: absolute;
 	height: 25px;
 	width: 25px;
 }
 
 .ui-button-text-only .ui-button-text {
+	font-family: "CabinRegular";
 	width: 115px;
 	height: 15px;
 	font-size: 10px;
 }
 
 .ui-widget {
+	font-family: "CabinRegular";
 	font-size: 10px;
 }
 
@@ -82,7 +92,6 @@ button.ui-button-icon-only {
 	margin: 0 auto;
 	margin-top: 20px;
 	text-align: center;
-	font-family: Trebuchet MS, Helvetica, Arial, sans-serif;
 	font-size: 14px;
 }
 #canvasloader-container {
