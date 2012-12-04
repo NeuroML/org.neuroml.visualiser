@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="js/jquery-1.8.2.min.js"></script>
+		<script src="js/three51.js"></script>
+		<script src="js/TrackballControls.js"></script>
+		<script src="js/dat.gui.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/THREEx.KeyboardState.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/OW.js"></script>
+		<script src="js/heartcode-canvasloader-min-0.9.1.js"></script>
+		<script src="js/main.js"></script>
+		<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/overcast/jquery-ui.css" />
+		<link rel="stylesheet" href="css/cabin.css" />
+		<link rel="stylesheet" href="css/main.css" />
+		
+
+		<div id="content">
+			<div id="controls">
+				<div id="position_toolbar">
+					<button id="w"></button>
+					<button id="n"></button>
+					<button id="e"></button>
+					<button id="s"></button>
+					<button id="h"></button>
+					
+					<button id="rw"></button>
+					<button id="rn"></button>
+					<button id="re"></button>
+					<button id="rs"></button>
+					<button id="rh"></button>
+					
+					<button id="zi"></button>
+					<button id="zo"></button>
+					<br />
+				</div>
+				<div id="toolbar">
+					<div id="mode">
+						<input type="radio" id="normalMode" name="radio" checked="checked"/>
+						<label for="normalMode">Normal mode</label>
+						<input type="radio" id="selectionMode" name="radio"  />
+						<label for="selectionMode">Selection mode</label>
+					</div>
+					<div id="io">
+						<input type="checkbox" id="showinputs"  checked="checked"/>
+						<label class="square" for="showinputs">Show/Hide inputs (i)</label>
+						<input type="checkbox" id="showoutputs"  checked="checked"/>
+						<label class="square"  for="showoutputs">Show/Hide outputs (o)</label>
+						<input type="checkbox" id="showdeselected"  checked="checked"/>
+						<label class="square" for="showdeselected">Show/Hide not selected cells(s)</label>
+					</div>
+					<input type="checkbox" id="rotationMode"/>
+					<label class="square" for="rotationMode">Rotation mode (r)</label>
+					
+					<button id="helpbutton">Quick guide (h)</button>
+				</div>
+			</div>
+			<div id="canvasloader-container" class="wrapper"></div>
+			<div id="loadinglbl">
+				The file you selected is currently loading.
+				<br/>
+				Please be patient, the model is coming straight from the selected remote repository.
+				<br/>
+				Big networks of cells may take up to several minutes depending on the performance of your system.
+			</div>
+			
+			<div id="help" title="OSB 3D Explorer (BETA) Quick Guide">
+				<b class="helptitle">Navigation</b><br/>
+				<p ><b>Rotation</b><br/>
+					Left click and drag with the mouse to rotate<br/>
+					Press 'r' or click on the button at the top left corner to toggle automatic rotation (good for a demo!).<br/>
+					<b>Scroll</b><br/>
+					Right click and drag with the mouse to scroll<br/>
+					<b>Zoom</b><br/>
+					Wheel click and move your mouse up and down to zoom in and out<br/><br/>
+					In addition you can use the buttons in the upper left corner. The Home button resets the view.<br/><br/>
+				<b class="helptitle">Modes</b><br/>
+				<p><b>Normal mode (hotkey:n)</b><br/>
+					Normal mode is for exploring a network or cell as a whole<br/><br/> 
+					<b>Selection mode (hotkey:z)</b><br/>
+					Once in selection mode hover on a cell to <b class="red">highlight</b> it.<br/>
+					Click on a cell to select it.<br/>
+					A selected cell is decomposed in <b class="soma">soma</b>, <b class="axons">axons</b> and <b class="dendrites">dendrites</b>.<br/>
+					The panel at the top right shows the properties for the currently selected cell.<br/>
+					When a cell is selected in a network <b class="inputs">inputs</b> and <b class="outputs">outputs</b> of the cell are also shown.<br/>
+					Cells which are both inputs and outputs are shown in <b class="io">white</b>.<br/><br/>
+					To hide/show non selected cells press 's' or use the button in the top right corner.<br/>
+					To hide/show input cells press 'i' or use the down arrow button in the top right corner.<br/>
+					To hide/show output cells press 'o' or use the down up button in the top right corner.<br/><br/>
+				</p>
+			</div>
+		</div>
+	</body>
+</html>
