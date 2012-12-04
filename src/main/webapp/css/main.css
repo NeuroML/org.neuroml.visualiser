@@ -68,6 +68,36 @@ button.ui-button-icon-only {
 	top: 50px;
 }
 
+
+#rw {
+	left: 0px;
+	top: 110px;
+}
+#rn {
+	left: 25px;
+	top: 85px;
+}
+#rh {
+	left: 25px;
+	top: 110px;
+}
+#re {
+	left: 50px;
+	top: 110px;
+}
+#rs {
+	left: 25px;
+	top: 135px;
+}
+
+#zo {
+	left: 25px;
+	top: 200px;
+}
+#zi {
+	left: 25px;
+	top: 175px;
+}
 #mode {
 	left: 150px;
 	margin-bottom: 10px;
