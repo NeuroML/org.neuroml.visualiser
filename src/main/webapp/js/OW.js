@@ -421,6 +421,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
 			entityObject.eid = jsonEntity.id;
+			entityObject.geometry.dynamic = false;
 		}
 		else
 		{
@@ -479,10 +480,14 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			{
 				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
 				THREE.GeometryUtils.merge(combined, threeObject);
+				OW.renderer.deallocateObject(threeObject);
+				threeObject.geometry.deallocate();
+				threeObject.deallocate();
 			}
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
 			entityObject.eid = jsonEntity.id;
+			entityObject.geometry.dynamic = false;
 		}
 	}
 	return entityObject;
