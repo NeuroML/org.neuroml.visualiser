@@ -1,3 +1,2 @@
 .DS_Store
-target
-WebContent/META-INF
+src/main/webapp/META-INF

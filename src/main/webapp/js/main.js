@@ -122,14 +122,13 @@ var dendriteMaterial = new THREE.MeshPhongMaterial({
 });
 
 var standardMaterial = new THREE.MeshPhongMaterial({
-	opacity : 1,
+	opacity : 0.5,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
 	shininess : 50,
 	shading : THREE.SmoothShading
 });
-standardMaterial.color.setHex(0x555555);
-// standardMaterial.opacity = 0.4;
+standardMaterial.color.setHex(0xaaaaaa);
 
 var INTERSECTED; // the object in the scene currently closest to the camera and intersected by the Ray projected from the mouse position
 var SELECTED = [];
@@ -227,7 +226,7 @@ var onClick = function(objectsClicked, button)
 								postIDs = Object.keys(entity.metadata["Connections"]["Output"]);
 							}
 
-							THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+							OW.scene.traverse( function(child)
 							{
 								if (child.hasOwnProperty("eid"))
 								{
@@ -449,7 +448,7 @@ function toggleNormalMode()
 		}
 		OW.metadata = {};
 		OW.renderer.setClearColorHex(0xffffff, 1);
-		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+		OW.scene.traverse( function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
@@ -478,11 +477,13 @@ function toggleSelectionMode()
 
 		if (singleEntity())
 		{
-			THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+			OW.scene.traverse( function(child)
 			{
 				if (child.hasOwnProperty("eid") && child.eid == OW.jsonscene.entities[0].id)
 				{
 					SELECTED = OW.divideEntity(child);
+					child.material.deallocate();
+					
 					for (s in SELECTED)
 					{
 						if (SELECTED[s].eid.indexOf("soma_group") != -1)
@@ -507,10 +508,11 @@ function toggleSelectionMode()
 
 			OW.setMouseClickListener(onClick);
 
-			THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+			OW.scene.traverse( function(child)
 			{
 				if (child.hasOwnProperty("material"))
 				{
+					child.material.deallocate();
 					child.material = standardMaterial;
 				}
 			});
@@ -524,7 +526,7 @@ function toggleHideDeselected()
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
 		TOGGLE_S = !TOGGLE_S;
-		THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+		OW.scene.traverse( function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{

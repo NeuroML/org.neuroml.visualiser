@@ -49,11 +49,11 @@ OW.init = function(containerp, jsonscenep, updatep)
 		OW.container = containerp;
 		OW.jsonscene = jsonscenep;
 		OW.customUpdate = updatep;
+		OW.setupRenderer();
 		OW.setupScene();
 		OW.setupCamera();
 		OW.setupLights();
 		OW.setupStats();
-		OW.setupRenderer();
 		OW.setupControls();
 		OW.setupListeners();
 		return true;
@@ -348,6 +348,9 @@ OW.divideEntity = function(entity)
 		newEntities.push(entityObject);
 	}
 
+	OW.renderer.deallocateObject(entity);
+	entity.geometry.deallocate();
+	entity.deallocate();
 	return newEntities;
 };
 
@@ -367,6 +370,9 @@ OW.mergeEntities = function(entities)
 		for ( var e in entities)
 		{
 			OW.scene.remove(entities[e]);
+			OW.renderer.deallocateObject(entities[e]);
+			entities[e].geometry.deallocate();
+			entities[e].deallocate();
 		}
 
 		entityObject = OW.getThreeObjectFromJSONEntity(jsonEntities[entityIndex], entityIndex, true);
@@ -395,7 +401,6 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			// if mergeSubentities is true then only one resulting entity is
 			// created
 			// by merging all geometries of the different subentities together
-			// var material = new THREE.MeshLambertMaterial();
 			var material = new THREE.MeshPhongMaterial({
 				opacity : 1,
 				ambient : 0x777777,
@@ -409,6 +414,9 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			{
 				var threeObject = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 				THREE.GeometryUtils.merge(combined, threeObject);
+				OW.renderer.deallocateObject(threeObject);
+				threeObject.geometry.deallocate();
+				threeObject.deallocate();
 			}
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
@@ -733,7 +741,7 @@ OW.getIntersectedObjects = function()
 	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
 
 	var visibleChildren = [];
-	THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+	OW.scene.traverse( function(child)
 	{
 		if (child.visible)
 		{
@@ -840,7 +848,7 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
 		referencedIDs.push(entity.references[r].entityId);
 	}
 
-	THREE.SceneUtils.traverseHierarchy(OW.scene, function(child)
+	OW.scene.traverse( function(child)
 	{
 		if (child.hasOwnProperty("eid"))
 		{
