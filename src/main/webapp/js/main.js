@@ -10,13 +10,13 @@ function get3DScene(neuromlurl)
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
 			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
-			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
-			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-			url : neuromlurl
+			url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+		// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+		// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+		// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
+		// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+		// url : neuromlurl
 
 		},
 		timeout : 9000000,
@@ -163,11 +163,11 @@ var onClick = function(objectsClicked, button)
 			if (objectsClicked.length > 0)
 			{
 				var oldSelected = SELECTED;
-				SELECTED = [];
 
 				// we read the new object clicked
 				if (objectsClicked[0].object.visible)
 				{
+					SELECTED = [];
 					SELECTED.push(objectsClicked[0].object);
 
 					// go ahead and do what described unless we clicked on the same entity
@@ -317,7 +317,9 @@ var preprocessMetadata = function(data)
 	}
 };
 
-var checkIntersectionPeriod = 0;
+// disabling intersection check, to have decent performance it has to be too slow
+// and it feels buggy, removing the functionality altogether as it's not necessary.
+var checkIntersectionPeriod = -1;
 var update = function()
 {
 	// if we are in selection mode (Z) checks for intersections
@@ -352,7 +354,7 @@ var update = function()
 			}
 
 		}
-		checkIntersectionPeriod++;
+		// checkIntersectionPeriod++;
 		if (checkIntersectionPeriod > 25) // the higher the smaller the frequency
 		{
 			checkIntersectionPeriod = 0;
@@ -415,17 +417,27 @@ function toggleOutputs()
 	TOGGLE_O = !TOGGLE_O;
 	for (o in OUTPUT)
 	{
-		var refMaterial = postConnectedMaterial;
+		inputAndEnabled=TOGGLE_I && OW.isIn(OUTPUT[o], INPUT);
 		if (TOGGLE_S)
 		{
-			OUTPUT[o].visible = TOGGLE_O;
+			OUTPUT[o].visible = TOGGLE_O || inputAndEnabled;
 		}
-		if (TOGGLE_I && OW.isIn(OUTPUT[o], INPUT))
+		else
 		{
-			refMaterial = prePostConnectedMaterial;
-
+			OUTPUT[o].visible = true;
 		}
-		OUTPUT[o].material = TOGGLE_O ? refMaterial : standardMaterial;
+		if (inputAndEnabled)
+		{
+			OUTPUT[o].material = prePostConnectedMaterial;
+		}
+		else if (TOGGLE_O)
+		{
+			OUTPUT[o].material = postConnectedMaterial;
+		}
+		else
+		{
+			OUTPUT[o].material = standardMaterial;
+		}
 	}
 
 }
@@ -435,16 +447,27 @@ function toggleInputs()
 	TOGGLE_I = !TOGGLE_I;
 	for (i in INPUT)
 	{
-		var refMaterial = preConnectedMaterial;
+		outputAndEnabled=TOGGLE_O && OW.isIn(INPUT[i], OUTPUT);
 		if (TOGGLE_S)
 		{
-			INPUT[i].visible = TOGGLE_I;
+			INPUT[i].visible = TOGGLE_I || outputAndEnabled;
 		}
-		if (TOGGLE_O && OW.isIn(INPUT[i], OUTPUT))
+		else
 		{
-			refMaterial = prePostConnectedMaterial;
+			INPUT[i].visible = true;
 		}
-		INPUT[i].material = TOGGLE_I ? refMaterial : standardMaterial;
+		if (outputAndEnabled)
+		{
+			INPUT[i].material = prePostConnectedMaterial;
+		}
+		else if (TOGGLE_I)
+		{
+			INPUT[i].material = preConnectedMaterial;
+		}
+		else
+		{
+			INPUT[i].material = standardMaterial;
+		}
 	}
 }
 
@@ -465,6 +488,7 @@ function toggleNormalMode()
 			// if anything was selected we merge the geometries again
 			OW.mergeEntities(SELECTED);
 			SELECTED = [];
+			REFERENCED = [];
 		}
 		OW.metadata = {};
 		OW.renderer.setClearColorHex(0xffffff, 1);

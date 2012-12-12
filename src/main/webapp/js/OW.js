@@ -756,7 +756,7 @@ OW.getIntersectedObjects = function()
 
 	// returns an array containing all objects in the scene with which the ray
 	// intersects
-	return ray.intersectObjects(visibleChildren, true);
+	return ray.intersectObjects(visibleChildren);
 };
 
 /**
@@ -903,6 +903,7 @@ OW.isIn = function(e, array)
 	}
 	return found;
 };
+
 
 
 $(document).ready(function()
