@@ -417,7 +417,7 @@ function toggleOutputs()
 	TOGGLE_O = !TOGGLE_O;
 	for (o in OUTPUT)
 	{
-		inputAndEnabled=TOGGLE_I && OW.isIn(OUTPUT[o], INPUT);
+		inputAndEnabled = TOGGLE_I && OW.isIn(OUTPUT[o], INPUT);
 		if (TOGGLE_S)
 		{
 			OUTPUT[o].visible = TOGGLE_O || inputAndEnabled;
@@ -447,7 +447,7 @@ function toggleInputs()
 	TOGGLE_I = !TOGGLE_I;
 	for (i in INPUT)
 	{
-		outputAndEnabled=TOGGLE_O && OW.isIn(INPUT[i], OUTPUT);
+		outputAndEnabled = TOGGLE_O && OW.isIn(INPUT[i], OUTPUT);
 		if (TOGGLE_S)
 		{
 			INPUT[i].visible = TOGGLE_I || outputAndEnabled;
@@ -574,10 +574,28 @@ function toggleHideDeselected()
 		{
 			if (child.hasOwnProperty("material"))
 			{
-				if (!OW.isIn(child, SELECTED) && !OW.isIn(child, REFERENCED))
+				if (!OW.isIn(child, SELECTED))
 				{
+					if (OW.isIn(child, INPUT))
+					{
+						if (!TOGGLE_I)
+						{
+							child.visible = !child.visible;
+						}
+						return;
+
+					}
+					if (OW.isIn(child, OUTPUT))
+					{
+						if (!TOGGLE_O)
+						{
+							child.visible = !child.visible;
+						}
+						return;
+					}
 					child.visible = !child.visible;
 				}
+
 			}
 		});
 	}
