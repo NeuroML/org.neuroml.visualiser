@@ -1,6 +1,7 @@
 function get3DScene(neuromlurl)
 {
 	$("#controls").hide();
+	$("#error").hide();
 	$("#loadinglbl").show();
 	$("#canvasloader-container").show();
 	$.ajax({
@@ -8,34 +9,51 @@ function get3DScene(neuromlurl)
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-//			url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
-		 url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-		// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
-		// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-//		 url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-		// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-		// url : neuromlurl
+			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
+			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
+			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			url : neuromlurl
 
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
 		{
-
-			preprocessMetadata(data);
-			if (OW.init(createContainer(), data, update))
+			if (data.length === 0 || data.entities.length === 0)
 			{
-				OW.animate();
-				document.addEventListener("keydown", keyPressed, false);
-				$("#controls").show();
 				$("#loadinglbl").hide();
 				$("#canvasloader-container").hide();
+				$("#error").dialog({
+					modal : true,
+					buttons : {
+						Close : function()
+						{
+							$(this).dialog("close");
+						}
+					}
+				});
+				$("#error").show();
 			}
 			else
 			{
-				// initialisation failed
-				$("#loadinglbl").hide();
-				$("#canvasloader-container").hide();
+				preprocessMetadata(data);
+				if (OW.init(createContainer(), data, update))
+				{
+					OW.animate();
+					document.addEventListener("keydown", keyPressed, false);
+					$("#controls").show();
+					$("#loadinglbl").hide();
+					$("#canvasloader-container").hide();
+				}
+				else
+				{
+					// initialisation failed
+					$("#loadinglbl").hide();
+					$("#canvasloader-container").hide();
+				}
 			}
 
 		},
@@ -159,7 +177,8 @@ var onClick = function(objectsClicked, button)
 						// the object we clicked on was previously selected
 						if (TOGGLE_S || singleEntity())
 						{
-							// do nothing we don't want everything to disappear
+							OW.centerOnObject(SELECTED[0]);
+							// do nothing else we don't want everything to disappear
 						}
 						else
 						{
@@ -226,7 +245,7 @@ var onClick = function(objectsClicked, button)
 								postIDs = Object.keys(entity.metadata["Connections"]["Output"]);
 							}
 
-							OW.scene.traverse( function(child)
+							OW.scene.traverse(function(child)
 							{
 								if (child.hasOwnProperty("eid"))
 								{
@@ -259,6 +278,7 @@ var onClick = function(objectsClicked, button)
 						{
 							if (SELECTED[s].eid.indexOf("soma_group") != -1)
 							{
+								OW.centerOnObject(SELECTED[s]);
 								SELECTED[s].material = somaMaterial;
 							}
 							else if (SELECTED[s].eid.indexOf("axon_group") != -1)
@@ -448,7 +468,7 @@ function toggleNormalMode()
 		}
 		OW.metadata = {};
 		OW.renderer.setClearColorHex(0xffffff, 1);
-		OW.scene.traverse( function(child)
+		OW.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
@@ -477,13 +497,13 @@ function toggleSelectionMode()
 
 		if (singleEntity())
 		{
-			OW.scene.traverse( function(child)
+			OW.scene.traverse(function(child)
 			{
 				if (child.hasOwnProperty("eid") && child.eid == OW.jsonscene.entities[0].id)
 				{
 					SELECTED = OW.divideEntity(child);
 					child.material.deallocate();
-					
+
 					for (s in SELECTED)
 					{
 						if (SELECTED[s].eid.indexOf("soma_group") != -1)
@@ -508,7 +528,7 @@ function toggleSelectionMode()
 
 			OW.setMouseClickListener(onClick);
 
-			OW.scene.traverse( function(child)
+			OW.scene.traverse(function(child)
 			{
 				if (child.hasOwnProperty("material"))
 				{
@@ -526,7 +546,7 @@ function toggleHideDeselected()
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
 		TOGGLE_S = !TOGGLE_S;
-		OW.scene.traverse( function(child)
+		OW.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{

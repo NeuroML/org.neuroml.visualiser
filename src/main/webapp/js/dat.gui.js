@@ -56,10 +56,8 @@ dat.utils.common = (function () {
   var ARR_SLICE = Array.prototype.slice;
 
   /**
-   * Band-aid methods for things that should be a lot easier in JavaScript.
-   * Implementation and structure inspired by underscore.js
-   * http://documentcloud.github.com/underscore/
-   */
+	 * Band-aid methods for things that should be a lot easier in JavaScript. Implementation and structure inspired by underscore.js http://documentcloud.github.com/underscore/
+	 */
 
   return { 
     
@@ -170,8 +168,11 @@ dat.utils.common = (function () {
     
     isFunction: function(obj) {
       return Object.prototype.toString.call(obj) === '[object Function]';
-    }
+    },
   
+    isURL:function(obj){
+    	return obj.startsWith("URL:");
+    }
   };
     
 })();
@@ -180,47 +181,54 @@ dat.utils.common = (function () {
 dat.controllers.Controller = (function (common) {
 
   /**
-   * @class An "abstract" class that represents a given property of an object.
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   *
-   * @member dat.controllers
-   */
+	 * @class An "abstract" class that represents a given property of an object.
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * 
+	 * @member dat.controllers
+	 */
   var Controller = function(object, property) {
 
     this.initialValue = object[property];
 
     /**
-     * Those who extend this class will put their DOM elements in here.
-     * @type {DOMElement}
-     */
+	 * Those who extend this class will put their DOM elements in here.
+	 * 
+	 * @type {DOMElement}
+	 */
     this.domElement = document.createElement('div');
 
     /**
-     * The object to manipulate
-     * @type {Object}
-     */
+	 * The object to manipulate
+	 * 
+	 * @type {Object}
+	 */
     this.object = object;
 
     /**
-     * The name of the property to manipulate
-     * @type {String}
-     */
+	 * The name of the property to manipulate
+	 * 
+	 * @type {String}
+	 */
     this.property = property;
 
     /**
-     * The function to be called on change.
-     * @type {Function}
-     * @ignore
-     */
+	 * The function to be called on change.
+	 * 
+	 * @type {Function}
+	 * @ignore
+	 */
     this.__onChange = undefined;
 
     /**
-     * The function to be called on finishing change.
-     * @type {Function}
-     * @ignore
-     */
+	 * The function to be called on finishing change.
+	 * 
+	 * @type {Function}
+	 * @ignore
+	 */
     this.__onFinishChange = undefined;
 
   };
@@ -233,37 +241,35 @@ dat.controllers.Controller = (function (common) {
       {
 
         /**
-         * Specify that a function fire every time someone changes the value with
-         * this Controller.
-         *
-         * @param {Function} fnc This function will be called whenever the value
-         * is modified via this Controller.
-         * @returns {dat.controllers.Controller} this
-         */
+		 * Specify that a function fire every time someone changes the value with this Controller.
+		 * 
+		 * @param {Function}
+		 *            fnc This function will be called whenever the value is modified via this Controller.
+		 * @returns {dat.controllers.Controller} this
+		 */
         onChange: function(fnc) {
           this.__onChange = fnc;
           return this;
         },
 
         /**
-         * Specify that a function fire every time someone "finishes" changing
-         * the value wih this Controller. Useful for values that change
-         * incrementally like numbers or strings.
-         *
-         * @param {Function} fnc This function will be called whenever
-         * someone "finishes" changing the value via this Controller.
-         * @returns {dat.controllers.Controller} this
-         */
+		 * Specify that a function fire every time someone "finishes" changing the value wih this Controller. Useful for values that change incrementally like numbers or strings.
+		 * 
+		 * @param {Function}
+		 *            fnc This function will be called whenever someone "finishes" changing the value via this Controller.
+		 * @returns {dat.controllers.Controller} this
+		 */
         onFinishChange: function(fnc) {
           this.__onFinishChange = fnc;
           return this;
         },
 
         /**
-         * Change the value of <code>object[property]</code>
-         *
-         * @param {Object} newValue The new value of <code>object[property]</code>
-         */
+		 * Change the value of <code>object[property]</code>
+		 * 
+		 * @param {Object}
+		 *            newValue The new value of <code>object[property]</code>
+		 */
         setValue: function(newValue) {
           this.object[this.property] = newValue;
           if (this.__onChange) {
@@ -274,26 +280,26 @@ dat.controllers.Controller = (function (common) {
         },
 
         /**
-         * Gets the value of <code>object[property]</code>
-         *
-         * @returns {Object} The current value of <code>object[property]</code>
-         */
+		 * Gets the value of <code>object[property]</code>
+		 * 
+		 * @returns {Object} The current value of <code>object[property]</code>
+		 */
         getValue: function() {
           return this.object[this.property];
         },
 
         /**
-         * Refreshes the visual display of a Controller in order to keep sync
-         * with the object's current value.
-         * @returns {dat.controllers.Controller} this
-         */
+		 * Refreshes the visual display of a Controller in order to keep sync with the object's current value.
+		 * 
+		 * @returns {dat.controllers.Controller} this
+		 */
         updateDisplay: function() {
           return this;
         },
 
         /**
-         * @returns {Boolean} true if the value has deviated from initialValue
-         */
+		 * @returns {Boolean} true if the value has deviated from initialValue
+		 */
         isModified: function() {
           return this.initialValue !== this.getValue()
         }
@@ -342,16 +348,16 @@ dat.dom.dom = (function (common) {
   }
 
   /**
-   * @namespace
-   * @member dat.dom
-   */
+	 * @namespace
+	 * @member dat.dom
+	 */
   var dom = {
 
     /**
-     * 
-     * @param elem
-     * @param selectable
-     */
+	 * 
+	 * @param elem
+	 * @param selectable
+	 */
     makeSelectable: function(elem, selectable) {
 
       if (elem === undefined || elem.style === undefined) return;
@@ -368,11 +374,11 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param horizontal
-     * @param vertical
-     */
+	 * 
+	 * @param elem
+	 * @param horizontal
+	 * @param vertical
+	 */
     makeFullscreen: function(elem, horizontal, vertical) {
 
       if (common.isUndefined(horizontal)) horizontal = true;
@@ -392,11 +398,11 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param eventType
-     * @param params
-     */
+	 * 
+	 * @param elem
+	 * @param eventType
+	 * @param params
+	 */
     fakeEvent: function(elem, eventType, params, aux) {
       params = params || {};
       var className = EVENT_MAP_INV[eventType];
@@ -410,10 +416,10 @@ dat.dom.dom = (function (common) {
           var clientY = params.y || params.clientY || 0;
           evt.initMouseEvent(eventType, params.bubbles || false,
               params.cancelable || true, window, params.clickCount || 1,
-              0, //screen X
-              0, //screen Y
-              clientX, //client X
-              clientY, //client Y
+              0, // screen X
+              0, // screen Y
+              clientX, // client X
+              clientY, // client Y
               false, false, false, false, 0, null);
           break;
         case 'KeyboardEvents':
@@ -443,12 +449,12 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param event
-     * @param func
-     * @param bool
-     */
+	 * 
+	 * @param elem
+	 * @param event
+	 * @param func
+	 * @param bool
+	 */
     bind: function(elem, event, func, bool) {
       bool = bool || false;
       if (elem.addEventListener)
@@ -459,12 +465,12 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param event
-     * @param func
-     * @param bool
-     */
+	 * 
+	 * @param elem
+	 * @param event
+	 * @param func
+	 * @param bool
+	 */
     unbind: function(elem, event, func, bool) {
       bool = bool || false;
       if (elem.removeEventListener)
@@ -475,10 +481,10 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param className
-     */
+	 * 
+	 * @param elem
+	 * @param className
+	 */
     addClass: function(elem, className) {
       if (elem.className === undefined) {
         elem.className = className;
@@ -493,10 +499,10 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     * @param className
-     */
+	 * 
+	 * @param elem
+	 * @param className
+	 */
     removeClass: function(elem, className) {
       if (className) {
         if (elem.className === undefined) {
@@ -522,9 +528,9 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     */
+	 * 
+	 * @param elem
+	 */
     getWidth: function(elem) {
 
       var style = getComputedStyle(elem);
@@ -537,9 +543,9 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     */
+	 * 
+	 * @param elem
+	 */
     getHeight: function(elem) {
 
       var style = getComputedStyle(elem);
@@ -552,9 +558,9 @@ dat.dom.dom = (function (common) {
     },
 
     /**
-     *
-     * @param elem
-     */
+	 * 
+	 * @param elem
+	 */
     getOffset: function(elem) {
       var offset = {left: 0, top:0};
       if (elem.offsetParent) {
@@ -568,9 +574,9 @@ dat.dom.dom = (function (common) {
 
     // http://stackoverflow.com/posts/2684561/revisions
     /**
-     * 
-     * @param elem
-     */
+	 * 
+	 * @param elem
+	 */
     isActive: function(elem) {
       return elem === document.activeElement && ( elem.type || elem.href );
     }
@@ -585,18 +591,19 @@ dat.dom.dom = (function (common) {
 dat.controllers.OptionController = (function (Controller, dom, common) {
 
   /**
-   * @class Provides a select input to alter the property of an object, using a
-   * list of accepted values.
-   *
-   * @extends dat.controllers.Controller
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   * @param {Object|string[]} options A map of labels to acceptable values, or
-   * a list of acceptable string values.
-   *
-   * @member dat.controllers
-   */
+	 * @class Provides a select input to alter the property of an object, using a list of accepted values.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * @param {Object|string[]}
+	 *            options A map of labels to acceptable values, or a list of acceptable string values.
+	 * 
+	 * @member dat.controllers
+	 */
   var OptionController = function(object, property, options) {
 
     OptionController.superclass.call(this, object, property);
@@ -604,9 +611,10 @@ dat.controllers.OptionController = (function (Controller, dom, common) {
     var _this = this;
 
     /**
-     * The drop down menu
-     * @ignore
-     */
+	 * The drop down menu
+	 * 
+	 * @ignore
+	 */
     this.__select = document.createElement('select');
 
     if (common.isArray(options)) {
@@ -674,19 +682,25 @@ dat.utils.common);
 dat.controllers.NumberController = (function (Controller, common) {
 
   /**
-   * @class Represents a given property of an object that is a number.
-   *
-   * @extends dat.controllers.Controller
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   * @param {Object} [params] Optional parameters
-   * @param {Number} [params.min] Minimum allowed value
-   * @param {Number} [params.max] Maximum allowed value
-   * @param {Number} [params.step] Increment by which to change value
-   *
-   * @member dat.controllers
-   */
+	 * @class Represents a given property of an object that is a number.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * @param {Object}
+	 *            [params] Optional parameters
+	 * @param {Number}
+	 *            [params.min] Minimum allowed value
+	 * @param {Number}
+	 *            [params.max] Maximum allowed value
+	 * @param {Number}
+	 *            [params.step] Increment by which to change value
+	 * 
+	 * @member dat.controllers
+	 */
   var NumberController = function(object, property, params) {
 
     NumberController.superclass.call(this, object, property);
@@ -744,39 +758,37 @@ dat.controllers.NumberController = (function (Controller, common) {
         },
 
         /**
-         * Specify a minimum value for <code>object[property]</code>.
-         *
-         * @param {Number} minValue The minimum value for
-         * <code>object[property]</code>
-         * @returns {dat.controllers.NumberController} this
-         */
+		 * Specify a minimum value for <code>object[property]</code>.
+		 * 
+		 * @param {Number}
+		 *            minValue The minimum value for <code>object[property]</code>
+		 * @returns {dat.controllers.NumberController} this
+		 */
         min: function(v) {
           this.__min = v;
           return this;
         },
 
         /**
-         * Specify a maximum value for <code>object[property]</code>.
-         *
-         * @param {Number} maxValue The maximum value for
-         * <code>object[property]</code>
-         * @returns {dat.controllers.NumberController} this
-         */
+		 * Specify a maximum value for <code>object[property]</code>.
+		 * 
+		 * @param {Number}
+		 *            maxValue The maximum value for <code>object[property]</code>
+		 * @returns {dat.controllers.NumberController} this
+		 */
         max: function(v) {
           this.__max = v;
           return this;
         },
 
         /**
-         * Specify a step value that dat.controllers.NumberController
-         * increments by.
-         *
-         * @param {Number} stepValue The step value for
-         * dat.controllers.NumberController
-         * @default if minimum and maximum specified increment is 1% of the
-         * difference otherwise stepValue is 1
-         * @returns {dat.controllers.NumberController} this
-         */
+		 * Specify a step value that dat.controllers.NumberController increments by.
+		 * 
+		 * @param {Number}
+		 *            stepValue The step value for dat.controllers.NumberController
+		 * @default if minimum and maximum specified increment is 1% of the difference otherwise stepValue is 1
+		 * @returns {dat.controllers.NumberController} this
+		 */
         step: function(v) {
           this.__step = v;
           return this;
@@ -804,21 +816,26 @@ dat.utils.common);
 dat.controllers.NumberControllerBox = (function (NumberController, dom, common) {
 
   /**
-   * @class Represents a given property of an object that is a number and
-   * provides an input element with which to manipulate it.
-   *
-   * @extends dat.controllers.Controller
-   * @extends dat.controllers.NumberController
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   * @param {Object} [params] Optional parameters
-   * @param {Number} [params.min] Minimum allowed value
-   * @param {Number} [params.max] Maximum allowed value
-   * @param {Number} [params.step] Increment by which to change value
-   *
-   * @member dat.controllers
-   */
+	 * @class Represents a given property of an object that is a number and provides an input element with which to manipulate it.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * @extends dat.controllers.NumberController
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * @param {Object}
+	 *            [params] Optional parameters
+	 * @param {Number}
+	 *            [params.min] Minimum allowed value
+	 * @param {Number}
+	 *            [params.max] Maximum allowed value
+	 * @param {Number}
+	 *            [params.step] Increment by which to change value
+	 * 
+	 * @member dat.controllers
+	 */
   var NumberControllerBox = function(object, property, params) {
 
     this.__truncationSuspended = false;
@@ -828,9 +845,10 @@ dat.controllers.NumberControllerBox = (function (NumberController, dom, common) 
     var _this = this;
 
     /**
-     * {Number} Previous mouse y position
-     * @ignore
-     */
+	 * {Number} Previous mouse y position
+	 * 
+	 * @ignore
+	 */
     var prev_y;
 
     this.__input = document.createElement('input');
@@ -924,23 +942,25 @@ dat.utils.common);
 dat.controllers.NumberControllerSlider = (function (NumberController, dom, css, common, styleSheet) {
 
   /**
-   * @class Represents a given property of an object that is a number, contains
-   * a minimum and maximum, and provides a slider element with which to
-   * manipulate it. It should be noted that the slider element is made up of
-   * <code>&lt;div&gt;</code> tags, <strong>not</strong> the html5
-   * <code>&lt;slider&gt;</code> element.
-   *
-   * @extends dat.controllers.Controller
-   * @extends dat.controllers.NumberController
-   * 
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   * @param {Number} minValue Minimum allowed value
-   * @param {Number} maxValue Maximum allowed value
-   * @param {Number} stepValue Increment by which to change value
-   *
-   * @member dat.controllers
-   */
+	 * @class Represents a given property of an object that is a number, contains a minimum and maximum, and provides a slider element with which to manipulate it. It should be noted that the slider element is made up of <code>&lt;div&gt;</code> tags, <strong>not</strong> the html5
+	 *        <code>&lt;slider&gt;</code> element.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * @extends dat.controllers.NumberController
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * @param {Number}
+	 *            minValue Minimum allowed value
+	 * @param {Number}
+	 *            maxValue Maximum allowed value
+	 * @param {Number}
+	 *            stepValue Increment by which to change value
+	 * 
+	 * @member dat.controllers
+	 */
   var NumberControllerSlider = function(object, property, min, max, step) {
 
     NumberControllerSlider.superclass.call(this, object, property, { min: min, max: max, step: step });
@@ -998,8 +1018,8 @@ dat.controllers.NumberControllerSlider = (function (NumberController, dom, css, 
   NumberControllerSlider.superclass = NumberController;
 
   /**
-   * Injects default stylesheet for slider elements.
-   */
+	 * Injects default stylesheet for slider elements.
+	 */
   NumberControllerSlider.useDefaultStyles = function() {
     css.inject(styleSheet);
   };
@@ -1036,18 +1056,77 @@ dat.utils.common,
 ".slider {\n  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);\n  height: 1em;\n  border-radius: 1em;\n  background-color: #eee;\n  padding: 0 0.5em;\n  overflow: hidden;\n}\n\n.slider-fg {\n  padding: 1px 0 2px 0;\n  background-color: #aaa;\n  height: 1em;\n  margin-left: -0.5em;\n  padding-right: 0.5em;\n  border-radius: 1em 0 0 1em;\n}\n\n.slider-fg:after {\n  display: inline-block;\n  border-radius: 1em;\n  background-color: #fff;\n  border:  1px solid #aaa;\n  content: '';\n  float: right;\n  margin-right: -1em;\n  margin-top: -1px;\n  height: 0.9em;\n  width: 0.9em;\n}");
 
 
+dat.controllers.URLController = (function (Controller, dom, common) {
+
+	  /**
+		 * @class Provides a GUI interface to fire a specified method, a property of an object.
+		 * 
+		 * @extends dat.controllers.Controller
+		 * 
+		 * @param {Object}
+		 *            object The object to be manipulated
+		 * @param {string}
+		 *            property The name of the property to be manipulated
+		 * 
+		 * @member dat.controllers
+		 */
+	  var URLController = function(object, property, text) {
+
+			 URLController.superclass.call(this, object, property);
+
+			    var _this = this;
+
+			    this.__input = document.createElement('a');
+			    this.__input.setAttribute('class', 'dg url various fancybox.iframe');
+			    this.__input.innerHTML='Open';
+			    
+			    this.__input.setAttribute('data-fancybox-type','iframe');
+			    this.__input.setAttribute('href',object[property].substring(4));
+
+			    this.domElement.appendChild(this.__input);
+
+			  };
+
+			  URLController.superclass = Controller;
+
+			  common.extend(
+
+					  URLController.prototype,
+			      Controller.prototype,
+			      {
+			        
+			        fire: function() {
+			          if (this.__onChange) {
+			            this.__onChange.call(this);
+			          }
+			          if (this.__onFinishChange) {
+			            this.__onFinishChange.call(this, this.getValue());
+			          }
+			          this.getValue().call(this.object);
+			        }});
+
+
+			  return URLController;
+
+	})(dat.controllers.Controller,
+	dat.dom.dom,
+	dat.utils.common);
+
+
 dat.controllers.FunctionController = (function (Controller, dom, common) {
 
   /**
-   * @class Provides a GUI interface to fire a specified method, a property of an object.
-   *
-   * @extends dat.controllers.Controller
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   *
-   * @member dat.controllers
-   */
+	 * @class Provides a GUI interface to fire a specified method, a property of an object.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * 
+	 * @member dat.controllers
+	 */
   var FunctionController = function(object, property, text) {
 
     FunctionController.superclass.call(this, object, property);
@@ -1100,14 +1179,16 @@ dat.utils.common);
 dat.controllers.BooleanController = (function (Controller, dom, common) {
 
   /**
-   * @class Provides a checkbox input to alter the boolean property of an object.
-   * @extends dat.controllers.Controller
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   *
-   * @member dat.controllers
-   */
+	 * @class Provides a checkbox input to alter the boolean property of an object.
+	 * @extends dat.controllers.Controller
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * 
+	 * @member dat.controllers
+	 */
   var BooleanController = function(object, property) {
 
     BooleanController.superclass.call(this, object, property);
@@ -1563,28 +1644,34 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
   var hideable_guis = [];
 
   /**
-   * A lightweight controller library for JavaScript. It allows you to easily
-   * manipulate variables and fire functions on the fly.
-   * @class
-   *
-   * @member dat.gui
-   *
-   * @param {Object} [params]
-   * @param {String} [params.name] The name of this GUI.
-   * @param {Object} [params.load] JSON object representing the saved state of
-   * this GUI.
-   * @param {Boolean} [params.auto=true]
-   * @param {dat.gui.GUI} [params.parent] The GUI I'm nested in.
-   * @param {Boolean} [params.closed] If true, starts closed
-   */
+	 * A lightweight controller library for JavaScript. It allows you to easily manipulate variables and fire functions on the fly.
+	 * 
+	 * @class
+	 * 
+	 * @member dat.gui
+	 * 
+	 * @param {Object}
+	 *            [params]
+	 * @param {String}
+	 *            [params.name] The name of this GUI.
+	 * @param {Object}
+	 *            [params.load] JSON object representing the saved state of this GUI.
+	 * @param {Boolean}
+	 *            [params.auto=true]
+	 * @param {dat.gui.GUI}
+	 *            [params.parent] The GUI I'm nested in.
+	 * @param {Boolean}
+	 *            [params.closed] If true, starts closed
+	 */
   var GUI = function(params) {
 
     var _this = this;
 
     /**
-     * Outermost DOM Element
-     * @type DOMElement
-     */
+	 * Outermost DOM Element
+	 * 
+	 * @type DOMElement
+	 */
     this.domElement = document.createElement('div');
     this.__ul = document.createElement('ul');
     this.domElement.appendChild(this.__ul);
@@ -1592,37 +1679,29 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
     dom.addClass(this.domElement, CSS_NAMESPACE);
 
     /**
-     * Nested GUI's by name
-     * @ignore
-     */
+	 * Nested GUI's by name
+	 * 
+	 * @ignore
+	 */
     this.__folders = {};
 
     this.__controllers = [];
 
     /**
-     * List of objects I'm remembering for save, only used in top level GUI
-     * @ignore
-     */
+	 * List of objects I'm remembering for save, only used in top level GUI
+	 * 
+	 * @ignore
+	 */
     this.__rememberedObjects = [];
 
     /**
-     * Maps the index of remembered objects to a map of controllers, only used
-     * in top level GUI.
-     *
-     * @private
-     * @ignore
-     *
-     * @example
-     * [
-     *  {
-     *    propertyName: Controller,
-     *    anotherPropertyName: Controller
-     *  },
-     *  {
-     *    propertyName: Controller
-     *  }
-     * ]
-     */
+	 * Maps the index of remembered objects to a map of controllers, only used in top level GUI.
+	 * 
+	 * @private
+	 * @ignore
+	 * 
+	 * @example [ { propertyName: Controller, anotherPropertyName: Controller }, { propertyName: Controller } ]
+	 */
     this.__rememberedObjectIndecesToControllers = [];
 
     this.__listening = [];
@@ -1663,7 +1742,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
     if (params.autoPlace && common.isUndefined(params.scrollable)) {
       params.scrollable = true;
     }
-//    params.scrollable = common.isUndefined(params.parent) && params.scrollable === true;
+// params.scrollable = common.isUndefined(params.parent) && params.scrollable === true;
 
     // Not part of params because I don't want people passing this in via
     // constructor. Should be a 'remembered' value.
@@ -1677,9 +1756,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         {
 
           /**
-           * The parent <code>GUI</code>
-           * @type dat.gui.GUI
-           */
+			 * The parent <code>GUI</code>
+			 * 
+			 * @type dat.gui.GUI
+			 */
           parent: {
             get: function() {
               return params.parent;
@@ -1693,9 +1773,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * Handles <code>GUI</code>'s element placement for you
-           * @type Boolean
-           */
+			 * Handles <code>GUI</code>'s element placement for you
+			 * 
+			 * @type Boolean
+			 */
           autoPlace: {
             get: function() {
               return params.autoPlace;
@@ -1703,9 +1784,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * The identifier for a set of saved values
-           * @type String
-           */
+			 * The identifier for a set of saved values
+			 * 
+			 * @type String
+			 */
           preset: {
 
             get: function() {
@@ -1729,9 +1811,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * The width of <code>GUI</code> element
-           * @type Number
-           */
+			 * The width of <code>GUI</code> element
+			 * 
+			 * @type Number
+			 */
           width: {
             get: function() {
               return params.width;
@@ -1743,10 +1826,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * The name of <code>GUI</code>. Used for folders. i.e
-           * a folder's name
-           * @type String
-           */
+			 * The name of <code>GUI</code>. Used for folders. i.e a folder's name
+			 * 
+			 * @type String
+			 */
           name: {
             get: function() {
               return params.name;
@@ -1761,9 +1844,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * Whether the <code>GUI</code> is collapsed or not
-           * @type Boolean
-           */
+			 * Whether the <code>GUI</code> is collapsed or not
+			 * 
+			 * @type Boolean
+			 */
           closed: {
             get: function() {
               return params.closed;
@@ -1787,9 +1871,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * Contains all presets
-           * @type Object
-           */
+			 * Contains all presets
+			 * 
+			 * @type Object
+			 */
           load: {
             get: function() {
               return params.load;
@@ -1797,10 +1882,10 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
           },
 
           /**
-           * Determines whether or not to use <a href="https://developer.mozilla.org/en/DOM/Storage#localStorage">localStorage</a> as the means for
-           * <code>remember</code>ing
-           * @type Boolean
-           */
+			 * Determines whether or not to use <a href="https://developer.mozilla.org/en/DOM/Storage#localStorage">localStorage</a> as the means for <code>remember</code>ing
+			 * 
+			 * @type Boolean
+			 */
           useLocalStorage: {
 
             get: function() {
@@ -1984,11 +2069,11 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
       {
 
         /**
-         * @param object
-         * @param property
-         * @returns {dat.controllers.Controller} The new controller that was added.
-         * @instance
-         */
+		 * @param object
+		 * @param property
+		 * @returns {dat.controllers.Controller} The new controller that was added.
+		 * @instance
+		 */
         add: function(object, property) {
 
           return add(
@@ -2003,11 +2088,11 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * @param object
-         * @param property
-         * @returns {dat.controllers.ColorController} The new controller that was added.
-         * @instance
-         */
+		 * @param object
+		 * @param property
+		 * @returns {dat.controllers.ColorController} The new controller that was added.
+		 * @instance
+		 */
         addColor: function(object, property) {
 
           return add(
@@ -2022,9 +2107,9 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * @param controller
-         * @instance
-         */
+		 * @param controller
+		 * @instance
+		 */
         remove: function(controller) {
 
           // TODO listening?
@@ -2046,12 +2131,12 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * @param name
-         * @returns {dat.gui.GUI} The new folder.
-         * @throws {Error} if this GUI already has a folder by the specified
-         * name
-         * @instance
-         */
+		 * @param name
+		 * @returns {dat.gui.GUI} The new folder.
+		 * @throws {Error}
+		 *             if this GUI already has a folder by the specified name
+		 * @instance
+		 */
         addFolder: function(name) {
 
           // We have to prevent collisions on names in order to have a key
@@ -2136,14 +2221,14 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * Mark objects for saving. The order of these objects cannot change as
-         * the GUI grows. When remembering new objects, append them to the end
-         * of the list.
-         *
-         * @param {Object...} objects
-         * @throws {Error} if not called on a top level GUI.
-         * @instance
-         */
+		 * Mark objects for saving. The order of these objects cannot change as the GUI grows. When remembering new objects, append them to the end of the list.
+		 * 
+		 * @param {Object...}
+		 *            objects
+		 * @throws {Error}
+		 *             if not called on a top level GUI.
+		 * @instance
+		 */
         remember: function() {
 
           if (common.isUndefined(SAVE_DIALOGUE)) {
@@ -2174,9 +2259,9 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * @returns {dat.gui.GUI} the topmost parent GUI of a nested GUI.
-         * @instance
-         */
+		 * @returns {dat.gui.GUI} the topmost parent GUI of a nested GUI.
+		 * @instance
+		 */
         getRoot: function() {
           var gui = this;
           while (gui.parent) {
@@ -2186,10 +2271,9 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
         },
 
         /**
-         * @returns {Object} a JSON object representing the current state of
-         * this GUI as well as its remembered properties.
-         * @instance
-         */
+		 * @returns {Object} a JSON object representing the current state of this GUI as well as its remembered properties.
+		 * @instance
+		 */
         getSaveObject: function() {
 
           var toReturn = this.load;
@@ -2328,12 +2412,14 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
   }
 
   /**
-   * Add a row to the end of the GUI or before another row.
-   *
-   * @param gui
-   * @param [dom] If specified, inserts the dom content in the new row
-   * @param [liBefore] If specified, places the new row before another row
-   */
+	 * Add a row to the end of the GUI or before another row.
+	 * 
+	 * @param gui
+	 * @param [dom]
+	 *            If specified, inserts the dom content in the new row
+	 * @param [liBefore]
+	 *            If specified, places the new row before another row
+	 */
   function addRow(gui, dom, liBefore) {
     var li = document.createElement('li');
     if (dom) li.appendChild(dom);
@@ -2693,7 +2779,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
       gui.revert();
     });
 
-//    div.appendChild(button2);
+// div.appendChild(button2);
 
   }
 
@@ -2708,7 +2794,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
       height: '200px',
       cursor: 'ew-resize',
       position: 'absolute'
-//      border: '1px solid blue'
+// border: '1px solid blue'
 
     });
 
@@ -2813,7 +2899,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
 
   function markPresetModified(gui, modified) {
     var opt = gui.__preset_select[gui.__preset_select.selectedIndex];
-//    console.log('mark', modified, opt);
+// console.log('mark', modified, opt);
     if (modified) {
       opt.innerHTML = opt.value + "*";
     } else {
@@ -2843,7 +2929,7 @@ dat.GUI = dat.gui.GUI = (function (css, saveDialogueContents, styleSheet, contro
 })(dat.utils.css,
 "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n      \n    </div>\n    \n  </div>\n\n</div>",
 ".dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity 0.1s linear;-o-transition:opacity 0.1s linear;-moz-transition:opacity 0.1s linear;transition:opacity 0.1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity 0.1s linear;-o-transition:opacity 0.1s linear;-moz-transition:opacity 0.1s linear;transition:opacity 0.1s linear;border:0;position:absolute;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-x:hidden}.dg.a.has-save ul{margin-top:27px}.dg.a.has-save ul.closed{margin-top:0}.dg.a .save-row{position:fixed;top:0;z-index:1002}.dg li{-webkit-transition:height 0.1s ease-out;-o-transition:height 0.1s ease-out;-moz-transition:height 0.1s ease-out;transition:height 0.1s ease-out}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;overflow:hidden;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li > *{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:9px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2fa1d6}.dg .cr.number input[type=text]{color:#2fa1d6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2fa1d6}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}\n",
-dat.controllers.factory = (function (OptionController, NumberControllerBox, NumberControllerSlider, StringController, FunctionController, BooleanController, common) {
+dat.controllers.factory = (function (OptionController, NumberControllerBox, NumberControllerSlider, StringController, URLController, FunctionController, BooleanController, common) {
 
       return function(object, property) {
 
@@ -2871,6 +2957,11 @@ dat.controllers.factory = (function (OptionController, NumberControllerBox, Numb
 
         }
 
+        if(common.isURL(initialValue))
+        {
+        	return new URLController(object,property);
+        }
+        
         if (common.isString(initialValue)) {
           return new StringController(object, property);
         }
@@ -2891,15 +2982,17 @@ dat.controllers.NumberControllerSlider,
 dat.controllers.StringController = (function (Controller, dom, common) {
 
   /**
-   * @class Provides a text input to alter the string property of an object.
-   *
-   * @extends dat.controllers.Controller
-   *
-   * @param {Object} object The object to be manipulated
-   * @param {string} property The name of the property to be manipulated
-   *
-   * @member dat.controllers
-   */
+	 * @class Provides a text input to alter the string property of an object.
+	 * 
+	 * @extends dat.controllers.Controller
+	 * 
+	 * @param {Object}
+	 *            object The object to be manipulated
+	 * @param {string}
+	 *            property The name of the property to be manipulated
+	 * 
+	 * @member dat.controllers
+	 */
   var StringController = function(object, property) {
 
     StringController.superclass.call(this, object, property);
@@ -2959,12 +3052,7 @@ dat.controllers.StringController = (function (Controller, dom, common) {
 
   return StringController;
 
-})(dat.controllers.Controller,
-dat.dom.dom,
-dat.utils.common),
-dat.controllers.FunctionController,
-dat.controllers.BooleanController,
-dat.utils.common),
+})(dat.controllers.Controller,dat.dom.dom,dat.utils.common), dat.controllers.URLController,dat.controllers.FunctionController,dat.controllers.BooleanController,dat.utils.common),
 dat.controllers.Controller,
 dat.controllers.BooleanController,
 dat.controllers.FunctionController,
@@ -3081,10 +3169,10 @@ dat.controllers.ColorController = (function (Controller, dom, Color, interpret, 
 
     common.extend(this.__input.style, {
       outline: 'none',
-//      width: '120px',
+// width: '120px',
       textAlign: 'center',
-//      padding: '4px',
-//      marginBottom: '6px',
+// padding: '4px',
+// marginBottom: '6px',
       color: '#fff',
       border: 0,
       fontWeight: 'bold',
@@ -3540,9 +3628,8 @@ dat.utils.common),
 dat.utils.requestAnimationFrame = (function () {
 
   /**
-   * requirejs version of Paul Irish's RequestAnimationFrame
-   * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-   */
+	 * requirejs version of Paul Irish's RequestAnimationFrame http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+	 */
 
   return window.webkitRequestAnimationFrame ||
       window.mozRequestAnimationFrame ||
@@ -3604,7 +3691,7 @@ dat.dom.CenteredDiv = (function (dom, common) {
 
     this.domElement.style.display = 'block';
     this.domElement.style.opacity = 0;
-//    this.domElement.style.top = '52%';
+// this.domElement.style.top = '52%';
     this.domElement.style.webkitTransform = 'scale(1.1)';
 
     this.layout();
@@ -3637,7 +3724,7 @@ dat.dom.CenteredDiv = (function (dom, common) {
     dom.bind(this.domElement, 'oTransitionEnd', hide);
 
     this.backgroundElement.style.opacity = 0;
-//    this.domElement.style.top = '48%';
+// this.domElement.style.top = '48%';
     this.domElement.style.opacity = 0;
     this.domElement.style.webkitTransform = 'scale(1.1)';
 

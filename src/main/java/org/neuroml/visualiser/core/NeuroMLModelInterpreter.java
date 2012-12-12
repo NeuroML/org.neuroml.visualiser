@@ -126,7 +126,7 @@ public class NeuroMLModelInterpreter
 	 * @param neuroml
 	 * @param scene
 	 * @param url
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private Collection<Entity> getEntitiesFromNetwork(Neuroml neuroml, URL url) throws Exception
 	{
@@ -159,14 +159,14 @@ public class NeuroMLModelInterpreter
 				}
 
 				int size = p.getSize().intValue();
-				
+
 				for (int i = 0; i < size; i++)
 				{
 					// FIXME the position of the population within the network needs to be specified in neuroml
 					List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
 					for (Entity e : localEntities)
 					{
-						e.setId(e.getId()+"["+i+"]");
+						e.setId(e.getId() + "[" + i + "]");
 						entities.put(e.getId(), e);
 					}
 				}
@@ -178,21 +178,21 @@ public class NeuroMLModelInterpreter
 			{
 				String from = c.getFrom();
 				String to = c.getTo();
-				
+
 				Metadata mPost = new Metadata();
 				mPost.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
 				mPost.setAdditionalProperties(Resources.CONNECTION_TYPE.get(), Resources.POST_SYNAPTIC.get());
 				Reference rPost = new Reference();
 				rPost.setEntityId(to);
 				rPost.setMetadata(mPost);
-				
+
 				Metadata mPre = new Metadata();
 				mPre.setAdditionalProperties(Resources.SYNAPSE.get(), c.getSynapse());
 				mPre.setAdditionalProperties(Resources.CONNECTION_TYPE.get(), Resources.PRE_SYNAPTIC.get());
 				Reference rPre = new Reference();
 				rPre.setEntityId(from);
 				rPre.setMetadata(mPre);
-				
+
 				if (entities.containsKey(from))
 				{
 					entities.get(from).getReferences().add(rPost);
@@ -201,7 +201,7 @@ public class NeuroMLModelInterpreter
 				{
 					throw new Exception("Reference not found." + from + " was not found in the path of the network file");
 				}
-				
+
 				if (entities.containsKey(to))
 				{
 					entities.get(to).getReferences().add(rPre);
@@ -232,9 +232,15 @@ public class NeuroMLModelInterpreter
 			Metadata intracellularProperties = new Metadata();
 			intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
 
+			// Sample code to add URL metadata
+			// Metadata externalResources = new Metadata();
+			// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
+			// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
+
 			entity.setMetadata(new Metadata());
 			entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
 			entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
+			// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
 		}
 		catch (NullPointerException ex)
 		{

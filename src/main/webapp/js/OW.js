@@ -903,3 +903,15 @@ OW.isIn = function(e, array)
 	}
 	return found;
 };
+
+
+$(document).ready(function()
+{
+	$(".dg .url").fancybox({
+		fitToView	: true,
+		autoSize	: false,
+		closeClick	: false,
+		openEffect	: 'elastic',
+		closeEffect	: 'fade',
+	});
+});
