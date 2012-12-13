@@ -687,7 +687,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			translate("x", -10);
+			OW.controls.incrementPanEnd(-0.01,0);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-triangle-1-n"
@@ -695,7 +698,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			translate("y", 10);
+			OW.controls.incrementPanEnd(0, -0.01);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-triangle-1-e"
@@ -703,7 +709,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			translate("x", 10);
+			OW.controls.incrementPanEnd(0.01,0);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-triangle-1-s"
@@ -711,17 +720,20 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			translate("y", -10);
+			OW.controls.incrementPanEnd(0, 0.01);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-home"
 			},
-			text : false
+			text : false,
+			enabled:false
 		}).click(function(event)
 		{
-			OW.camera.position.x = 0;
-			OW.camera.position.y = 0;
-		});
+
+		}).attr('disabled', true).addClass( 'ui-state-disabled' );
 
 		$("#showdeselected").button({
 			icons : {
@@ -791,7 +803,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			rotate("x", -10);
+			OW.controls.incrementRotationEnd(-0.01,0,0);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-arrowreturn-1-n"
@@ -799,7 +814,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			rotate("y", 10);
+			OW.controls.incrementRotationEnd(0,0,0.01);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-arrowreturn-1-e"
@@ -807,7 +825,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			rotate("x", 10);
+			OW.controls.incrementRotationEnd(0.01,0,0);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-arrowreturn-1-s"
@@ -815,17 +836,21 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			rotate("y", -10);
+			OW.controls.incrementRotationEnd(0,0,-0.01);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		}).next().button({
 			icons : {
 				primary : "ui-icon-home"
 			},
-			text : false
+			text : false,
+			enabled:false
 		}).click(function(event)
 		{
 			OW.camera.rotation.x = 0;
 			OW.camera.rotation.y = 0;
-		});
+		}).attr('disabled', true).addClass( 'ui-state-disabled' );
 
 		$("#zo").button({
 			icons : {
@@ -834,7 +859,11 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			OW.camera.translateZ(100);
+			OW.controls.incrementZoomEnd(+0.01);
+
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		});
 
 		$("#zi").button({
@@ -844,7 +873,10 @@ function setupUI()
 			text : false
 		}).click(function(event)
 		{
-			OW.camera.translateZ(-100);
+			OW.controls.incrementZoomEnd(-0.01);
+		}).mouseup(function(event)
+		{
+			OW.controls.resetSTATE();
 		});
 
 		var cl = new CanvasLoader('canvasloader-container');
