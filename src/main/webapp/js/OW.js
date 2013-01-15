@@ -513,14 +513,8 @@ OW.setupControls = function()
 {
 	// Controls
 	OW.controls = new THREE.TrackballControls(OW.camera, OW.renderer.domElement);
-	OW.controls.rotateSpeed = 1.5;
-	OW.controls.zoomSpeed = 10;
-	OW.controls.panSpeed = 1;
 	OW.controls.noZoom = false;
 	OW.controls.noPan = false;
-	OW.controls.staticMoving = true;
-	OW.controls.dynamicDampingFactor = 0.3;
-	OW.controls.keys = [ 65, 83, 68 ];
 	OW.controls.addEventListener('change', OW.render);
 };
 

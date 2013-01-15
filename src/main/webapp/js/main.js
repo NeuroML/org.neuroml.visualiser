@@ -9,14 +9,14 @@ function get3DScene(neuromlurl)
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
 		data : {
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
-			url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+//			 url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
+//			url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
 		// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 		// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 		// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-		// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-		// url : neuromlurl
+		 url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
+//		 url : neuromlurl
 
 		},
 		timeout : 9000000,
@@ -729,11 +729,11 @@ function setupUI()
 				primary : "ui-icon-home"
 			},
 			text : false,
-			enabled:false
 		}).click(function(event)
 		{
-
-		}).attr('disabled', true).addClass( 'ui-state-disabled' );
+			OW.setupCamera();
+			OW.setupControls();
+		});
 
 		$("#showdeselected").button({
 			icons : {
@@ -845,12 +845,11 @@ function setupUI()
 				primary : "ui-icon-home"
 			},
 			text : false,
-			enabled:false
 		}).click(function(event)
 		{
-			OW.camera.rotation.x = 0;
-			OW.camera.rotation.y = 0;
-		}).attr('disabled', true).addClass( 'ui-state-disabled' );
+			OW.setupCamera();
+			OW.setupControls();
+		});
 
 		$("#zo").button({
 			icons : {
