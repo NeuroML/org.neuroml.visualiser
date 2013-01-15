@@ -4,20 +4,21 @@ function get3DScene(neuromlurl)
 	$("#error").hide();
 	$("#loadinglbl").show();
 	$("#canvasloader-container").show();
-	$.ajax({
+	$.ajax(
+	{
 		type : 'POST',
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
-		data : {
+		data :
+		{
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-//			 url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
-//			url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-		// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
-		// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-		// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-		// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-		 url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-//		 url : neuromlurl
-
+			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
+			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
+			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
+			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
+			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
+			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
+			url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
@@ -26,9 +27,11 @@ function get3DScene(neuromlurl)
 			{
 				$("#loadinglbl").hide();
 				$("#canvasloader-container").hide();
-				$("#error").dialog({
+				$("#error").dialog(
+				{
 					modal : true,
-					buttons : {
+					buttons :
+					{
 						Close : function()
 						{
 							$(this).dialog("close");
@@ -76,7 +79,8 @@ $(document).ready(function()
 	get3DScene(decodeURIComponent(vars.url));
 });
 
-var highlightMaterial = new THREE.MeshPhongMaterial({
+var highlightMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -85,7 +89,8 @@ var highlightMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var preConnectedMaterial = new THREE.MeshPhongMaterial({
+var preConnectedMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -94,7 +99,8 @@ var preConnectedMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var postConnectedMaterial = new THREE.MeshPhongMaterial({
+var postConnectedMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -103,7 +109,8 @@ var postConnectedMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var prePostConnectedMaterial = new THREE.MeshPhongMaterial({
+var prePostConnectedMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -112,7 +119,8 @@ var prePostConnectedMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var somaMaterial = new THREE.MeshPhongMaterial({
+var somaMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -121,7 +129,8 @@ var somaMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var axonMaterial = new THREE.MeshPhongMaterial({
+var axonMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -130,7 +139,8 @@ var axonMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var dendriteMaterial = new THREE.MeshPhongMaterial({
+var dendriteMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 1,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -139,7 +149,8 @@ var dendriteMaterial = new THREE.MeshPhongMaterial({
 	shading : THREE.SmoothShading
 });
 
-var standardMaterial = new THREE.MeshPhongMaterial({
+var standardMaterial = new THREE.MeshPhongMaterial(
+{
 	opacity : 0.5,
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
@@ -302,14 +313,16 @@ var preprocessMetadata = function(data)
 	for (d in data.entities)
 	{
 		var m = data.entities[d];
-		var mcon = m.metadata["Connections"] = {};
+		var mcon = m.metadata["Connections"] =
+		{};
 		for (r in m.references)
 		{
 			var connectionType = m.references[r].metadata["Connection Type"];
 			delete m.references[r].metadata["Connection Type"];
 			if (!mcon[connectionType])
 			{
-				mcon[connectionType] = {};
+				mcon[connectionType] =
+				{};
 			}
 			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
 		}
@@ -490,13 +503,15 @@ function toggleNormalMode()
 			SELECTED = [];
 			REFERENCED = [];
 		}
-		OW.metadata = {};
+		OW.metadata =
+		{};
 		OW.renderer.setClearColorHex(0xffffff, 1);
 		OW.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
-				var material = new THREE.MeshPhongMaterial({
+				var material = new THREE.MeshPhongMaterial(
+				{
 					opacity : 1,
 					ambient : 0x777777,
 					specular : 0xbbbb9b,
@@ -673,26 +688,31 @@ function setupUI()
 {
 	$(function()
 	{
-		$("#help").dialog({
+		$("#help").dialog(
+		{
 			autoOpen : false,
 			show : "side",
 			hide : "fade",
 			width : "650px"
 		});
 
-		$("button:first").button({
-			icons : {
+		$("button:first").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-triangle-1-w"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementPanEnd(-0.01,0);
+			OW.controls.incrementPanEnd(-0.01, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-triangle-1-n"
 			},
 			text : false
@@ -702,19 +722,23 @@ function setupUI()
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-triangle-1-e"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementPanEnd(0.01,0);
+			OW.controls.incrementPanEnd(0.01, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-triangle-1-s"
 			},
 			text : false
@@ -724,8 +748,10 @@ function setupUI()
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-home"
 			},
 			text : false,
@@ -735,8 +761,10 @@ function setupUI()
 			OW.setupControls();
 		});
 
-		$("#showdeselected").button({
-			icons : {
+		$("#showdeselected").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-grip-dotted-vertical"
 			},
 			text : false
@@ -745,8 +773,10 @@ function setupUI()
 			toggleHideDeselected();
 		});
 
-		$("#showinputs").button({
-			icons : {
+		$("#showinputs").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowthick-1-s"
 			},
 			text : false
@@ -755,8 +785,10 @@ function setupUI()
 			toggleInputs();
 		});
 		;
-		$("#showoutputs").button({
-			icons : {
+		$("#showoutputs").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowthick-1-n"
 			},
 			text : false
@@ -765,8 +797,10 @@ function setupUI()
 			toggleOutputs();
 		});
 		;
-		$("#rotationMode").button({
-			icons : {
+		$("#rotationMode").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowrefresh-1-s"
 			},
 			text : false
@@ -786,8 +820,10 @@ function setupUI()
 		});
 		$("#mode").buttonset();
 
-		$("#helpbutton").button({
-			icons : {
+		$("#helpbutton").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-help"
 			},
 			text : false
@@ -796,52 +832,62 @@ function setupUI()
 			toggleHelp();
 		});
 
-		$("#rw").button({
-			icons : {
+		$("#rw").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowreturn-1-w"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementRotationEnd(-0.01,0,0);
+			OW.controls.incrementRotationEnd(-0.01, 0, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowreturn-1-n"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0,0,0.01);
+			OW.controls.incrementRotationEnd(0, 0, 0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowreturn-1-e"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0.01,0,0);
+			OW.controls.incrementRotationEnd(0.01, 0, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-arrowreturn-1-s"
 			},
 			text : false
 		}).click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0,0,-0.01);
+			OW.controls.incrementRotationEnd(0, 0, -0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button({
-			icons : {
+		}).next().button(
+		{
+			icons :
+			{
 				primary : "ui-icon-home"
 			},
 			text : false,
@@ -851,8 +897,10 @@ function setupUI()
 			OW.setupControls();
 		});
 
-		$("#zo").button({
-			icons : {
+		$("#zo").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-zoomout"
 			},
 			text : false
@@ -865,8 +913,10 @@ function setupUI()
 			OW.controls.resetSTATE();
 		});
 
-		$("#zi").button({
-			icons : {
+		$("#zi").button(
+		{
+			icons :
+			{
 				primary : "ui-icon-zoomin"
 			},
 			text : false
