@@ -18,7 +18,7 @@ function get3DScene(neuromlurl)
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
 			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			url : neuromlurl
+			 url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
@@ -313,20 +313,22 @@ var preprocessMetadata = function(data)
 	for (d in data.entities)
 	{
 		var m = data.entities[d];
-		var mcon = m.metadata["Connections"] =
-		{};
-		for (r in m.references)
+		if (m.metadata != null)
 		{
-			var connectionType = m.references[r].metadata["Connection Type"];
-			delete m.references[r].metadata["Connection Type"];
-			if (!mcon[connectionType])
+			var mcon = m.metadata["Connections"] =
+			{};
+			for (r in m.references)
 			{
-				mcon[connectionType] =
-				{};
+				var connectionType = m.references[r].metadata["Connection Type"];
+				delete m.references[r].metadata["Connection Type"];
+				if (!mcon[connectionType])
+				{
+					mcon[connectionType] =
+					{};
+				}
+				mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
 			}
-			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
 		}
-
 	}
 };
 

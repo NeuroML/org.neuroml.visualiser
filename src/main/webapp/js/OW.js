@@ -8,7 +8,8 @@
 /**
  * Base class
  */
-var OW = OW || {};
+var OW = OW ||
+{};
 
 /**
  * Global variables
@@ -24,15 +25,18 @@ OW.projector = null;
 OW.keyboard = new THREEx.KeyboardState();
 OW.jsonscene = null;
 OW.needsUpdate = false;
-OW.metadata = {};
+OW.metadata =
+{};
 OW.customUpdate = null;
 OW.mouseClickListener = null;
 OW.rotationMode = false;
-OW.mouse = {
+OW.mouse =
+{
 	x : 0,
 	y : 0
 };
-OW.geometriesMap = {};
+OW.geometriesMap =
+{};
 
 /**
  * Initialize the engine
@@ -192,7 +196,7 @@ OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, ma
 	midPoint.add(bottomBasePos, topBasePos);
 	midPoint.multiplyScalar(0.5);
 
-	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, 1,false);
+	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, 1, false);
 	threeObject = new THREE.Mesh(c, material);
 
 	OW.lookAt(threeObject, cylinderAxis);
@@ -401,7 +405,8 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			// if mergeSubentities is true then only one resulting entity is
 			// created
 			// by merging all geometries of the different subentities together
-			var material = new THREE.MeshPhongMaterial({
+			var material = new THREE.MeshPhongMaterial(
+			{
 				opacity : 1,
 				ambient : 0x777777,
 				specular : 0xbbbb9b,
@@ -438,56 +443,61 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 	{
 		// leaf entity it only contains geometries
 		var geometries = jsonEntity.geometries;
-		if (geometries[0].type == "Particle")
+		if (geometries != null)
 		{
-			// assumes there are no particles mixed with other kind of
-			// geometrie hence if the first one is a particle then they all are
-			// create the particle variables
-			var pMaterial = new THREE.ParticleBasicMaterial({
-				color : 0x81b621,
-				size : 5,
-				map : THREE.ImageUtils.loadTexture("images/ball.png"),
-				blending : THREE.AdditiveBlending,
-				transparent : true
-			});
+			if (geometries[0].type == "Particle")
+			{
+				// assumes there are no particles mixed with other kind of
+				// geometries hence if the first one is a particle then they all are
+				// create the particle variables
+				var pMaterial = new THREE.ParticleBasicMaterial(
+				{
+					color : 0x81b621,
+					size : 5,
+					map : THREE.ImageUtils.loadTexture("images/ball.png"),
+					blending : THREE.AdditiveBlending,
+					transparent : true
+				});
 
-			geometry = new THREE.Geometry();
-			for ( var gindex in geometries)
-			{
-				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
-				geometry.vertices.push(threeObject);
+				geometry = new THREE.Geometry();
+				for ( var gindex in geometries)
+				{
+					var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
+					geometry.vertices.push(threeObject);
+				}
+				entityObject = new THREE.ParticleSystem(geometry, pMaterial);
+				entityObject.eid = jsonEntity.id;
+				// also update the particle system to
+				// sort the particles which enables
+				// the behaviour we want
+				entityObject.sortParticles = true;
+				OW.geometriesMap[jsonEntity.id] = entityObject;
 			}
-			entityObject = new THREE.ParticleSystem(geometry, pMaterial);
-			entityObject.eid = jsonEntity.id;
-			// also update the particle system to
-			// sort the particles which enables
-			// the behaviour we want
-			entityObject.sortParticles = true;
-			OW.geometriesMap[jsonEntity.id] = entityObject;
-		}
-		else
-		{
-			var material = new THREE.MeshPhongMaterial({
-				opacity : 1,
-				ambient : 0x777777,
-				specular : 0xbbbb9b,
-				shininess : 50,
-				shading : THREE.SmoothShading
-			});
-			material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
-			var combined = new THREE.Geometry();
-			for ( var gindex in geometries)
+			else
 			{
-				var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
-				THREE.GeometryUtils.merge(combined, threeObject);
-				OW.renderer.deallocateObject(threeObject);
-				threeObject.geometry.deallocate();
-				threeObject.deallocate();
+				var material = new THREE.MeshPhongMaterial(
+				{
+					opacity : 1,
+					ambient : 0x777777,
+					specular : 0xbbbb9b,
+					shininess : 50,
+					shading : THREE.SmoothShading
+				});
+				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
+				var combined = new THREE.Geometry();
+				for ( var gindex in geometries)
+				{
+					var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
+					THREE.GeometryUtils.merge(combined, threeObject);
+					OW.renderer.deallocateObject(threeObject);
+					threeObject.geometry.deallocate();
+					threeObject.deallocate();
+				}
+				entityObject = new THREE.Mesh(combined, material);
+				entityObject.eindex = eindex;
+				entityObject.eid = jsonEntity.id;
+				entityObject.geometry.dynamic = false;
 			}
-			entityObject = new THREE.Mesh(combined, material);
-			entityObject.eindex = eindex;
-			entityObject.eid = jsonEntity.id;
-			entityObject.geometry.dynamic = false;
 		}
 	}
 	return entityObject;
@@ -652,7 +662,8 @@ OW.setupRenderer = function()
 {
 	// and the CanvasRenderer figures out what the
 	// stuff in the scene looks like and draws it!
-	OW.renderer = new THREE.WebGLRenderer({
+	OW.renderer = new THREE.WebGLRenderer(
+	{
 		antialias : true
 	});
 	OW.renderer.setClearColorHex(0xffffff, 1);
@@ -740,7 +751,7 @@ OW.getIntersectedObjects = function()
 	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
 
 	var visibleChildren = [];
-	OW.scene.traverse( function(child)
+	OW.scene.traverse(function(child)
 	{
 		if (child.visible)
 		{
@@ -847,7 +858,7 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
 		referencedIDs.push(entity.references[r].entityId);
 	}
 
-	OW.scene.traverse( function(child)
+	OW.scene.traverse(function(child)
 	{
 		if (child.hasOwnProperty("eid"))
 		{
@@ -898,15 +909,14 @@ OW.isIn = function(e, array)
 	return found;
 };
 
-
-
 $(document).ready(function()
 {
-	$(".dg .url").fancybox({
-		fitToView	: true,
-		autoSize	: false,
-		closeClick	: false,
-		openEffect	: 'elastic',
-		closeEffect	: 'fade',
+	$(".dg .url").fancybox(
+	{
+		fitToView : true,
+		autoSize : false,
+		closeClick : false,
+		openEffect : 'elastic',
+		closeEffect : 'fade',
 	});
 });

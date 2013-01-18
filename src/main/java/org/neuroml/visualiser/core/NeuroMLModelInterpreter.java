@@ -68,8 +68,7 @@ public class NeuroMLModelInterpreter
 	 * @return
 	 */
 	public Scene getSceneFromNeuroML(List<URL> neuromlURLs)
-	{
-		Scene scene = new Scene();
+ 	{		Scene scene = new Scene();
 		for (URL url : neuromlURLs)
 		{
 			Neuroml neuroml;
@@ -223,24 +222,27 @@ public class NeuroMLModelInterpreter
 	{
 		try
 		{
-			Metadata membraneProperties = new Metadata();
-			membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
-			membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
-			membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
-			membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
-
-			Metadata intracellularProperties = new Metadata();
-			intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
-
-			// Sample code to add URL metadata
-			// Metadata externalResources = new Metadata();
-			// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
-			// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
-
-			entity.setMetadata(new Metadata());
-			entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
-			entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
-			// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+			if(c.getBiophysicalProperties()!=null)
+			{
+				Metadata membraneProperties = new Metadata();
+				membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
+				membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
+				membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
+				membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
+	
+				Metadata intracellularProperties = new Metadata();
+				intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
+	
+				// Sample code to add URL metadata
+				// Metadata externalResources = new Metadata();
+				// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
+				// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
+	
+				entity.setMetadata(new Metadata());
+				entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
+				entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
+				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+			}
 		}
 		catch (NullPointerException ex)
 		{
@@ -346,8 +348,11 @@ public class NeuroMLModelInterpreter
 		entity.setAdditionalProperties(GROUP_PROPERTY, macroGroup.getId());
 		for (Include i : macroGroup.getInclude())
 		{
-			entity.getGeometries().addAll(segmentGeometries.get(i.getSegmentGroup()));
-			segmentGeometries.remove(i.getSegmentGroup());
+			if(segmentGeometries.containsKey(i.getSegmentGroup()))
+			{
+				entity.getGeometries().addAll(segmentGeometries.get(i.getSegmentGroup()));
+				segmentGeometries.remove(i.getSegmentGroup());
+			}
 		}
 		return entity;
 	}
