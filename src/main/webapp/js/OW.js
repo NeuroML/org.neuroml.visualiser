@@ -57,7 +57,7 @@ OW.init = function(containerp, jsonscenep, updatep)
 		OW.setupScene();
 		OW.setupCamera();
 		OW.setupLights();
-		OW.setupStats();
+		//OW.setupStats();
 		OW.setupControls();
 		OW.setupListeners();
 		return true;
