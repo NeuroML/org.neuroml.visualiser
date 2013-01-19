@@ -810,7 +810,10 @@ OW.animate = function()
 {
 	OW.updateScene();
 	OW.customUpdate();
-	OW.stats.update();
+	if(OW.stats)
+	{
+		OW.stats.update();
+	}
 	OW.controls.update();
 	requestAnimationFrame(OW.animate);
 	if (OW.rotationMode)
