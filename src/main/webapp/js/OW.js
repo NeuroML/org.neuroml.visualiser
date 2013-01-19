@@ -514,6 +514,7 @@ OW.setupCamera = function()
 	OW.scene.add(OW.camera);
 	OW.camera.position.set(0, 150, 400);
 	OW.camera.lookAt(OW.scene.position);
+	OW.projector = new THREE.Projector();
 };
 
 /**
@@ -539,7 +540,7 @@ OW.setupStats = function()
 	OW.stats.domElement.style.bottom = '0px';
 	OW.stats.domElement.style.zIndex = 100;
 	OW.container.appendChild(OW.stats.domElement);
-	OW.projector = new THREE.Projector();
+	
 };
 
 /**
