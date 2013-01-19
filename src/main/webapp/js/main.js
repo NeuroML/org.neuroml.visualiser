@@ -188,7 +188,6 @@ var onClick = function(objectsClicked, button)
 						// the object we clicked on was previously selected
 						if (TOGGLE_S || singleEntity())
 						{
-							OW.centerOnObject(SELECTED[0]);
 							// do nothing else we don't want everything to disappear
 						}
 						else
@@ -289,7 +288,6 @@ var onClick = function(objectsClicked, button)
 						{
 							if (SELECTED[s].eid.indexOf("soma_group") != -1)
 							{
-								OW.centerOnObject(SELECTED[s]);
 								SELECTED[s].material = somaMaterial;
 							}
 							else if (SELECTED[s].eid.indexOf("axon_group") != -1)
