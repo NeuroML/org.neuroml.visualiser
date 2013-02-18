@@ -225,13 +225,37 @@ public class NeuroMLModelInterpreter
 			if(c.getBiophysicalProperties()!=null)
 			{
 				Metadata membraneProperties = new Metadata();
-				membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
-				membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
-				membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
-				membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
+				if(c.getBiophysicalProperties().getMembraneProperties()!=null)
+				{
+					if(c.getBiophysicalProperties().getMembraneProperties().getChannelDensity()!=null && c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().size()>0)
+					{
+						membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
+					}
+					if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
+					{
+						membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
+					}
+					if(c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().size()>0)
+					{
+						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
+					}
+					if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
+					{
+						membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
+					}
+					
+				}
+
 	
 				Metadata intracellularProperties = new Metadata();
-				intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
+				if(c.getBiophysicalProperties().getIntracellularProperties()!=null)
+				{
+					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity()!=null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size()>0)
+					{
+						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
+					}
+				}
+				
 	
 				// Sample code to add URL metadata
 				// Metadata externalResources = new Metadata();

@@ -18,7 +18,8 @@ function get3DScene(neuromlurl)
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
 			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			 url : neuromlurl
+			// url:"file:///Users/matteocantarelli/Desktop/cell2.nml" 
+			url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
