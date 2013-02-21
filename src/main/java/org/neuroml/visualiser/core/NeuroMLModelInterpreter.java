@@ -16,7 +16,7 @@ import org.neuroml.model.Include;
 import org.neuroml.model.Member;
 import org.neuroml.model.Morphology;
 import org.neuroml.model.Network;
-import org.neuroml.model.Neuroml;
+import org.neuroml.model.NeuroMLDocument;
 import org.neuroml.model.Point3DWithDiam;
 import org.neuroml.model.Population;
 import org.neuroml.model.Segment;
@@ -71,7 +71,7 @@ public class NeuroMLModelInterpreter
  	{		Scene scene = new Scene();
 		for (URL url : neuromlURLs)
 		{
-			Neuroml neuroml;
+			NeuroMLDocument neuroml;
 			try
 			{
 				neuroml = _neuromlConverter.urlToNeuroML(url);
@@ -90,7 +90,7 @@ public class NeuroMLModelInterpreter
 	 * @param neuroml
 	 * @return
 	 */
-	public List<Entity> getEntitiesFromMorphologies(Neuroml neuroml)
+	public List<Entity> getEntitiesFromMorphologies(NeuroMLDocument neuroml)
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 		List<Morphology> morphologies = neuroml.getMorphology();
@@ -127,7 +127,7 @@ public class NeuroMLModelInterpreter
 	 * @param url
 	 * @throws Exception
 	 */
-	private Collection<Entity> getEntitiesFromNetwork(Neuroml neuroml, URL url) throws Exception
+	private Collection<Entity> getEntitiesFromNetwork(NeuroMLDocument neuroml, URL url) throws Exception
 	{
 		Map<String, Entity> entities = new HashMap<String, Entity>();
 		String baseURL = url.getFile();
@@ -140,7 +140,7 @@ public class NeuroMLModelInterpreter
 		{
 			for (Population p : n.getPopulation())
 			{
-				Neuroml neuromlComponent = null;
+				NeuroMLDocument neuromlComponent = null;
 				String component = p.getComponent();
 				try
 				{
