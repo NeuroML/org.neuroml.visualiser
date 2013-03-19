@@ -788,10 +788,12 @@ OW.showMetadataForEntity = function(entityIndex)
 	}
 
 	OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
-	OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
-
-	OW.setupGUI();
-
+	if(OW.metadata)
+	{
+		OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
+		OW.setupGUI();
+	}
+	
 };
 
 /**

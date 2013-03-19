@@ -312,22 +312,24 @@ var preprocessMetadata = function(data)
 	for (d in data.entities)
 	{
 		var m = data.entities[d];
-		if (m.metadata != null)
+		if (m.metadata == null)
 		{
-			var mcon = m.metadata["Connections"] =
-			{};
-			for (r in m.references)
-			{
-				var connectionType = m.references[r].metadata["Connection Type"];
-				delete m.references[r].metadata["Connection Type"];
-				if (!mcon[connectionType])
-				{
-					mcon[connectionType] =
-					{};
-				}
-				mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
-			}
+			m.metadata={};
 		}
+		var mcon = m.metadata["Connections"] =
+		{};
+		for (r in m.references)
+		{
+			var connectionType = m.references[r].metadata["Connection Type"];
+			delete m.references[r].metadata["Connection Type"];
+			if (!mcon[connectionType])
+			{
+				mcon[connectionType] =
+				{};
+			}
+			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
+		}
+		
 	}
 };
 
