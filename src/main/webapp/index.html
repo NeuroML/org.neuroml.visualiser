@@ -17,14 +17,13 @@
 		<script src="js/THREEx.KeyboardState.js"></script>
 		<script src="js/Detector.js"></script>
 		<script src="js/OW.js"></script>
-		<script src="js/heartcode-canvasloader-min-0.9.1.js"></script>
 		<script src="js/jquery.fancybox.pack.js"></script>
 		<script src="js/main.js"></script>
-		<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="css/jquery.fancybox.css"/>
-		<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/overcast/jquery-ui.css" />
-		<link rel="stylesheet" href="css/cabin.css" />
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
 		<link rel="stylesheet" href="css/main.css" />
+		<link rel="stylesheet" href="css/font-awesome.css" />
 
 		<div id="content">
 			<div id="error" title="OSB 3D Explorer">
@@ -32,55 +31,54 @@
 			</div>
 			<div id="controls">
 				<div id="position_toolbar">
-					<button id="w"></button>
-					<button id="n"></button>
-					<button id="e"></button>
-					<button id="s"></button>
-					<button id="h"></button>
+					<button class="btn squareB icon-chevron-left" id="w"></button>
+					<button class="btn squareB icon-chevron-up" id="n"></button>
+					<button class="btn squareB icon-chevron-right" id="e"></button>
+					<button class="btn squareB icon-chevron-down" id="s"></button>
+					<button class="btn squareB icon-home" id="h"></button>
 
-					<button id="rw"></button>
-					<button id="rn"></button>
-					<button id="re"></button>
-					<button id="rs"></button>
-					<button id="rh"></button>
+					<button class="btn squareB icon-undo" id="rw"></button>
+					<button class="btn squareB icon-repeat rotate90" id="rn"></button>
+					<button class="btn squareB icon-repeat" id="re"></button>
+					<button class="btn squareB icon-undo rotate90" id="rs"></button>
+					<button class="btn squareB icon-home" id="rh"></button>
 
-					<button id="zi"></button>
-					<button id="zo"></button>
+					<button class="btn squareB icon-zoom-in" id="zi"></button>
+					<button class="btn squareB icon-zoom-out" id="zo"></button>
 					<br />
 				</div>
 				<div id="toolbar">
-					<div id="mode">
-						<input type="radio" id="normalMode" name="radio" checked="checked"/>
-						<label for="normalMode">Normal mode</label>
-						<input type="radio" id="selectionMode" name="radio"  />
-						<label for="selectionMode">Selection mode</label>
+					<div id="mode" class="btn-group" data-toggle="buttons-radio">
+						<button class="btn active" id="normalMode" checked="checked">Normal mode</button>
+						<button class="btn"  id="selectionMode" checked="checked">Selection mode</button>
 					</div>
-					<div id="io">
-						<input type="checkbox" id="showinputs"  checked="checked"/>
-						<label class="square" for="showinputs">Show/Hide inputs (i)</label>
-						<input type="checkbox" id="showoutputs"  checked="checked"/>
-						<label class="square"  for="showoutputs">Show/Hide outputs (o)</label>
-						<input type="checkbox" id="showdeselected"  checked="checked"/>
-						<label class="square" for="showdeselected">Show/Hide not selected cells(s)</label>
+					<div id="io" class="btn-group" data-toggle="buttons-checkbox">
+						<button class="btn squareB icon-signin active" id="showinputs"   ></button>
+						<button class="btn squareB icon-signout active" id="showoutputs"></button>
+						<button class="btn squareB icon-filter active" id="showdeselected" ></button>
 					</div>
-					<input type="checkbox" id="rotationMode"/>
-					<label class="square" for="rotationMode">Rotation mode (r)</label>
-
-					<button id="helpbutton">
-						Quick guide (h)
-					</button>
+					<div>
+						<button class="btn squareB icon-refresh" data-toggle="button" id="rotationMode"></button>
+						<button class="btn squareB icon-info-sign" id="helpbutton" href="#help" data-toggle="modal"></button>
+					</div>
 				</div>
 			</div>
-			<div id="canvasloader-container" class="wrapper"></div>
-			<div id="loadinglbl">
+
+			<div id="loadinglbl" class="lead pagination-centered">
+				<br/>
+				<icon id="canvasloader-container" class="icon-spinner icon-spin pagination-centered"></icon>
+				<br/>
+				<br/>
+				<p>
 				The file you selected is currently loading.
-				<br/>
+				</p><p>
 				Please be patient, the model is coming straight from the selected remote repository.
-				<br/>
+				</p><p>
 				Big networks of cells may take up to several minutes depending on the performance of your system.
+				</p>
 			</div>
 
-			<div id="help" title="OSB 3D Explorer (BETA) Quick Guide">
+			<div id="help" title="OSB 3D Explorer (BETA) Quick Guide" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 				<b class="helptitle">Navigation</b>
 				<br/>
 				<p >

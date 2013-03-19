@@ -3,7 +3,6 @@ function get3DScene(neuromlurl)
 	$("#controls").hide();
 	$("#error").hide();
 	$("#loadinglbl").show();
-	$("#canvasloader-container").show();
 	$.ajax(
 	{
 		type : 'POST',
@@ -17,29 +16,28 @@ function get3DScene(neuromlurl)
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			// url:"file:///Users/matteocantarelli/Desktop/cell2.nml" 
-			url : neuromlurl
+			url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
+			 //url:"file:///Users/matteocantarelli/Desktop/cell2.nml" 
+			//url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
 		{
 			if (data.length === 0 || data.entities.length === 0)
 			{
-				$("#loadinglbl").hide();
-				$("#canvasloader-container").hide();
-				$("#error").dialog(
-				{
-					modal : true,
-					buttons :
-					{
-						Close : function()
-						{
-							$(this).dialog("close");
-						}
-					}
-				});
-				$("#error").show();
+//				$("#loadinglbl").hide();
+//				$("#error").modal(
+//				{
+//					modal : true,
+//					buttons :
+//					{
+//						Close : function()
+//						{
+//							$(this).modal("close");
+//						}
+//					}
+//				});
+//				$("#error").show();
 			}
 			else
 			{
@@ -50,13 +48,11 @@ function get3DScene(neuromlurl)
 					document.addEventListener("keydown", keyPressed, false);
 					$("#controls").show();
 					$("#loadinglbl").hide();
-					$("#canvasloader-container").hide();
 				}
 				else
 				{
 					// initialisation failed
 					$("#loadinglbl").hide();
-					$("#canvasloader-container").hide();
 				}
 			}
 
@@ -398,19 +394,6 @@ var TOGGLE_I = true;
 var TOGGLE_O = true;
 var TOGGLE_H = false;
 
-function toggleHelp()
-{
-	if (TOGGLE_H)
-	{
-		TOGGLE_H = false;
-		$("#help").dialog("close");
-	}
-	else
-	{
-		TOGGLE_H = true;
-		$("#help").dialog("open");
-	}
-}
 
 function toggleRotationMode()
 {
@@ -689,128 +672,58 @@ function setupUI()
 {
 	$(function()
 	{
-		$("#help").dialog(
-		{
-			autoOpen : false,
-			show : "side",
-			hide : "fade",
-			width : "650px"
-		});
 
-		$("button:first").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-triangle-1-w"
-			},
-			text : false
-		}).click(function(event)
+		$("button:first").click(function(event)
 		{
 			OW.controls.incrementPanEnd(-0.01, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-triangle-1-n"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementPanEnd(0, -0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-triangle-1-e"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementPanEnd(0.01, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-triangle-1-s"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementPanEnd(0, 0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-home"
-			},
-			text : false,
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.setupCamera();
 			OW.setupControls();
 		});
 
-		$("#showdeselected").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-grip-dotted-vertical"
-			},
-			text : false
-		}).click(function(event)
+		$("#showdeselected").click(function(event)
 		{
 			toggleHideDeselected();
 		});
 
-		$("#showinputs").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowthick-1-s"
-			},
-			text : false
-		}).click(function(event)
+		$("#showinputs").click(function(event)
 		{
 			toggleInputs();
 		});
-		;
-		$("#showoutputs").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowthick-1-n"
-			},
-			text : false
-		}).click(function(event)
+		
+		$("#showoutputs").click(function(event)
 		{
 			toggleOutputs();
 		});
-		;
-		$("#rotationMode").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowrefresh-1-s"
-			},
-			text : false
-		}).click(function(event)
+		
+		$("#rotationMode").click(function(event)
 		{
 			toggleRotationMode();
 		});
-		;
-		$("#io").buttonset();
+
+
 		$("#normalMode").click(function(event)
 		{
 			toggleNormalMode();
@@ -819,93 +732,44 @@ function setupUI()
 		{
 			toggleSelectionMode();
 		});
-		$("#mode").buttonset();
 
-		$("#helpbutton").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-help"
-			},
-			text : false
-		}).click(function(event)
+
+		$("#helpbutton").click(function(event)
 		{
 			toggleHelp();
 		});
 
-		$("#rw").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowreturn-1-w"
-			},
-			text : false
-		}).click(function(event)
+		$("#rw").click(function(event)
 		{
 			OW.controls.incrementRotationEnd(-0.01, 0, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowreturn-1-n"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementRotationEnd(0, 0, 0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowreturn-1-e"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementRotationEnd(0.01, 0, 0);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-arrowreturn-1-s"
-			},
-			text : false
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.controls.incrementRotationEnd(0, 0, -0.01);
 		}).mouseup(function(event)
 		{
 			OW.controls.resetSTATE();
-		}).next().button(
-		{
-			icons :
-			{
-				primary : "ui-icon-home"
-			},
-			text : false,
-		}).click(function(event)
+		}).next().click(function(event)
 		{
 			OW.setupCamera();
 			OW.setupControls();
 		});
 
-		$("#zo").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-zoomout"
-			},
-			text : false
-		}).click(function(event)
+		$("#zo").click(function(event)
 		{
 			OW.controls.incrementZoomEnd(+0.01);
 
@@ -914,14 +778,7 @@ function setupUI()
 			OW.controls.resetSTATE();
 		});
 
-		$("#zi").button(
-		{
-			icons :
-			{
-				primary : "ui-icon-zoomin"
-			},
-			text : false
-		}).click(function(event)
+		$("#zi").click(function(event)
 		{
 			OW.controls.incrementZoomEnd(-0.01);
 		}).mouseup(function(event)
@@ -929,15 +786,6 @@ function setupUI()
 			OW.controls.resetSTATE();
 		});
 
-		var cl = new CanvasLoader('canvasloader-container');
-		cl.setColor('#389dc9'); // default is '#000000'
-		cl.setShape('spiral'); // default is 'oval'
-		cl.setDiameter(100); // default is 40
-		cl.setDensity(17); // default is 40
-		cl.setRange(0.9); // default is 1.3
-		cl.setSpeed(1); // default is 2
-		cl.setFPS(30); // default is 24
-		cl.show(); // Hidden by default
 	});
 
 }

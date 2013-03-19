@@ -1,20 +1,29 @@
-body {
-	font-family: "CabinRegular";
-}
-
 iframe{
 	width:900px;
 	height:700px;
 }
+
+body{
+	color: #777777;
+}
+
+.btn{
+	color: #777777;
+}
+
+.squareB {
+	width:25px!important;
+	height:25px!important;
+	position:absolute;
+	padding:0;
+}
 .dg {
-	font-family: "CabinRegular";
+
 }
 .dg .cr.string {
-	font-family: "CabinRegular";
 	border-color: #43ccee;
 }
 .dg .cr.string input[type="text"] {
-	font-family: "CabinRegular";
 	color: #9FC701;
 }
 
@@ -24,7 +33,6 @@ iframe{
 	padding: 3px;
 	width: 100%;
 	float: right;
-	font-family: "CabinRegular";
 	color: white;
 	text-decoration:none;
 	height: 100%;
@@ -52,28 +60,37 @@ iframe{
 	height: 100px;
 }
 
-button.ui-button-icon-only {
-	font-family: "CabinRegular";
-	position: absolute;
-	height: 25px;
-	width: 25px;
+
+.rotate90
+{
+transform: rotate(90deg);
+-ms-transform: rotate(90deg); /* IE 9 */
+-webkit-transform: rotate(90deg); /* Safari and Chrome */
+-o-transform: rotate(90deg); /* Opera */
+-moz-transform: rotate(90deg); /* Firefox */
 }
 
-.ui-button-text-only .ui-button-text {
-	font-family: "CabinRegular";
-	width: 115px;
-	height: 15px;
-	font-size: 10px;
+.rotate180
+{
+transform: rotate(180deg);
+-ms-transform: rotate(180deg); /* IE 9 */
+-webkit-transform: rotate(180deg); /* Safari and Chrome */
+-o-transform: rotate(180deg); /* Opera */
+-moz-transform: rotate(180deg); /* Firefox */
 }
 
+.dg{
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-weight:200;
+}
+
+input{
+	font-weight:200;
+}
 .ui-widget {
-	font-family: "CabinRegular";
-	font-size: 10px;
 }
 
 #error {
-	font-family: "CabinRegular";
-	font-size: 14px;
 }
 
 #w {
@@ -127,7 +144,6 @@ button.ui-button-icon-only {
 	top: 175px;
 }
 #mode {
-	left: 150px;
 	margin-bottom: 10px;
 }
 
@@ -145,18 +161,12 @@ button.ui-button-icon-only {
 	float: left;
 }
 
-#loadinglbl {
-	width: 650px;
-	margin: 0 auto;
-	margin-top: 20px;
-	text-align: center;
-	font-size: 14px;
-}
+
 #canvasloader-container {
-	width: 100px;
-	height: 100px;
 	margin: 0 auto;
-	margin-top: 200px;
+	margin-top: 50px;
+	font-size:70pt!important;
+	color:#37ABC8;
 }
 
 #help {
@@ -185,11 +195,9 @@ button.ui-button-icon-only {
 	color: white;
 }
 .helptitle {
-	font-size: 14px;
+
 }
 
 #helpbutton {
-	margin-left: 10px;
-	height: 27px;
-	width: 27px;
+	left: 130px;
 }
