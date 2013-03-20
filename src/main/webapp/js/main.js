@@ -16,28 +16,28 @@ function get3DScene(neuromlurl)
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			 //url:"file:///Users/matteocantarelli/Desktop/cell2.nml" 
-			//url : neuromlurl
+			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
+			// url:"file:///Users/matteocantarelli/Desktop/cell2.nml"
+			url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
 		{
 			if (data.length === 0 || data.entities.length === 0)
 			{
-//				$("#loadinglbl").hide();
-//				$("#error").modal(
-//				{
-//					modal : true,
-//					buttons :
-//					{
-//						Close : function()
-//						{
-//							$(this).modal("close");
-//						}
-//					}
-//				});
-//				$("#error").show();
+				// $("#loadinglbl").hide();
+				// $("#error").modal(
+				// {
+				// modal : true,
+				// buttons :
+				// {
+				// Close : function()
+				// {
+				// $(this).modal("close");
+				// }
+				// }
+				// });
+				// $("#error").show();
 			}
 			else
 			{
@@ -308,21 +308,23 @@ var preprocessMetadata = function(data)
 	for (d in data.entities)
 	{
 		var m = data.entities[d];
-		if (m.metadata != null)
+		if (m.metadata == null)
 		{
-			var mcon = m.metadata["Connections"] =
+			m.metadata =
 			{};
-			for (r in m.references)
+		}
+		var mcon = m.metadata["Connections"] =
+		{};
+		for (r in m.references)
+		{
+			var connectionType = m.references[r].metadata["Connection Type"];
+			delete m.references[r].metadata["Connection Type"];
+			if (!mcon[connectionType])
 			{
-				var connectionType = m.references[r].metadata["Connection Type"];
-				delete m.references[r].metadata["Connection Type"];
-				if (!mcon[connectionType])
-				{
-					mcon[connectionType] =
-					{};
-				}
-				mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
+				mcon[connectionType] =
+				{};
 			}
+			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
 		}
 	}
 };
@@ -394,6 +396,11 @@ var TOGGLE_I = true;
 var TOGGLE_O = true;
 var TOGGLE_H = false;
 
+function toggleHelp()
+{
+	TOGGLE_H = !TOGGLE_H;
+	$("#help").modal('toggle');
+}
 
 function toggleRotationMode()
 {
@@ -602,9 +609,14 @@ function toggleHideDeselected()
 
 function switchButton(id, status)
 {
-	var radio = $('#' + id);
-	radio[0].checked = status;
-	radio.button("refresh");
+	if (status)
+	{
+		$('#' + id).addClass("active");
+	}
+	else
+	{
+		$('#' + id).removeClass("active");
+	}
 }
 
 function keyPressed()
@@ -632,15 +644,17 @@ function keyPressed()
 	{
 		toggleSelectionMode();
 		switchButton("selectionMode", TOGGLE_Z);
+		switchButton("normalMode", TOGGLE_N);
 	}
 	// N exits selection mode and switches to standard view
 	if (OW.isKeyPressed("n") && !TOGGLE_N)
 	{
 		toggleNormalMode();
 		switchButton("normalMode", TOGGLE_N);
+		switchButton("selectionMode", TOGGLE_Z);
 	}
 	// H exits selection mode and switches to standard view
-	if (OW.isKeyPressed("H"))
+	if (OW.isKeyPressed("h"))
 	{
 		toggleHelp();
 		switchButton("helpbutton", TOGGLE_H);
@@ -712,17 +726,16 @@ function setupUI()
 		{
 			toggleInputs();
 		});
-		
+
 		$("#showoutputs").click(function(event)
 		{
 			toggleOutputs();
 		});
-		
+
 		$("#rotationMode").click(function(event)
 		{
 			toggleRotationMode();
 		});
-
 
 		$("#normalMode").click(function(event)
 		{
@@ -731,12 +744,6 @@ function setupUI()
 		$("#selectionMode").click(function(event)
 		{
 			toggleSelectionMode();
-		});
-
-
-		$("#helpbutton").click(function(event)
-		{
-			toggleHelp();
 		});
 
 		$("#rw").click(function(event)

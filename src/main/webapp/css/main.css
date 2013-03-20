@@ -5,6 +5,7 @@ iframe{
 
 body{
 	color: #777777;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 .btn{
@@ -167,10 +168,16 @@ input{
 	margin-top: 50px;
 	font-size:70pt!important;
 	color:#37ABC8;
+	width:100px;
 }
 
 #help {
-	font-size: 12px;
+	padding:10px;
+	width:700px;
+	font-weight:200;
+}
+.helptitle {
+	font-size:20px;
 }
 
 .soma {
@@ -194,9 +201,7 @@ input{
 .io {
 	color: white;
 }
-.helptitle {
 
-}
 
 #helpbutton {
 	left: 130px;
