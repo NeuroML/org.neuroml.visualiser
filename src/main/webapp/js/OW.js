@@ -576,7 +576,9 @@ OW.setupGUI = function()
 	// GUI
 	if (!OW.gui && data)
 	{
-		OW.gui = new dat.GUI();
+		OW.gui = new dat.GUI({
+				width : 400
+		});
 		OW.addGUIControls(OW.gui, OW.metadata);
 	}
 	for (f in OW.gui.__folders)

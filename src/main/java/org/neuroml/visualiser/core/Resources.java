@@ -7,13 +7,13 @@ package org.neuroml.visualiser.core;
  */
 public enum Resources
 {
-	COND_DENSITY("Conductance density"),
+	COND_DENSITY("Passive conductance density"),
 	SPIKE_THRESHOLD("Spike Threshold"),
 	SPECIFIC_CAPACITANCE("Specific Capacitance"),
 	INIT_MEMBRANE_POTENTIAL("Initial Membrane Potential"),
 	RESISTIVITY("Resistivity"),
-	MEMBRANE_P("Membrane Properties"),
-	INTRACELLULAR_P("Intracellular Properties"), 
+	MEMBRANE_P("Membrane Properties (Soma)"),
+	INTRACELLULAR_P("Intracellular Properties (Soma)"), 
 	SYNAPSE("Synapse Type"), 
 	CONNECTION_TYPE("Connection Type"),
 	PRE_SYNAPTIC("Input"),

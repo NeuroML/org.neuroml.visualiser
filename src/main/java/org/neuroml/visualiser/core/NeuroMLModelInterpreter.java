@@ -231,18 +231,18 @@ public class NeuroMLModelInterpreter
 					{
 						membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
 					}
-					if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
-					{
-						membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
-					}
+//					if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
+//					{
+//						membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
+//					}
 					if(c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().size()>0)
 					{
 						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
 					}
-					if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
-					{
-						membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
-					}
+//					if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
+//					{
+//						membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
+//					}
 					
 				}
 
