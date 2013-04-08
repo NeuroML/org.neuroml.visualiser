@@ -25,19 +25,8 @@ function get3DScene(neuromlurl)
 		{
 			if (data.length === 0 || data.entities.length === 0)
 			{
-				// $("#loadinglbl").hide();
-				// $("#error").modal(
-				// {
-				// modal : true,
-				// buttons :
-				// {
-				// Close : function()
-				// {
-				// $(this).modal("close");
-				// }
-				// }
-				// });
-				// $("#error").show();
+				 $("#loadinglbl").hide();
+				 $("#error").modal();
 			}
 			else
 			{

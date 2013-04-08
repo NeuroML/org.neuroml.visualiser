@@ -26,8 +26,19 @@
 		<link rel="stylesheet" href="css/font-awesome.css" />
 
 		<div id="content">
-			<div id="error" title="OSB 3D Explorer">
-				<p>The selected file does not contain any morphology.</p>
+
+			<!-- Modal -->
+			<div id="error" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			  <div class="modal-header">
+			    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="icon-remove"></i></button>
+			    <h3 id="myModalLabel"><i class="icon-warning-sign"></i> OSB 3D Explorer</h3>
+			  </div>
+			  <div class="modal-body">
+			    <p>The selected file does not contain any morphology or there has been a network problem while fetching the data.</p>
+			  </div>
+			  <div class="modal-footer">
+			    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			  </div>
 			</div>
 			<div id="controls">
 				<div id="position_toolbar">
