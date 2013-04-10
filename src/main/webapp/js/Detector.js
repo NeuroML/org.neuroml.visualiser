@@ -27,11 +27,11 @@ var Detector = {
 		if ( ! this.webgl ) {
 
 			element.innerHTML = window.WebGLRenderingContext ? [
-				'Your graphics card does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>.<br />',
-				'Find out how to get it <a href="http://get.webgl.org/" style="color:#000">here</a>.'
+				'Your graphics card does not seem to support <ul><a href="http://get.webgl.org/" style="color:#000">WebGL</a></ul>.<br />',
+				'Find out how to get it <ul><a  target="_blank" href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">here</a></ul>.'
 			].join( '\n' ) : [
-				'Your browser does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">WebGL</a>.<br/>',
-				'Find out how to get it <a href="http://get.webgl.org/" style="color:#000">here</a>.'
+				'Your browser does not seem to support <ul><a href="http://get.webgl.org/" style="color:#000">WebGL</a></ul>.<br/>',
+				'Find out how to get it <ul><a  target="_blank" href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" style="color:#000">here</a></ul>.'
 			].join( '\n' );
 
 		}
