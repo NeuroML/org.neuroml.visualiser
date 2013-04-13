@@ -676,7 +676,7 @@ function setupUI()
 	$(function()
 	{
 
-		$("button:first").click(function(event)
+		$("#w").click(function(event)
 		{
 			OW.controls.incrementPanEnd(-0.01, 0);
 		}).mouseup(function(event)
