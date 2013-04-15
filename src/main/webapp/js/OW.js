@@ -188,12 +188,12 @@ OW.updateGeometry = function(g)
 OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, material)
 {
 	var cylinderAxis = new THREE.Vector3();
-	cylinderAxis.sub(topBasePos, bottomBasePos);
+	cylinderAxis.subVectors(topBasePos, bottomBasePos);
 
 	var cylHeight = cylinderAxis.length();
 
 	var midPoint = new THREE.Vector3();
-	midPoint.add(bottomBasePos, topBasePos);
+	midPoint.addVectors(bottomBasePos, topBasePos);
 	midPoint.multiplyScalar(0.5);
 
 	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, 1, false);
@@ -219,7 +219,7 @@ OW.lookAt = function(obj, point)
 
 	// Projection of the position vector on the XZ plane
 	var projXZ = new THREE.Vector3();
-	projXZ.sub(point, yAxis.multiplyScalar(point.dot(yAxis)));
+	projXZ.subVectors(point, yAxis.multiplyScalar(point.dot(yAxis)));
 
 	// Angle between the position vetor and the Y axis
 	var phi = OW.compPhi(point);
@@ -352,9 +352,7 @@ OW.divideEntity = function(entity)
 		newEntities.push(entityObject);
 	}
 
-	OW.renderer.deallocateObject(entity);
-	entity.geometry.deallocate();
-	entity.deallocate();
+	entity.geometry.dispose();
 	return newEntities;
 };
 
@@ -374,9 +372,7 @@ OW.mergeEntities = function(entities)
 		for ( var e in entities)
 		{
 			OW.scene.remove(entities[e]);
-			OW.renderer.deallocateObject(entities[e]);
-			entities[e].geometry.deallocate();
-			entities[e].deallocate();
+			entities[e].geometry.dispose();
 		}
 
 		entityObject = OW.getThreeObjectFromJSONEntity(jsonEntities[entityIndex], entityIndex, true);
@@ -419,9 +415,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			{
 				var threeObject = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 				THREE.GeometryUtils.merge(combined, threeObject);
-				OW.renderer.deallocateObject(threeObject);
-				threeObject.geometry.deallocate();
-				threeObject.deallocate();
+				threeObject.geometry.dispose();
 			}
 			entityObject = new THREE.Mesh(combined, material);
 			entityObject.eindex = eindex;
@@ -489,9 +483,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 				{
 					var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
 					THREE.GeometryUtils.merge(combined, threeObject);
-					OW.renderer.deallocateObject(threeObject);
-					threeObject.geometry.deallocate();
-					threeObject.deallocate();
+					threeObject.geometry.dispose();
 				}
 				entityObject = new THREE.Mesh(combined, material);
 				entityObject.eindex = eindex;

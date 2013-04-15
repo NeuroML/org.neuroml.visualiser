@@ -521,7 +521,7 @@ function toggleSelectionMode()
 				if (child.hasOwnProperty("eid") && child.eid == OW.jsonscene.entities[0].id)
 				{
 					SELECTED = OW.divideEntity(child);
-					child.material.deallocate();
+					child.material.dispose();
 
 					for (s in SELECTED)
 					{
@@ -551,7 +551,7 @@ function toggleSelectionMode()
 			{
 				if (child.hasOwnProperty("material"))
 				{
-					child.material.deallocate();
+					child.material.dispose();
 					child.material = standardMaterial;
 				}
 			});
