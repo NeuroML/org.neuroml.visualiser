@@ -8,40 +8,40 @@
 /**
  * Base class
  */
-var OW = OW ||
-{};
+var GEPPETTO = GEPPETTO || { REVISION: '1' };
+
 
 /**
  * Global variables
  */
-OW.camera = null;
-OW.container = null;
-OW.controls = null;
-OW.scene = null;
-OW.renderer = null;
-OW.stat = null;
-OW.gui = null;
-OW.projector = null;
-OW.keyboard = new THREEx.KeyboardState();
-OW.jsonscene = null;
-OW.needsUpdate = false;
-OW.metadata =
+GEPPETTO.camera = null;
+GEPPETTO.container = null;
+GEPPETTO.controls = null;
+GEPPETTO.scene = null;
+GEPPETTO.renderer = null;
+GEPPETTO.stat = null;
+GEPPETTO.gui = null;
+GEPPETTO.projector = null;
+GEPPETTO.keyboard = new THREEx.KeyboardState();
+GEPPETTO.jsonscene = null;
+GEPPETTO.needsUpdate = false;
+GEPPETTO.metadata =
 {};
-OW.customUpdate = null;
-OW.mouseClickListener = null;
-OW.rotationMode = false;
-OW.mouse =
+GEPPETTO.customUpdate = null;
+GEPPETTO.mouseClickListener = null;
+GEPPETTO.rotationMode = false;
+GEPPETTO.mouse =
 {
 	x : 0,
 	y : 0
 };
-OW.geometriesMap =
+GEPPETTO.geometriesMap =
 {};
 
 /**
  * Initialize the engine
  */
-OW.init = function(containerp, jsonscenep, updatep)
+GEPPETTO.init = function(containerp, jsonscenep, updatep)
 {
 	if (!Detector.webgl)
 	{
@@ -50,16 +50,16 @@ OW.init = function(containerp, jsonscenep, updatep)
 	}
 	else
 	{
-		OW.container = containerp;
-		OW.jsonscene = jsonscenep;
-		OW.customUpdate = updatep;
-		OW.setupRenderer();
-		OW.setupScene();
-		OW.setupCamera();
-		OW.setupLights();
-		//OW.setupStats();
-		OW.setupControls();
-		OW.setupListeners();
+		GEPPETTO.container = containerp;
+		GEPPETTO.jsonscene = jsonscenep;
+		GEPPETTO.customUpdate = updatep;
+		GEPPETTO.setupRenderer();
+		GEPPETTO.setupScene();
+		GEPPETTO.setupCamera();
+		GEPPETTO.setupLights();
+		//GEPPETTO.setupStats();
+		GEPPETTO.setupControls();
+		GEPPETTO.setupListeners();
 		return true;
 	}
 };
@@ -69,17 +69,17 @@ OW.init = function(containerp, jsonscenep, updatep)
  * 
  * @param listener
  */
-OW.setMouseClickListener = function(listener)
+GEPPETTO.setMouseClickListener = function(listener)
 {
-	OW.mouseClickListener = listener;
+	GEPPETTO.mouseClickListener = listener;
 };
 
 /**
  * Remove the mouse listener (it's expensive don't add it when you don't need it!)
  */
-OW.removeMouseClickListener = function()
+GEPPETTO.removeMouseClickListener = function()
 {
-	OW.mouseClickListener = null;
+	GEPPETTO.mouseClickListener = null;
 };
 
 /**
@@ -89,7 +89,7 @@ OW.removeMouseClickListener = function()
  * @param material
  * @returns a three mesh representing the geometry
  */
-OW.getThreeObjectFromJSONGeometry = function(g, material)
+GEPPETTO.getThreeObjectFromJSONGeometry = function(g, material)
 {
 	var threeObject = null;
 	switch (g.type)
@@ -103,7 +103,7 @@ OW.getThreeObjectFromJSONGeometry = function(g, material)
 	case "Cylinder":
 		var lookAtV = new THREE.Vector3(g.distal.x, g.distal.y, g.distal.z);
 		var positionV = new THREE.Vector3(g.position.x, g.position.y, g.position.z);
-		threeObject = OW.getCylinder(positionV, lookAtV, g.radiusTop, g.radiusBottom, material);
+		threeObject = GEPPETTO.getCylinder(positionV, lookAtV, g.radiusTop, g.radiusBottom, material);
 		break;
 	case "Sphere":
 		threeObject = new THREE.Mesh(new THREE.SphereGeometry(g.radius, 20, 20), material);
@@ -112,18 +112,18 @@ OW.getThreeObjectFromJSONGeometry = function(g, material)
 	}
 	// add the geometry to a map indexed by the geometry id so we can find it
 	// for updating purposes
-	OW.geometriesMap[g.id] = threeObject;
+	GEPPETTO.geometriesMap[g.id] = threeObject;
 	return threeObject;
 };
 
 /**
  * Updates the scene
  */
-OW.updateScene = function()
+GEPPETTO.updateScene = function()
 {
-	if (OW.needsUpdate)
+	if (GEPPETTO.needsUpdate)
 	{
-		var entities = OW.jsonscene.entities;
+		var entities = GEPPETTO.jsonscene.entities;
 
 		for ( var eindex in entities)
 		{
@@ -131,10 +131,10 @@ OW.updateScene = function()
 
 			for ( var gindex in geometries)
 			{
-				OW.updateGeometry(geometries[gindex]);
+				GEPPETTO.updateGeometry(geometries[gindex]);
 			}
 
-			var entityGeometry = OW.geometriesMap[entities[eindex].id];
+			var entityGeometry = GEPPETTO.geometriesMap[entities[eindex].id];
 			if (entityGeometry)
 			{
 				// if an entity is represented by a particle system we need to
@@ -145,7 +145,7 @@ OW.updateScene = function()
 				}
 			}
 		}
-		OW.needsUpdate = false;
+		GEPPETTO.needsUpdate = false;
 	}
 };
 
@@ -155,9 +155,9 @@ OW.updateScene = function()
  * @param g
  *            the update json geometry
  */
-OW.updateGeometry = function(g)
+GEPPETTO.updateGeometry = function(g)
 {
-	var threeObject = OW.geometriesMap[g.id];
+	var threeObject = GEPPETTO.geometriesMap[g.id];
 	if (threeObject)
 	{
 		if (threeObject instanceof THREE.Vector3)
@@ -185,7 +185,7 @@ OW.updateGeometry = function(g)
  * @param material
  * @returns a Cylinder translated and rotated in the scene according to the cartesian coordinated that describe it
  */
-OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, material)
+GEPPETTO.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, material)
 {
 	var cylinderAxis = new THREE.Vector3();
 	cylinderAxis.subVectors(topBasePos, bottomBasePos);
@@ -199,7 +199,7 @@ OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, ma
 	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, 1, false);
 	threeObject = new THREE.Mesh(c, material);
 
-	OW.lookAt(threeObject, cylinderAxis);
+	GEPPETTO.lookAt(threeObject, cylinderAxis);
 	var distance=midPoint.length();
 	
 
@@ -216,7 +216,7 @@ OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, ma
  * @param obj
  * @param point
  */
-OW.lookAt = function(obj, point)
+GEPPETTO.lookAt = function(obj, point)
 {
 
 	// Y Coordinate axis
@@ -227,11 +227,11 @@ OW.lookAt = function(obj, point)
 	projXZ.subVectors(point, yAxis.multiplyScalar(point.dot(yAxis)));
 
 	// Angle between the position vetor and the Y axis
-	var phi = OW.compPhi(point);
+	var phi = GEPPETTO.compPhi(point);
 
 	// Angle between x axis and the projection of the position vector on the XZ
 	// plane
-	var theta = OW.compTheta(projXZ);
+	var theta = GEPPETTO.compTheta(projXZ);
 
 	// Rotation matrix
 	var transfMat = new THREE.Matrix4();
@@ -250,7 +250,7 @@ OW.lookAt = function(obj, point)
  * @param string
  * @param point
  */
-OW.printPoint = function(string, point)
+GEPPETTO.printPoint = function(string, point)
 {
 	console.log(string + " (" + point.x + ", " + point.y + ", " + point.z + ")");
 };
@@ -260,7 +260,7 @@ OW.printPoint = function(string, point)
  * @param proj
  * @returns Angle between x axis and the projection of the position vector on the XZ plane
  */
-OW.compTheta = function(proj)
+GEPPETTO.compTheta = function(proj)
 {
 	var v = proj;
 
@@ -301,7 +301,7 @@ OW.compTheta = function(proj)
  * @param point
  * @returns Angle between the position vetor and the Y axis
  */
-OW.compPhi = function(point)
+GEPPETTO.compPhi = function(point)
 {
 	var v = point;
 	v.normalize();
@@ -320,14 +320,14 @@ OW.compPhi = function(point)
 /**
  * @returns
  */
-OW.setupScene = function()
+GEPPETTO.setupScene = function()
 {
-	OW.scene = new THREE.Scene();
+	GEPPETTO.scene = new THREE.Scene();
 
-	var entities = OW.jsonscene.entities;
+	var entities = GEPPETTO.jsonscene.entities;
 	for ( var eindex in entities)
 	{
-		OW.scene.add(OW.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
+		GEPPETTO.scene.add(GEPPETTO.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
 	}
 };
 
@@ -335,25 +335,25 @@ OW.setupScene = function()
  * @param entity
  * @returns the subentities in which the entity was decomposed
  */
-OW.divideEntity = function(entity)
+GEPPETTO.divideEntity = function(entity)
 {
-	var jsonEntities = OW.jsonscene.entities;
+	var jsonEntities = GEPPETTO.jsonscene.entities;
 	var jsonEntity = jsonEntities[entity.eindex];
 	var newEntities = [];
-	OW.scene.remove(entity);
+	GEPPETTO.scene.remove(entity);
 
-	var entityObject = OW.getThreeObjectFromJSONEntity(jsonEntity, entity.eindex, false);
+	var entityObject = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity, entity.eindex, false);
 	if (entityObject instanceof Array)
 	{
 		for ( var e in entityObject)
 		{
-			OW.scene.add(entityObject[e]);
+			GEPPETTO.scene.add(entityObject[e]);
 			newEntities.push(entityObject[e]);
 		}
 	}
 	else
 	{
-		OW.scene.add(entityObject);
+		GEPPETTO.scene.add(entityObject);
 		newEntities.push(entityObject);
 	}
 
@@ -366,22 +366,22 @@ OW.divideEntity = function(entity)
  *            the subentities
  * @returns the resulting parent entity in which the subentities were assembled
  */
-OW.mergeEntities = function(entities)
+GEPPETTO.mergeEntities = function(entities)
 {
 	var entityObject = null;
 	if (entities[0].hasOwnProperty("parentEntityIndex"))
 	{
-		var jsonEntities = OW.jsonscene.entities;
+		var jsonEntities = GEPPETTO.jsonscene.entities;
 		var entityIndex = entities[0].parentEntityIndex;
 
 		for ( var e in entities)
 		{
-			OW.scene.remove(entities[e]);
+			GEPPETTO.scene.remove(entities[e]);
 			entities[e].geometry.dispose();
 		}
 
-		entityObject = OW.getThreeObjectFromJSONEntity(jsonEntities[entityIndex], entityIndex, true);
-		OW.scene.add(entityObject);
+		entityObject = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntities[entityIndex], entityIndex, true);
+		GEPPETTO.scene.add(entityObject);
 	}
 	return entityObject;
 };
@@ -395,7 +395,7 @@ OW.mergeEntities = function(entities)
  *            true if subentities have to be merged
  * @returns the resulting parent entity in which the subentities were assembled
  */
-OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
+GEPPETTO.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 {
 	var entityObject = null;
 	if (jsonEntity.subentities && jsonEntity.subentities.length > 0)
@@ -418,7 +418,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			var combined = new THREE.Geometry();
 			for ( var seindex in jsonEntity.subentities)
 			{
-				var threeObject = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
+				var threeObject = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 				THREE.GeometryUtils.merge(combined, threeObject);
 				threeObject.geometry.dispose();
 			}
@@ -432,7 +432,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 			entityObject = [];
 			for ( var seindex in jsonEntity.subentities)
 			{
-				subentity = OW.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
+				subentity = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 				subentity.parentEntityIndex = eindex;
 				entityObject.push(subentity);
 			}
@@ -461,7 +461,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 				geometry = new THREE.Geometry();
 				for ( var gindex in geometries)
 				{
-					var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
+					var threeObject = GEPPETTO.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
 					geometry.vertices.push(threeObject);
 				}
 				entityObject = new THREE.ParticleSystem(geometry, pMaterial);
@@ -470,7 +470,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 				// sort the particles which enables
 				// the behaviour we want
 				entityObject.sortParticles = true;
-				OW.geometriesMap[jsonEntity.id] = entityObject;
+				GEPPETTO.geometriesMap[jsonEntity.id] = entityObject;
 			}
 			else
 			{
@@ -486,7 +486,7 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 				var combined = new THREE.Geometry();
 				for ( var gindex in geometries)
 				{
-					var threeObject = OW.getThreeObjectFromJSONGeometry(geometries[gindex], material);
+					var threeObject = GEPPETTO.getThreeObjectFromJSONGeometry(geometries[gindex], material);
 					THREE.GeometryUtils.merge(combined, threeObject);
 					threeObject.geometry.dispose();
 				}
@@ -502,86 +502,86 @@ OW.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubentities)
 /**
  * 
  */
-OW.setupCamera = function()
+GEPPETTO.setupCamera = function()
 {
 	// Camera
 	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
 	var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
-	OW.camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-	OW.scene.add(OW.camera);
-	OW.camera.position.set(0, 150, 400);
-	OW.camera.lookAt(OW.scene.position);
-	OW.projector = new THREE.Projector();
+	GEPPETTO.camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	GEPPETTO.scene.add(GEPPETTO.camera);
+	GEPPETTO.camera.position.set(0, 150, 400);
+	GEPPETTO.camera.lookAt(GEPPETTO.scene.position);
+	GEPPETTO.projector = new THREE.Projector();
 };
 
 /**
  * 
  */
-OW.setupControls = function()
+GEPPETTO.setupControls = function()
 {
 	// Controls
-	OW.controls = new THREE.TrackballControls(OW.camera, OW.renderer.domElement);
-	OW.controls.noZoom = false;
-	OW.controls.noPan = false;
-	OW.controls.addEventListener('change', OW.render);
+	GEPPETTO.controls = new THREE.TrackballControls(GEPPETTO.camera, GEPPETTO.renderer.domElement);
+	GEPPETTO.controls.noZoom = false;
+	GEPPETTO.controls.noPan = false;
+	GEPPETTO.controls.addEventListener('change', GEPPETTO.render);
 };
 
 /**
  * 
  */
-OW.setupStats = function()
+GEPPETTO.setupStats = function()
 {
 	// Stats
-	OW.stats = new Stats();
-	OW.stats.domElement.style.position = 'absolute';
-	OW.stats.domElement.style.bottom = '0px';
-	OW.stats.domElement.style.zIndex = 100;
-	OW.container.appendChild(OW.stats.domElement);
+	GEPPETTO.stats = new Stats();
+	GEPPETTO.stats.domElement.style.position = 'absolute';
+	GEPPETTO.stats.domElement.style.bottom = '0px';
+	GEPPETTO.stats.domElement.style.zIndex = 100;
+	GEPPETTO.container.appendChild(GEPPETTO.stats.domElement);
 	
 };
 
 /**
  * 
  */
-OW.setupLights = function()
+GEPPETTO.setupLights = function()
 {
 	// Lights
 
 	light = new THREE.DirectionalLight(0xffffff);
 	light.position.set(1, 1, 1);
-	OW.scene.add(light);
+	GEPPETTO.scene.add(light);
 	light = new THREE.DirectionalLight(0xffffff);
 	light.position.set(-1, -1, -1);
-	OW.scene.add(light);
+	GEPPETTO.scene.add(light);
 	light = new THREE.AmbientLight(0x222222);
-	OW.scene.add(light);
+	GEPPETTO.scene.add(light);
 
 };
 
 /**
  * Create a GUI element based on the available metadata
  */
-OW.setupGUI = function()
+GEPPETTO.setupGUI = function()
 {
 	var data = false;
-	for ( var m in OW.metadata)
+	for ( var m in GEPPETTO.metadata)
 	{
 		data = true;
 		break;
 	}
 
 	// GUI
-	if (!OW.gui && data)
+	if (!GEPPETTO.gui && data)
 	{
-		OW.gui = new dat.GUI({
+		GEPPETTO.gui = new dat.GUI({
 				width : 400
 		});
-		OW.addGUIControls(OW.gui, OW.metadata);
+		GEPPETTO.addGUIControls(GEPPETTO.gui, GEPPETTO.metadata);
 	}
-	for (f in OW.gui.__folders)
+	for (f in GEPPETTO.gui.__folders)
 	{
 		// opens only the root folders
-		OW.gui.__folders[f].open();
+		GEPPETTO.gui.__folders[f].open();
 	}
 
 };
@@ -590,7 +590,7 @@ OW.setupGUI = function()
  * @param gui
  * @param metadatap
  */
-OW.addGUIControls = function(parent, current_metadata)
+GEPPETTO.addGUIControls = function(parent, current_metadata)
 {
 	if (current_metadata.hasOwnProperty("ID"))
 	{
@@ -604,7 +604,7 @@ OW.addGUIControls = function(parent, current_metadata)
 			{
 				folder = parent.addFolder(m);
 				// recursive call to populate the GUI with sub-metadata
-				OW.addGUIControls(folder, current_metadata[m]);
+				GEPPETTO.addGUIControls(folder, current_metadata[m]);
 			}
 			else
 			{
@@ -620,7 +620,7 @@ OW.addGUIControls = function(parent, current_metadata)
 // * @param metadatatoupdate
 // * @param metadatanew
 // */
-// OW.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
+// GEPPETTO.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
 // {
 // for ( var m in metadatanew)
 // {
@@ -638,7 +638,7 @@ OW.addGUIControls = function(parent, current_metadata)
 // }
 // else
 // {
-// OW.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
+// GEPPETTO.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
 // }
 // }
 // else
@@ -658,55 +658,55 @@ OW.addGUIControls = function(parent, current_metadata)
 /**
  * 
  */
-OW.setupRenderer = function()
+GEPPETTO.setupRenderer = function()
 {
 	// and the CanvasRenderer figures out what the
 	// stuff in the scene looks like and draws it!
-	OW.renderer = new THREE.WebGLRenderer(
+	GEPPETTO.renderer = new THREE.WebGLRenderer(
 	{
 		antialias : true
 	});
-	OW.renderer.setClearColorHex(0xffffff, 1);
-	OW.renderer.setSize(window.innerWidth, window.innerHeight);
-	OW.container.appendChild(OW.renderer.domElement);
+	GEPPETTO.renderer.setClearColorHex(0xffffff, 1);
+	GEPPETTO.renderer.setSize(window.innerWidth, window.innerHeight);
+	GEPPETTO.container.appendChild(GEPPETTO.renderer.domElement);
 };
 
 /**
  * Adds debug axis to the scene
  */
-OW.setupAxis = function()
+GEPPETTO.setupAxis = function()
 {
 	// To use enter the axis length
-	OW.scene.add(new THREE.AxisHelper(200));
+	GEPPETTO.scene.add(new THREE.AxisHelper(200));
 };
 
 /**
  * 
  */
-OW.setupListeners = function()
+GEPPETTO.setupListeners = function()
 {
 	// when the mouse moves, call the given function
-	OW.renderer.domElement.addEventListener('mousemove', OW.onDocumentMouseMove, false);
-	OW.renderer.domElement.addEventListener('mousedown', OW.onDocumentMouseDown, false);
-	window.addEventListener('resize', OW.onWindowResize, false);
+	GEPPETTO.renderer.domElement.addEventListener('mousemove', GEPPETTO.onDocumentMouseMove, false);
+	GEPPETTO.renderer.domElement.addEventListener('mousedown', GEPPETTO.onDocumentMouseDown, false);
+	window.addEventListener('resize', GEPPETTO.onWindowResize, false);
 };
 
-OW.onWindowResize = function()
+GEPPETTO.onWindowResize = function()
 {
 
-	OW.camera.aspect = window.innerWidth / window.innerHeight;
-	OW.camera.updateProjectionMatrix();
+	GEPPETTO.camera.aspect = window.innerWidth / window.innerHeight;
+	GEPPETTO.camera.updateProjectionMatrix();
 
-	OW.renderer.setSize(window.innerWidth, window.innerHeight);
+	GEPPETTO.renderer.setSize(window.innerWidth, window.innerHeight);
 
 };
 
 /**
  * 
  */
-OW.render = function()
+GEPPETTO.render = function()
 {
-	OW.renderer.render(OW.scene, OW.camera);
+	GEPPETTO.renderer.render(GEPPETTO.scene, GEPPETTO.camera);
 };
 
 /**
@@ -714,15 +714,15 @@ OW.render = function()
  * 
  * @param event
  */
-OW.onDocumentMouseMove = function(event)
+GEPPETTO.onDocumentMouseMove = function(event)
 {
 	// the following line would stop any other event handler from firing
 	// (such as the mouse's TrackballControls)
 	// event.preventDefault();
 
 	// update the mouse variable
-	OW.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	OW.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	GEPPETTO.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	GEPPETTO.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 };
 
@@ -731,29 +731,29 @@ OW.onDocumentMouseMove = function(event)
  * 
  * @param event
  */
-OW.onDocumentMouseDown = function(event)
+GEPPETTO.onDocumentMouseDown = function(event)
 {
-	if (OW.mouseClickListener)
+	if (GEPPETTO.mouseClickListener)
 	{
-		OW.mouseClickListener(OW.getIntersectedObjects(), event.which);
+		GEPPETTO.mouseClickListener(GEPPETTO.getIntersectedObjects(), event.which);
 	}
 };
 
 /**
  * @returns a list of objects intersected by the current mouse coordinates
  */
-OW.getIntersectedObjects = function()
+GEPPETTO.getIntersectedObjects = function()
 {
 	// create a Ray with origin at the mouse position and direction into the
 	// scene (camera direction)
-	var vector = new THREE.Vector3(OW.mouse.x, OW.mouse.y, 1);
-	OW.projector.unprojectVector(vector, OW.camera);
+	var vector = new THREE.Vector3(GEPPETTO.mouse.x, GEPPETTO.mouse.y, 1);
+	GEPPETTO.projector.unprojectVector(vector, GEPPETTO.camera);
 	
-	var raycaster = new THREE.Raycaster(OW.camera.position, vector.sub(OW.camera.position).normalize());
+	var raycaster = new THREE.Raycaster(GEPPETTO.camera.position, vector.sub(GEPPETTO.camera.position).normalize());
 
 
 	var visibleChildren = [];
-	OW.scene.traverse(function(child)
+	GEPPETTO.scene.traverse(function(child)
 	{
 		if (child.visible)
 		{
@@ -771,27 +771,27 @@ OW.getIntersectedObjects = function()
  *            the pressed key
  * @returns true if the key is pressed
  */
-OW.isKeyPressed = function(key)
+GEPPETTO.isKeyPressed = function(key)
 {
-	return OW.keyboard.pressed(key);
+	return GEPPETTO.keyboard.pressed(key);
 };
 
 /**
  * @param entityIndex
  *            the id of the entity for which we want to display metadata
  */
-OW.showMetadataForEntity = function(entityIndex)
+GEPPETTO.showMetadataForEntity = function(entityIndex)
 {
-	if (OW.gui)
+	if (GEPPETTO.gui)
 	{
-		OW.gui.domElement.parentNode.removeChild(OW.gui.domElement);
-		OW.gui = null;
+		GEPPETTO.gui.domElement.parentNode.removeChild(GEPPETTO.gui.domElement);
+		GEPPETTO.gui = null;
 	}
 
-	OW.metadata = OW.jsonscene.entities[entityIndex].metadata;
-	OW.metadata.ID = OW.jsonscene.entities[entityIndex].id;
+	GEPPETTO.metadata = GEPPETTO.jsonscene.entities[entityIndex].metadata;
+	GEPPETTO.metadata.ID = GEPPETTO.jsonscene.entities[entityIndex].id;
 
-	OW.setupGUI();
+	GEPPETTO.setupGUI();
 
 };
 
@@ -799,63 +799,63 @@ OW.showMetadataForEntity = function(entityIndex)
  * @param newJSONScene
  *            the id of the entity for which we want to display metadata
  */
-OW.updateJSONScene = function(newJSONScene)
+GEPPETTO.updateJSONScene = function(newJSONScene)
 {
-	OW.jsonscene = newJSONScene;
-	OW.needsUpdate = true;
+	GEPPETTO.jsonscene = newJSONScene;
+	GEPPETTO.needsUpdate = true;
 };
 
 /**
  * 
  */
-OW.animate = function()
+GEPPETTO.animate = function()
 {
-	OW.updateScene();
-	OW.customUpdate();
-	if(OW.stats)
+	GEPPETTO.updateScene();
+	GEPPETTO.customUpdate();
+	if(GEPPETTO.stats)
 	{
-		OW.stats.update();
+		GEPPETTO.stats.update();
 	}
-	OW.controls.update();
-	requestAnimationFrame(OW.animate);
-	if (OW.rotationMode)
+	GEPPETTO.controls.update();
+	requestAnimationFrame(GEPPETTO.animate);
+	if (GEPPETTO.rotationMode)
 	{
 		var timer = new Date().getTime() * 0.0005;
-		OW.camera.position.x = Math.floor(Math.cos(timer) * 200);
-		OW.camera.position.z = Math.floor(Math.sin(timer) * 200);
+		GEPPETTO.camera.position.x = Math.floor(Math.cos(timer) * 200);
+		GEPPETTO.camera.position.z = Math.floor(Math.sin(timer) * 200);
 	}
-	OW.render();
+	GEPPETTO.render();
 };
 
 /**
  * @param aroundObject
  *            the object around which the rotation will happen
  */
-OW.enterRotationMode = function(aroundObject)
+GEPPETTO.enterRotationMode = function(aroundObject)
 
 {
-	OW.rotationMode = true;
+	GEPPETTO.rotationMode = true;
 	if (aroundObject)
 	{
-		OW.camera.lookAt(aroundObject);
+		GEPPETTO.camera.lookAt(aroundObject);
 	}
 };
 
 /**
  * 
  */
-OW.exitRotationMode = function()
+GEPPETTO.exitRotationMode = function()
 {
-	OW.rotationMode = false;
+	GEPPETTO.rotationMode = false;
 };
 
 /**
  * @param entityId
  *            the entity id
  */
-OW.getThreeReferencedObjectsFrom = function(entityId)
+GEPPETTO.getThreeReferencedObjectsFrom = function(entityId)
 {
-	var entity = OW.getJSONEntityFromId(entityId);
+	var entity = GEPPETTO.getJSONEntityFromId(entityId);
 	var referencedIDs = [];
 	var threeObjects = [];
 	for (r in entity.references)
@@ -863,11 +863,11 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
 		referencedIDs.push(entity.references[r].entityId);
 	}
 
-	OW.scene.traverse(function(child)
+	GEPPETTO.scene.traverse(function(child)
 	{
 		if (child.hasOwnProperty("eid"))
 		{
-			if (OW.isIn(child.eid, referencedIDs))
+			if (GEPPETTO.isIn(child.eid, referencedIDs))
 			{
 				threeObjects.push(child);
 				var index = referencedIDs.indexOf(child.eid);
@@ -883,13 +883,13 @@ OW.getThreeReferencedObjectsFrom = function(entityId)
  * @param entityId
  *            the entity id
  */
-OW.getJSONEntityFromId = function(entityId)
+GEPPETTO.getJSONEntityFromId = function(entityId)
 {
-	for (e in OW.jsonscene.entities)
+	for (e in GEPPETTO.jsonscene.entities)
 	{
-		if (OW.jsonscene.entities[e].id == entityId)
+		if (GEPPETTO.jsonscene.entities[e].id == entityId)
 		{
-			return OW.jsonscene.entities[e];
+			return GEPPETTO.jsonscene.entities[e];
 		}
 	}
 };
@@ -900,7 +900,7 @@ OW.getJSONEntityFromId = function(entityId)
  * @param array
  *            the array to be checked
  */
-OW.isIn = function(e, array)
+GEPPETTO.isIn = function(e, array)
 {
 	var found = false;
 	for ( var i = 0; i < array.length; i++)

@@ -31,9 +31,9 @@ function get3DScene(neuromlurl)
 			else
 			{
 				preprocessMetadata(data);
-				if (OW.init(createContainer(), data, update))
+				if (GEPPETTO.init(createContainer(), data, update))
 				{
-					OW.animate();
+					GEPPETTO.animate();
 					document.addEventListener("keydown", keyPressed, false);
 					$("#controls").show();
 					$("#loadinglbl").hide();
@@ -179,7 +179,7 @@ var onClick = function(objectsClicked, button)
 
 					// go ahead and do what described unless we clicked on the same entity
 					// and we are in S mode in which case we don't want it to disappear
-					if (OW.isIn(SELECTED[0], oldSelected))
+					if (GEPPETTO.isIn(SELECTED[0], oldSelected))
 					{
 						// the object we clicked on was previously selected
 						if (TOGGLE_S || singleEntity())
@@ -190,7 +190,7 @@ var onClick = function(objectsClicked, button)
 						{
 							// 1)merge the entity
 							// 2)change the color to all the referenced entities by the selected
-							mergedEntity = OW.mergeEntities(oldSelected);
+							mergedEntity = GEPPETTO.mergeEntities(oldSelected);
 							mergedEntity.material = standardMaterial;
 							SELECTED = [];
 							for (r in REFERENCED)
@@ -212,7 +212,7 @@ var onClick = function(objectsClicked, button)
 						// 4)make all references invisible if S
 						if (oldSelected.length > 0)
 						{
-							mergedEntity = OW.mergeEntities(oldSelected);
+							mergedEntity = GEPPETTO.mergeEntities(oldSelected);
 							mergedEntity.material = standardMaterial;
 							if (TOGGLE_S)
 							{
@@ -235,9 +235,9 @@ var onClick = function(objectsClicked, button)
 						// 1)show metadata for what we clicked on
 						// 2)decompose selected entity in subentities
 						// 3)show references and change their material
-						OW.showMetadataForEntity(SELECTED[0].eindex);
+						GEPPETTO.showMetadataForEntity(SELECTED[0].eindex);
 
-						var entity = OW.getJSONEntityFromId(SELECTED[0].eid);
+						var entity = GEPPETTO.getJSONEntityFromId(SELECTED[0].eid);
 						var preIDs = [];
 						var postIDs = [];
 						if (entity.metadata.hasOwnProperty("Connections"))
@@ -251,25 +251,25 @@ var onClick = function(objectsClicked, button)
 								postIDs = Object.keys(entity.metadata["Connections"]["Output"]);
 							}
 
-							OW.scene.traverse(function(child)
+							GEPPETTO.scene.traverse(function(child)
 							{
 								if (child.hasOwnProperty("eid"))
 								{
-									if (TOGGLE_I && OW.isIn(child.eid, preIDs))
+									if (TOGGLE_I && GEPPETTO.isIn(child.eid, preIDs))
 									{
 										REFERENCED.push(child);
 										INPUT.push(child);
 										child.material = preConnectedMaterial;
 										child.visible = true;
 									}
-									if (TOGGLE_O && OW.isIn(child.eid, postIDs))
+									if (TOGGLE_O && GEPPETTO.isIn(child.eid, postIDs))
 									{
 										REFERENCED.push(child);
 										OUTPUT.push(child);
 										child.material = postConnectedMaterial;
 										child.visible = true;
 									}
-									if (TOGGLE_I && TOGGLE_O && OW.isIn(child.eid, postIDs) && OW.isIn(child.eid, preIDs))
+									if (TOGGLE_I && TOGGLE_O && GEPPETTO.isIn(child.eid, postIDs) && GEPPETTO.isIn(child.eid, preIDs))
 									{
 										REFERENCED.push(child);
 										child.material = prePostConnectedMaterial;
@@ -279,7 +279,7 @@ var onClick = function(objectsClicked, button)
 								}
 							});
 						}
-						SELECTED = OW.divideEntity(SELECTED[0]);
+						SELECTED = GEPPETTO.divideEntity(SELECTED[0]);
 						for (s in SELECTED)
 						{
 							if (SELECTED[s].eid.indexOf("soma_group") != -1)
@@ -338,7 +338,7 @@ var update = function()
 	{
 		if (checkIntersectionPeriod == 0)
 		{
-			var intersects = OW.getIntersectedObjects();
+			var intersects = GEPPETTO.getIntersectedObjects();
 			// if there is one (or more) intersections
 			if (intersects.length > 0)
 			{
@@ -355,7 +355,7 @@ var update = function()
 					INTERSECTED = intersects[0].object;
 					INTERSECTED.material = highlightMaterial;
 
-					OW.showMetadataForEntity(INTERSECTED.eindex);
+					GEPPETTO.showMetadataForEntity(INTERSECTED.eindex);
 				}
 			}
 			else
@@ -406,12 +406,12 @@ function toggleRotationMode()
 	if (TOGGLE_R)
 	{
 		TOGGLE_R = false;
-		OW.exitRotationMode();
+		GEPPETTO.exitRotationMode();
 	}
 	else
 	{
 		TOGGLE_R = true;
-		OW.enterRotationMode(SELECTED);
+		GEPPETTO.enterRotationMode(SELECTED);
 	}
 }
 
@@ -420,7 +420,7 @@ function toggleOutputs()
 	TOGGLE_O = !TOGGLE_O;
 	for (o in OUTPUT)
 	{
-		inputAndEnabled = TOGGLE_I && OW.isIn(OUTPUT[o], INPUT);
+		inputAndEnabled = TOGGLE_I && GEPPETTO.isIn(OUTPUT[o], INPUT);
 		if (TOGGLE_S)
 		{
 			OUTPUT[o].visible = TOGGLE_O || inputAndEnabled;
@@ -450,7 +450,7 @@ function toggleInputs()
 	TOGGLE_I = !TOGGLE_I;
 	for (i in INPUT)
 	{
-		outputAndEnabled = TOGGLE_O && OW.isIn(INPUT[i], OUTPUT);
+		outputAndEnabled = TOGGLE_O && GEPPETTO.isIn(INPUT[i], OUTPUT);
 		if (TOGGLE_S)
 		{
 			INPUT[i].visible = TOGGLE_I || outputAndEnabled;
@@ -480,23 +480,23 @@ function toggleNormalMode()
 	{
 		TOGGLE_Z = false;
 		TOGGLE_N = true;
-		OW.removeMouseClickListener();
-		if (OW.gui)
+		GEPPETTO.removeMouseClickListener();
+		if (GEPPETTO.gui)
 		{
-			OW.gui.domElement.parentNode.removeChild(OW.gui.domElement);
-			OW.gui = null;
+			GEPPETTO.gui.domElement.parentNode.removeChild(GEPPETTO.gui.domElement);
+			GEPPETTO.gui = null;
 		}
 		if (SELECTED.length > 0)
 		{
 			// if anything was selected we merge the geometries again
-			OW.mergeEntities(SELECTED);
+			GEPPETTO.mergeEntities(SELECTED);
 			SELECTED = [];
 			REFERENCED = [];
 		}
-		OW.metadata =
+		GEPPETTO.metadata =
 		{};
-		OW.renderer.setClearColorHex(0xffffff, 1);
-		OW.scene.traverse(function(child)
+		GEPPETTO.renderer.setClearColorHex(0xffffff, 1);
+		GEPPETTO.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
@@ -522,15 +522,15 @@ function toggleSelectionMode()
 	{
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
-		OW.renderer.setClearColorHex(0x000000, 1);
+		GEPPETTO.renderer.setClearColorHex(0x000000, 1);
 
 		if (singleEntity())
 		{
-			OW.scene.traverse(function(child)
+			GEPPETTO.scene.traverse(function(child)
 			{
-				if (child.hasOwnProperty("eid") && child.eid == OW.jsonscene.entities[0].id)
+				if (child.hasOwnProperty("eid") && child.eid == GEPPETTO.jsonscene.entities[0].id)
 				{
-					SELECTED = OW.divideEntity(child);
+					SELECTED = GEPPETTO.divideEntity(child);
 					child.material.dispose();
 
 					for (s in SELECTED)
@@ -548,16 +548,16 @@ function toggleSelectionMode()
 							SELECTED[s].material = dendriteMaterial;
 						}
 					}
-					OW.showMetadataForEntity(0);
+					GEPPETTO.showMetadataForEntity(0);
 				}
 			});
 		}
 		else
 		{
 
-			OW.setMouseClickListener(onClick);
+			GEPPETTO.setMouseClickListener(onClick);
 
-			OW.scene.traverse(function(child)
+			GEPPETTO.scene.traverse(function(child)
 			{
 				if (child.hasOwnProperty("material"))
 				{
@@ -575,13 +575,13 @@ function toggleHideDeselected()
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
 		TOGGLE_S = !TOGGLE_S;
-		OW.scene.traverse(function(child)
+		GEPPETTO.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
-				if (!OW.isIn(child, SELECTED))
+				if (!GEPPETTO.isIn(child, SELECTED))
 				{
-					if (OW.isIn(child, INPUT))
+					if (GEPPETTO.isIn(child, INPUT))
 					{
 						if (!TOGGLE_I)
 						{
@@ -590,7 +590,7 @@ function toggleHideDeselected()
 						return;
 
 					}
-					if (OW.isIn(child, OUTPUT))
+					if (GEPPETTO.isIn(child, OUTPUT))
 					{
 						if (!TOGGLE_O)
 						{
@@ -621,64 +621,64 @@ function switchButton(id, status)
 function keyPressed()
 {
 	// R enters rotation mode
-	if (OW.isKeyPressed("r"))
+	if (GEPPETTO.isKeyPressed("r"))
 	{
 		toggleRotationMode();
 		switchButton("rotationMode", TOGGLE_R);
 	}
 	// I shows/hides inputs
-	if (OW.isKeyPressed("i"))
+	if (GEPPETTO.isKeyPressed("i"))
 	{
 		toggleInputs();
 		switchButton("showinputs", TOGGLE_I);
 	}
 	// O shows/hides outputs
-	if (OW.isKeyPressed("o"))
+	if (GEPPETTO.isKeyPressed("o"))
 	{
 		toggleOutputs();
 		switchButton("showoutputs", TOGGLE_O);
 	}
 	// Z enters selection mode
-	if (OW.isKeyPressed("z"))
+	if (GEPPETTO.isKeyPressed("z"))
 	{
 		toggleSelectionMode();
 		switchButton("selectionMode", TOGGLE_Z);
 		switchButton("normalMode", TOGGLE_N);
 	}
 	// N exits selection mode and switches to standard view
-	if (OW.isKeyPressed("n") && !TOGGLE_N)
+	if (GEPPETTO.isKeyPressed("n") && !TOGGLE_N)
 	{
 		toggleNormalMode();
 		switchButton("normalMode", TOGGLE_N);
 		switchButton("selectionMode", TOGGLE_Z);
 	}
 	// H exits selection mode and switches to standard view
-	if (OW.isKeyPressed("h"))
+	if (GEPPETTO.isKeyPressed("h"))
 	{
 		toggleHelp();
 		switchButton("helpbutton", TOGGLE_H);
 	}
 	// S hides the non selected entities
-	if (OW.isKeyPressed("s"))
+	if (GEPPETTO.isKeyPressed("s"))
 	{
 		toggleHideDeselected();
 		switchButton("showdeselected", TOGGLE_S);
 	}
-	// if (OW.isKeyPressed("w"))
+	// if (GEPPETTO.isKeyPressed("w"))
 	// {
-	// window.open(OW.renderer.domElement.toDataURL('image/png'), 'screenshot');
+	// window.open(GEPPETTO.renderer.domElement.toDataURL('image/png'), 'screenshot');
 	// }
 
 }
 
 function rotate(axis, delta)
 {
-	OW.camera.rotation[axis] = OW.camera.rotation[axis] + delta;
+	GEPPETTO.camera.rotation[axis] = GEPPETTO.camera.rotation[axis] + delta;
 }
 
 function translate(axis, delta)
 {
-	OW.camera.position[axis] = OW.camera.position[axis] + delta;
+	GEPPETTO.camera.position[axis] = GEPPETTO.camera.position[axis] + delta;
 }
 
 function setupUI()
@@ -688,32 +688,32 @@ function setupUI()
 
 		$("#w").click(function(event)
 		{
-			OW.controls.incrementPanEnd(-0.01, 0);
+			GEPPETTO.controls.incrementPanEnd(-0.01, 0);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementPanEnd(0, -0.01);
+			GEPPETTO.controls.incrementPanEnd(0, -0.01);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementPanEnd(0.01, 0);
+			GEPPETTO.controls.incrementPanEnd(0.01, 0);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementPanEnd(0, 0.01);
+			GEPPETTO.controls.incrementPanEnd(0, 0.01);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.setupCamera();
-			OW.setupControls();
+			GEPPETTO.setupCamera();
+			GEPPETTO.setupControls();
 		});
 
 		$("#showdeselected").click(function(event)
@@ -747,49 +747,49 @@ function setupUI()
 
 		$("#rw").click(function(event)
 		{
-			OW.controls.incrementRotationEnd(-0.01, 0, 0);
+			GEPPETTO.controls.incrementRotationEnd(-0.01, 0, 0);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0, 0, 0.01);
+			GEPPETTO.controls.incrementRotationEnd(0, 0, 0.01);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0.01, 0, 0);
+			GEPPETTO.controls.incrementRotationEnd(0.01, 0, 0);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.controls.incrementRotationEnd(0, 0, -0.01);
+			GEPPETTO.controls.incrementRotationEnd(0, 0, -0.01);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		}).next().click(function(event)
 		{
-			OW.setupCamera();
-			OW.setupControls();
+			GEPPETTO.setupCamera();
+			GEPPETTO.setupControls();
 		});
 
 		$("#zo").click(function(event)
 		{
-			OW.controls.incrementZoomEnd(+0.01);
+			GEPPETTO.controls.incrementZoomEnd(+0.01);
 
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		});
 
 		$("#zi").click(function(event)
 		{
-			OW.controls.incrementZoomEnd(-0.01);
+			GEPPETTO.controls.incrementZoomEnd(-0.01);
 		}).mouseup(function(event)
 		{
-			OW.controls.resetSTATE();
+			GEPPETTO.controls.resetSTATE();
 		});
 
 	});
@@ -798,7 +798,7 @@ function setupUI()
 
 function singleEntity()
 {
-	return OW.jsonscene.entities.length == 1;
+	return GEPPETTO.jsonscene.entities.length == 1;
 }
 
 function getUrlVars()
