@@ -200,8 +200,13 @@ OW.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBottom, ma
 	threeObject = new THREE.Mesh(c, material);
 
 	OW.lookAt(threeObject, cylinderAxis);
-	threeObject.translate(midPoint.length(), midPoint);
+	var distance=midPoint.length();
+	
 
+	midPoint.transformDirection( threeObject.matrix );
+	midPoint.multiplyScalar( distance );
+
+	threeObject.position.add( midPoint );
 	return threeObject;
 };
 
@@ -743,7 +748,9 @@ OW.getIntersectedObjects = function()
 	// scene (camera direction)
 	var vector = new THREE.Vector3(OW.mouse.x, OW.mouse.y, 1);
 	OW.projector.unprojectVector(vector, OW.camera);
-	var ray = new THREE.Ray(OW.camera.position, vector.subSelf(OW.camera.position).normalize());
+	
+	var raycaster = new THREE.Raycaster(OW.camera.position, vector.sub(OW.camera.position).normalize());
+
 
 	var visibleChildren = [];
 	OW.scene.traverse(function(child)
@@ -756,7 +763,7 @@ OW.getIntersectedObjects = function()
 
 	// returns an array containing all objects in the scene with which the ray
 	// intersects
-	return ray.intersectObjects(visibleChildren);
+	return raycaster.intersectObjects(visibleChildren);
 };
 
 /**

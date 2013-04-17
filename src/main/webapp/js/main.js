@@ -10,15 +10,15 @@ function get3DScene(neuromlurl)
 		data :
 		{
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.nml"
+			 url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.net.nml"
 			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
+			 //url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
 			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			// url:"file:///Users/matteocantarelli/Desktop/cell2.nml"
-			url : neuromlurl
+			 //url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
+			 //url:"file:///Users/matteocantarelli/Desktop/sample.nml"
+			//url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
@@ -60,6 +60,13 @@ function createContainer()
 
 $(document).ready(function()
 {
+	if (typeof String.prototype.startsWith != 'function') 
+	{
+		  // see below for better implementation!
+		  String.prototype.startsWith = function (str){
+		    return this.indexOf(str) == 0;
+		  };
+	}
 	setupUI();
 	vars = getUrlVars();
 	get3DScene(decodeURIComponent(vars.url));
@@ -141,9 +148,12 @@ var standardMaterial = new THREE.MeshPhongMaterial(
 	ambient : 0x777777,
 	specular : 0xbbbb9b,
 	shininess : 50,
-	shading : THREE.SmoothShading
+	transparent: true,
+	shading : THREE.SmoothShading,
+	color : 0xaaaaaa
 });
-standardMaterial.color.setHex(0xaaaaaa);
+
+
 
 var INTERSECTED; // the object in the scene currently closest to the camera and intersected by the Ray projected from the mouse position
 var SELECTED = [];
