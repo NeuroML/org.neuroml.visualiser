@@ -1,5 +1,5 @@
 /**
- * @fileoverview Visualization engine built on top of THREE.js. Displays
+ * @fileoverview GEPPETTO Visualisation engine built on top of THREE.js. Displays
  * a scene as defined on org.openworm.simulationengine.core
  *
  * @author matteo@openworm.org (Matteo Cantarelli)
@@ -8,8 +8,11 @@
 /**
  * Base class
  */
-var GEPPETTO = GEPPETTO || { REVISION: '1' };
 
+var GEPPETTO = GEPPETTO ||
+{
+	REVISION : '3'
+};
 
 /**
  * Global variables
@@ -57,7 +60,7 @@ GEPPETTO.init = function(containerp, jsonscenep, updatep)
 		GEPPETTO.setupScene();
 		GEPPETTO.setupCamera();
 		GEPPETTO.setupLights();
-		//GEPPETTO.setupStats();
+		GEPPETTO.setupStats();
 		GEPPETTO.setupControls();
 		GEPPETTO.setupListeners();
 		return true;
@@ -197,52 +200,21 @@ GEPPETTO.getCylinder = function(bottomBasePos, topBasePos, radiusTop, radiusBott
 	midPoint.multiplyScalar(0.5);
 
 	var c = new THREE.CylinderGeometry(radiusTop, radiusBottom, cylHeight, 6, 1, false);
+	
+	c.applyMatrix( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+	
 	threeObject = new THREE.Mesh(c, material);
 
-	GEPPETTO.lookAt(threeObject, cylinderAxis);
-	var distance=midPoint.length();
-	
+	threeObject.lookAt(cylinderAxis);
+	var distance = midPoint.length();
 
-	midPoint.transformDirection( threeObject.matrix );
-	midPoint.multiplyScalar( distance );
+	midPoint.transformDirection(threeObject.matrix);
+	midPoint.multiplyScalar(distance);
 
-	threeObject.position.add( midPoint );
+	threeObject.position.add(midPoint);
 	return threeObject;
 };
 
-/**
- * Orients an object obj so that it looks at a point in space
- * 
- * @param obj
- * @param point
- */
-GEPPETTO.lookAt = function(obj, point)
-{
-
-	// Y Coordinate axis
-	var yAxis = new THREE.Vector3(0, 1, 0);
-
-	// Projection of the position vector on the XZ plane
-	var projXZ = new THREE.Vector3();
-	projXZ.subVectors(point, yAxis.multiplyScalar(point.dot(yAxis)));
-
-	// Angle between the position vetor and the Y axis
-	var phi = GEPPETTO.compPhi(point);
-
-	// Angle between x axis and the projection of the position vector on the XZ
-	// plane
-	var theta = GEPPETTO.compTheta(projXZ);
-
-	// Rotation matrix
-	var transfMat = new THREE.Matrix4();
-	transfMat.identity(); // initialize to identity
-
-	transfMat.rotateY(theta); // multiply by rotation around Y by theta
-	transfMat.rotateZ(phi); // multiply by rotation around Z by phy
-
-	obj.rotation.setEulerFromRotationMatrix(transfMat); // apply the rotation to
-	// the object
-};
 
 /**
  * Print a point coordinates on console
@@ -255,67 +227,6 @@ GEPPETTO.printPoint = function(string, point)
 	console.log(string + " (" + point.x + ", " + point.y + ", " + point.z + ")");
 };
 
-/**
- * 
- * @param proj
- * @returns Angle between x axis and the projection of the position vector on the XZ plane
- */
-GEPPETTO.compTheta = function(proj)
-{
-	var v = proj;
-
-	v.normalize();
-
-	var cos = v.x;
-
-	var sign = v.x * v.z;
-
-	var angle = Math.acos(cos);
-
-	// Correct the fact that the reference system is right handed
-	// and that acos returns only values between 0 and PI
-	// ignoring angles in the third and fourth quadrant
-	if (sign != 0)
-	{
-		if ((cos >= 0 && sign >= 0) || (cos < 0 && sign < 0))
-			return -angle;
-		else if (cos < 0 && sign >= 0)
-			return (angle + Math.PI);
-		else if (cos >= 0 && sign < 0)
-			return angle;
-	}
-	else
-	{
-		if (v.z > 0 || v.x < 0)
-		{
-			return -angle;
-		}
-		else if (v.x >= 0 || v.z < 0)
-		{
-			return angle;
-		}
-	}
-};
-
-/**
- * @param point
- * @returns Angle between the position vetor and the Y axis
- */
-GEPPETTO.compPhi = function(point)
-{
-	var v = point;
-	v.normalize();
-
-	var cos = v.y;
-	var angle = Math.acos(cos);
-
-	// Correction for right handed reference system and
-	// acos return values
-	if (point.x < 0 && point.z < 0)
-		return angle;
-	else
-		return -angle;
-};
 
 /**
  * @returns
@@ -442,22 +353,52 @@ GEPPETTO.getThreeObjectFromJSONEntity = function(jsonEntity, eindex, mergeSubent
 	{
 		// leaf entity it only contains geometries
 		var geometries = jsonEntity.geometries;
-		if (geometries != null)
+		if (geometries != null && geometries.length > 0)
 		{
 			if (geometries[0].type == "Particle")
 			{
 				// assumes there are no particles mixed with other kind of
-				// geometries hence if the first one is a particle then they all are
+				// geometrie hence if the first one is a particle then they all are
 				// create the particle variables
-				var pMaterial = new THREE.ParticleBasicMaterial(
+				var eMaterial = new THREE.ParticleBasicMaterial(
 				{
-					color : 0x81b621,
+					color : 0x0000FF,
+					size : 5,
+					map : THREE.ImageUtils.loadTexture("images/ball.png"),
+					blending : THREE.AdditiveBlending,
+					transparent : true
+				});
+				var bMaterial = new THREE.ParticleBasicMaterial(
+				{
+					color : 0x00FF00,
+					size : 1,
+					map : THREE.ImageUtils.loadTexture("images/ball.png"),
+					blending : THREE.AdditiveBlending,
+					transparent : true
+				});
+				var lMaterial = new THREE.ParticleBasicMaterial(
+				{
+					color : 0xFF0000,
 					size : 5,
 					map : THREE.ImageUtils.loadTexture("images/ball.png"),
 					blending : THREE.AdditiveBlending,
 					transparent : true
 				});
 
+				var pMaterial = null;
+				if (jsonEntity.id.indexOf("LIQUID") != -1)
+				{
+					pMaterial = lMaterial;
+				}
+				else if (jsonEntity.id.indexOf("ELASTIC") != -1)
+				{
+					pMaterial = eMaterial;
+				}
+				else if (jsonEntity.id.indexOf("BOUNDARY") != -1)
+				{
+					// pMaterial = bMaterial; swap this line with return to render boundary particles
+					return entityObject;
+				}
 				geometry = new THREE.Geometry();
 				for ( var gindex in geometries)
 				{
@@ -535,9 +476,10 @@ GEPPETTO.setupStats = function()
 	GEPPETTO.stats = new Stats();
 	GEPPETTO.stats.domElement.style.position = 'absolute';
 	GEPPETTO.stats.domElement.style.bottom = '0px';
+	GEPPETTO.stats.domElement.style.right = '0px';
 	GEPPETTO.stats.domElement.style.zIndex = 100;
 	GEPPETTO.container.appendChild(GEPPETTO.stats.domElement);
-	
+
 };
 
 /**
@@ -573,8 +515,9 @@ GEPPETTO.setupGUI = function()
 	// GUI
 	if (!GEPPETTO.gui && data)
 	{
-		GEPPETTO.gui = new dat.GUI({
-				width : 400
+		GEPPETTO.gui = new dat.GUI(
+		{
+			width : 400
 		});
 		GEPPETTO.addGUIControls(GEPPETTO.gui, GEPPETTO.metadata);
 	}
@@ -614,47 +557,6 @@ GEPPETTO.addGUIControls = function(parent, current_metadata)
 	}
 };
 
-// /**
-// * This method updates the available metadata. This method is required since to update a GUI element we have to overwrite the properties in the same object without changing the object itself.
-// *
-// * @param metadatatoupdate
-// * @param metadatanew
-// */
-// GEPPETTO.updateMetaData = function(metadatatoupdate, metadatanew, parentGUI)
-// {
-// for ( var m in metadatanew)
-// {
-// if (typeof metadatanew[m] == "object")
-// {
-// var currentparentGUI = parentGUI.__folders[m];
-// if (!currentparentGUI)
-// {
-// currentparentGUI = parentGUI;
-// }
-//
-// if (!metadatatoupdate[m])
-// {
-// metadatatoupdate[m] = metadatanew[m];
-// }
-// else
-// {
-// GEPPETTO.updateMetaData(metadatatoupdate[m], metadatanew[m], currentparentGUI);
-// }
-// }
-// else
-// {
-// metadatatoupdate[m] = metadatanew[m];
-// }
-// }
-// for ( var m in metadatatoupdate)
-// {
-// if (!metadatanew[m])
-// {
-// delete metadatatoupdate[m];
-// }
-// }
-// };
-
 /**
  * 
  */
@@ -666,7 +568,7 @@ GEPPETTO.setupRenderer = function()
 	{
 		antialias : true
 	});
-	GEPPETTO.renderer.setClearColorHex(0xffffff, 1);
+	GEPPETTO.renderer.setClearColor(0x000000, 1);
 	GEPPETTO.renderer.setSize(window.innerWidth, window.innerHeight);
 	GEPPETTO.container.appendChild(GEPPETTO.renderer.domElement);
 };
@@ -748,9 +650,8 @@ GEPPETTO.getIntersectedObjects = function()
 	// scene (camera direction)
 	var vector = new THREE.Vector3(GEPPETTO.mouse.x, GEPPETTO.mouse.y, 1);
 	GEPPETTO.projector.unprojectVector(vector, GEPPETTO.camera);
-	
-	var raycaster = new THREE.Raycaster(GEPPETTO.camera.position, vector.sub(GEPPETTO.camera.position).normalize());
 
+	var raycaster = new THREE.Raycaster(GEPPETTO.camera.position, vector.sub(GEPPETTO.camera.position).normalize());
 
 	var visibleChildren = [];
 	GEPPETTO.scene.traverse(function(child)
@@ -812,7 +713,7 @@ GEPPETTO.animate = function()
 {
 	GEPPETTO.updateScene();
 	GEPPETTO.customUpdate();
-	if(GEPPETTO.stats)
+	if (GEPPETTO.stats)
 	{
 		GEPPETTO.stats.update();
 	}
@@ -914,14 +815,95 @@ GEPPETTO.isIn = function(e, array)
 	return found;
 };
 
+GEPPETTO.resetScene = function()
+{
+	GEPPETTO.jsonscene = null;
+	GEPPETTO.scene = null;
+	GEPPETTO.needsUpdate = true;
+};
+
+// ============================================================================
+// Application logic.
+// ============================================================================
+
 $(document).ready(function()
 {
-	$(".dg .url").fancybox(
+	// Toolbar controls
+
+	$("#w").click(function(event)
 	{
-		fitToView : true,
-		autoSize : false,
-		closeClick : false,
-		openEffect : 'elastic',
-		closeEffect : 'fade',
+		GEPPETTO.controls.incrementPanEnd(-0.01, 0);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementPanEnd(0, -0.01);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementPanEnd(0.01, 0);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementPanEnd(0, 0.01);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.setupCamera();
+		GEPPETTO.setupControls();
+	});
+
+	$("#rw").click(function(event)
+	{
+		GEPPETTO.controls.incrementRotationEnd(-0.01, 0, 0);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementRotationEnd(0, 0, 0.01);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementRotationEnd(0.01, 0, 0);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.controls.incrementRotationEnd(0, 0, -0.01);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	}).next().click(function(event)
+	{
+		GEPPETTO.setupCamera();
+		GEPPETTO.setupControls();
+	});
+
+	$("#zo").click(function(event)
+	{
+		GEPPETTO.controls.incrementZoomEnd(+0.01);
+
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
+	});
+
+	$("#zi").click(function(event)
+	{
+		GEPPETTO.controls.incrementZoomEnd(-0.01);
+	}).mouseup(function(event)
+	{
+		GEPPETTO.controls.resetSTATE();
 	});
 });

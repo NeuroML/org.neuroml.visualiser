@@ -10,7 +10,7 @@ function get3DScene(neuromlurl)
 		data :
 		{
 			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-			 url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.net.nml"
+			 //url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.net.nml"
 			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
 			 //url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
 			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
@@ -18,7 +18,7 @@ function get3DScene(neuromlurl)
 			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
 			 //url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
 			 //url:"file:///Users/matteocantarelli/Desktop/sample.nml"
-			//url : neuromlurl
+			url : neuromlurl
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
@@ -33,6 +33,7 @@ function get3DScene(neuromlurl)
 				preprocessMetadata(data);
 				if (GEPPETTO.init(createContainer(), data, update))
 				{
+					GEPPETTO.renderer.setClearColor(0xFFFFFF, 1);
 					GEPPETTO.animate();
 					document.addEventListener("keydown", keyPressed, false);
 					$("#controls").show();
@@ -48,7 +49,8 @@ function get3DScene(neuromlurl)
 		},
 		error : function(xhr, textStatus, errorThrown)
 		{
-			alert("Error getting scene!" + textStatus + " ET " + errorThrown);
+			$("#loadinglbl").hide();
+			$("#error").modal();
 		}
 	});
 }
@@ -495,7 +497,7 @@ function toggleNormalMode()
 		}
 		GEPPETTO.metadata =
 		{};
-		GEPPETTO.renderer.setClearColorHex(0xffffff, 1);
+		GEPPETTO.renderer.setClearColor(0xffffff, 1);
 		GEPPETTO.scene.traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
@@ -522,7 +524,7 @@ function toggleSelectionMode()
 	{
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
-		GEPPETTO.renderer.setClearColorHex(0x000000, 1);
+		GEPPETTO.renderer.setClearColor(0x000000, 1);
 
 		if (singleEntity())
 		{
@@ -715,6 +717,37 @@ function setupUI()
 			GEPPETTO.setupCamera();
 			GEPPETTO.setupControls();
 		});
+		
+		$("#rw").click(function(event)
+		{
+			GEPPETTO.controls.incrementRotationEnd(-0.01, 0, 0);
+		}).mouseup(function(event)
+		{
+			GEPPETTO.controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.controls.incrementRotationEnd(0, 0, 0.01);
+		}).mouseup(function(event)
+		{
+			GEPPETTO.controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.controls.incrementRotationEnd(0.01, 0, 0);
+		}).mouseup(function(event)
+		{
+			GEPPETTO.controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.controls.incrementRotationEnd(0, 0, -0.01);
+		}).mouseup(function(event)
+		{
+			GEPPETTO.controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.setupCamera();
+			GEPPETTO.setupControls();
+		});
+		
 
 		$("#showdeselected").click(function(event)
 		{
@@ -745,35 +778,7 @@ function setupUI()
 			toggleSelectionMode();
 		});
 
-		$("#rw").click(function(event)
-		{
-			GEPPETTO.controls.incrementRotationEnd(-0.01, 0, 0);
-		}).mouseup(function(event)
-		{
-			GEPPETTO.controls.resetSTATE();
-		}).next().click(function(event)
-		{
-			GEPPETTO.controls.incrementRotationEnd(0, 0, 0.01);
-		}).mouseup(function(event)
-		{
-			GEPPETTO.controls.resetSTATE();
-		}).next().click(function(event)
-		{
-			GEPPETTO.controls.incrementRotationEnd(0.01, 0, 0);
-		}).mouseup(function(event)
-		{
-			GEPPETTO.controls.resetSTATE();
-		}).next().click(function(event)
-		{
-			GEPPETTO.controls.incrementRotationEnd(0, 0, -0.01);
-		}).mouseup(function(event)
-		{
-			GEPPETTO.controls.resetSTATE();
-		}).next().click(function(event)
-		{
-			GEPPETTO.setupCamera();
-			GEPPETTO.setupControls();
-		});
+
 
 		$("#zo").click(function(event)
 		{
