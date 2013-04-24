@@ -311,8 +311,7 @@ var preprocessMetadata = function(data)
 		var m = data.entities[d];
 		if (m.metadata == null)
 		{
-			m.metadata =
-			{};
+			m.metadata ={};
 		}
 		var mcon = m.metadata["Connections"] =
 		{};
@@ -326,7 +325,9 @@ var preprocessMetadata = function(data)
 				{};
 			}
 			mcon[connectionType][m.references[r].entityId] = m.references[r].metadata;
+
 		}
+		
 	}
 };
 
