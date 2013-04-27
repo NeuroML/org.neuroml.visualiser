@@ -19,8 +19,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.geppetto.core.visualisation.model.Scene;
 import org.neuroml.visualiser.core.NeuroMLModelInterpreter;
-import org.openworm.simulationengine.core.visualisation.model.Scene;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

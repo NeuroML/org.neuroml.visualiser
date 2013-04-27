@@ -130,9 +130,9 @@
 			<version>1.0.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openworm</groupId>
-			<artifactId>simulationengine.core</artifactId>
-			<version>1.0.0</version>
+			<groupId>org.geppetto</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

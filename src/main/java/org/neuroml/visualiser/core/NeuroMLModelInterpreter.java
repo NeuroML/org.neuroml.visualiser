@@ -11,26 +11,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.geppetto.core.visualisation.model.AGeometry;
+import org.geppetto.core.visualisation.model.Cylinder;
+import org.geppetto.core.visualisation.model.Entity;
+import org.geppetto.core.visualisation.model.Metadata;
+import org.geppetto.core.visualisation.model.Point;
+import org.geppetto.core.visualisation.model.Reference;
+import org.geppetto.core.visualisation.model.Scene;
+import org.geppetto.core.visualisation.model.Sphere;
 import org.neuroml.model.Cell;
 import org.neuroml.model.Include;
 import org.neuroml.model.Member;
 import org.neuroml.model.Morphology;
 import org.neuroml.model.Network;
+import org.neuroml.model.NeuroMLDocument;
 import org.neuroml.model.Point3DWithDiam;
 import org.neuroml.model.Population;
-import org.neuroml.model.NeuroMLDocument;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
 import org.neuroml.model.SynapticConnection;
 import org.neuroml.model.util.NeuroMLConverter;
-import org.openworm.simulationengine.core.visualisation.model.AGeometry;
-import org.openworm.simulationengine.core.visualisation.model.Cylinder;
-import org.openworm.simulationengine.core.visualisation.model.Entity;
-import org.openworm.simulationengine.core.visualisation.model.Metadata;
-import org.openworm.simulationengine.core.visualisation.model.Point;
-import org.openworm.simulationengine.core.visualisation.model.Reference;
-import org.openworm.simulationengine.core.visualisation.model.Scene;
-import org.openworm.simulationengine.core.visualisation.model.Sphere;
 
 /**
  * @author matteocantarelli
