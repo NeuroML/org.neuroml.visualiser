@@ -3,6 +3,7 @@
  */
 package org.neuroml.visualiser.core;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.UnmarshalException;
 
 import org.geppetto.core.visualisation.model.AGeometry;
 import org.geppetto.core.visualisation.model.Cylinder;
@@ -57,7 +60,7 @@ public class NeuroMLModelInterpreter
 		{
 			_neuromlConverter = new NeuroMLConverter();
 		}
-		catch (Exception e)
+		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -68,8 +71,9 @@ public class NeuroMLModelInterpreter
 	 * @return
 	 */
 	public Scene getSceneFromNeuroML(List<URL> neuromlURLs)
- 	{		Scene scene = new Scene();
-		for (URL url : neuromlURLs)
+	{
+		Scene scene = new Scene();
+		for(URL url : neuromlURLs)
 		{
 			NeuroMLDocument neuroml;
 			try
@@ -78,7 +82,7 @@ public class NeuroMLModelInterpreter
 				scene.getEntities().addAll(getEntitiesFromMorphologies(neuroml)); // if there's any morphology
 				scene.getEntities().addAll(getEntitiesFromNetwork(neuroml, url)); // if a population is described -> network
 			}
-			catch (Exception e)
+			catch(Exception e)
 			{
 				e.printStackTrace();
 			}
@@ -94,21 +98,21 @@ public class NeuroMLModelInterpreter
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 		List<Morphology> morphologies = neuroml.getMorphology();
-		if (morphologies != null)
+		if(morphologies != null)
 		{
-			for (Morphology m : morphologies)
+			for(Morphology m : morphologies)
 			{
 				Entity entity = getEntityFromMorphology(m);
 				entities.add(entity);
 			}
 		}
 		List<Cell> cells = neuroml.getCell();
-		if (cells != null)
+		if(cells != null)
 		{
-			for (Cell c : cells)
+			for(Cell c : cells)
 			{
 				Morphology cellmorphology = c.getMorphology();
-				if (cellmorphology != null)
+				if(cellmorphology != null)
 				{
 					Entity cell = new Entity();
 					cell.setSubentities(getEntitiesFromMorphologyBySegmentGroup(cellmorphology, c.getId()));
@@ -121,6 +125,8 @@ public class NeuroMLModelInterpreter
 		return entities;
 	}
 
+	private static final int MAX_ATTEMPTS = 3;
+
 	/**
 	 * @param neuroml
 	 * @param scene
@@ -131,39 +137,54 @@ public class NeuroMLModelInterpreter
 	{
 		Map<String, Entity> entities = new HashMap<String, Entity>();
 		String baseURL = url.getFile();
-		if (url.getFile().endsWith("nml"))
+		if(url.getFile().endsWith("nml"))
 		{
 			baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
 		}
 		List<Network> networks = neuroml.getNetwork();
-		for (Network n : networks)
+		for(Network n : networks)
 		{
-			for (Population p : n.getPopulation())
+			for(Population p : n.getPopulation())
 			{
+				boolean attemptConnection = true;
+				int attempts = 0;
 				NeuroMLDocument neuromlComponent = null;
 				String component = p.getComponent();
-				try
+				while(attemptConnection)
 				{
-					URL componentURL = new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".nml");
-					neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
-
+					try
+					{
+						attemptConnection = false;
+						attempts++;
+						URL componentURL = new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".nml");
+						neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
+					}
+					catch(MalformedURLException e)
+					{
+						throw e;
+					}
+					catch(UnmarshalException e)
+					{
+						if(e.getLinkedException() instanceof IOException)
+						{
+							if(attempts < MAX_ATTEMPTS)
+							{
+								attemptConnection = true;
+							}
+						}
+					}
+					catch(Exception e)
+					{
+						throw e;
+					}
 				}
-				catch (MalformedURLException e)
-				{
-					e.printStackTrace();
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-
 				int size = p.getSize().intValue();
 
-				for (int i = 0; i < size; i++)
+				for(int i = 0; i < size; i++)
 				{
 					// FIXME the position of the population within the network needs to be specified in neuroml
 					List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
-					for (Entity e : localEntities)
+					for(Entity e : localEntities)
 					{
 						e.setId(e.getId() + "[" + i + "]");
 						entities.put(e.getId(), e);
@@ -173,7 +194,7 @@ public class NeuroMLModelInterpreter
 				String id = p.getId();
 
 			}
-			for (SynapticConnection c : n.getSynapticConnection())
+			for(SynapticConnection c : n.getSynapticConnection())
 			{
 				String from = c.getFrom();
 				String to = c.getTo();
@@ -192,7 +213,7 @@ public class NeuroMLModelInterpreter
 				rPre.setEntityId(from);
 				rPre.setMetadata(mPre);
 
-				if (entities.containsKey(from))
+				if(entities.containsKey(from))
 				{
 					entities.get(from).getReferences().add(rPost);
 				}
@@ -201,7 +222,7 @@ public class NeuroMLModelInterpreter
 					throw new Exception("Reference not found." + from + " was not found in the path of the network file");
 				}
 
-				if (entities.containsKey(to))
+				if(entities.containsKey(to))
 				{
 					entities.get(to).getReferences().add(rPre);
 				}
@@ -222,53 +243,54 @@ public class NeuroMLModelInterpreter
 	{
 		try
 		{
-			if(c.getBiophysicalProperties()!=null)
+			if(c.getBiophysicalProperties() != null)
 			{
 				Metadata membraneProperties = new Metadata();
-				if(c.getBiophysicalProperties().getMembraneProperties()!=null)
+				if(c.getBiophysicalProperties().getMembraneProperties() != null)
 				{
-					if(c.getBiophysicalProperties().getMembraneProperties().getChannelDensity()!=null && c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().size()>0)
+					if(c.getBiophysicalProperties().getMembraneProperties().getChannelDensity() != null && c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().size() > 0)
 					{
 						membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
 					}
-//					if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
-//					{
-//						membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
-//					}
-					if(c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().size()>0)
+					// if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
+					// {
+					// membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
+					// }
+					if(c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance() != null
+							&& c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().size() > 0)
 					{
-						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0).getValue());
+						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0)
+								.getValue());
 					}
-//					if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
-//					{
-//						membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(), c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
-//					}
-					
+					// if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
+					// {
+					// membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(),
+					// c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
+					// }
+
 				}
 
-	
 				Metadata intracellularProperties = new Metadata();
-				if(c.getBiophysicalProperties().getIntracellularProperties()!=null)
+				if(c.getBiophysicalProperties().getIntracellularProperties() != null)
 				{
-					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity()!=null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size()>0)
+					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity() != null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size() > 0)
 					{
 						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
 					}
 				}
-				
-	
+
 				// Sample code to add URL metadata
 				// Metadata externalResources = new Metadata();
 				// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
 				// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
-	
+
 				entity.setMetadata(new Metadata());
 				entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
 				entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
 				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
 			}
 		}
-		catch (NullPointerException ex)
+		catch(NullPointerException ex)
 		{
 
 		}
@@ -297,43 +319,43 @@ public class NeuroMLModelInterpreter
 		SegmentGroup axonGroup = null;
 		SegmentGroup dendriteGroup = null;
 
-		for (SegmentGroup sg : morphology.getSegmentGroup())
+		for(SegmentGroup sg : morphology.getSegmentGroup())
 		{
 			// three hardcoded groups :(
-			if (sg.getId().equals(SOMA_GROUP))
+			if(sg.getId().equals(SOMA_GROUP))
 			{
 				somaGroup = sg;
 			}
-			else if (sg.getId().equals(AXON_GROUP))
+			else if(sg.getId().equals(AXON_GROUP))
 			{
 				axonGroup = sg;
 			}
-			else if (sg.getId().equals(DENDRITE_GROUP))
+			else if(sg.getId().equals(DENDRITE_GROUP))
 			{
 				dendriteGroup = sg;
 			}
 			else
 			{
-				if (!sg.getMember().isEmpty())
+				if(!sg.getMember().isEmpty())
 				{
 					segmentGeometries.put(sg.getId(), getGeometriesForGroup(sg, allSegments));
 				}
 			}
 		}
 
-		if (somaGroup != null)
+		if(somaGroup != null)
 		{
 			Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries);
 			entity.setId(getGroupId(cellId, somaGroup.getId()));
 			entities.add(entity);
 		}
-		if (axonGroup != null)
+		if(axonGroup != null)
 		{
 			Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries);
 			entity.setId(getGroupId(cellId, axonGroup.getId()));
 			entities.add(entity);
 		}
-		if (dendriteGroup != null)
+		if(dendriteGroup != null)
 		{
 			Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries);
 			entity.setId(getGroupId(cellId, dendriteGroup.getId()));
@@ -341,7 +363,7 @@ public class NeuroMLModelInterpreter
 		}
 
 		// this adds all segment groups not contained in the macro groups if any
-		for (String sgId : segmentGeometries.keySet())
+		for(String sgId : segmentGeometries.keySet())
 		{
 			Entity entity = new Entity();
 			entity.getGeometries().addAll(segmentGeometries.get(sgId));
@@ -370,7 +392,7 @@ public class NeuroMLModelInterpreter
 	{
 		Entity entity = new Entity();
 		entity.setAdditionalProperties(GROUP_PROPERTY, macroGroup.getId());
-		for (Include i : macroGroup.getInclude())
+		for(Include i : macroGroup.getInclude())
 		{
 			if(segmentGeometries.containsKey(i.getSegmentGroup()))
 			{
@@ -389,11 +411,11 @@ public class NeuroMLModelInterpreter
 	private List<AGeometry> getGeometriesForGroup(SegmentGroup sg, Entity allSegments)
 	{
 		List<AGeometry> geometries = new ArrayList<AGeometry>();
-		for (Member m : sg.getMember())
+		for(Member m : sg.getMember())
 		{
-			for (AGeometry g : allSegments.getGeometries())
+			for(AGeometry g : allSegments.getGeometries())
 			{
-				if (g.getId().equals(m.getSegment().toString()))
+				if(g.getId().equals(m.getSegment().toString()))
 				{
 					geometries.add(g);
 				}
@@ -410,15 +432,15 @@ public class NeuroMLModelInterpreter
 	{
 		Entity entity = new Entity();
 		Map<String, Point3DWithDiam> distalPoints = new HashMap<String, Point3DWithDiam>();
-		for (Segment s : list)
+		for(Segment s : list)
 		{
 			String idSegmentParent = null;
 			Point3DWithDiam parentDistal = null;
-			if (s.getParent() != null)
+			if(s.getParent() != null)
 			{
 				idSegmentParent = s.getParent().getSegment().toString();
 			}
-			if (distalPoints.containsKey(idSegmentParent))
+			if(distalPoints.containsKey(idSegmentParent))
 			{
 				parentDistal = distalPoints.get(idSegmentParent);
 			}
@@ -449,8 +471,8 @@ public class NeuroMLModelInterpreter
 		Point3DWithDiam proximal = s.getProximal() == null ? parentDistal : s.getProximal();
 		Point3DWithDiam distal = s.getDistal();
 
-		if (samePoint(proximal, distal)) // ideally an equals but the objects
-											// are generated. hassle postponed.
+		if(samePoint(proximal, distal)) // ideally an equals but the objects
+										// are generated. hassle postponed.
 		{
 			Sphere sphere = new Sphere();
 			sphere.setRadius(proximal.getDiameter() / 2);
@@ -462,13 +484,13 @@ public class NeuroMLModelInterpreter
 		{
 			Cylinder cyl = new Cylinder();
 			cyl.setId(s.getId());
-			if (proximal != null)
+			if(proximal != null)
 			{
 				cyl.setPosition(getPoint(proximal));
 				cyl.setRadiusBottom(proximal.getDiameter() / 2);
 			}
 
-			if (distal != null)
+			if(distal != null)
 			{
 				cyl.setRadiusTop(s.getDistal().getDiameter() / 2);
 				cyl.setDistal(getPoint(distal));
