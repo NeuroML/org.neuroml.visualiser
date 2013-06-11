@@ -319,57 +319,64 @@ public class NeuroMLModelInterpreter
 		SegmentGroup axonGroup = null;
 		SegmentGroup dendriteGroup = null;
 
-		for(SegmentGroup sg : morphology.getSegmentGroup())
+		if(morphology.getSegmentGroup().isEmpty())
 		{
-			// three hardcoded groups :(
-			if(sg.getId().equals(SOMA_GROUP))
+			// there are no segment groups
+			entities.add(allSegments);
+		}
+		else
+		{
+			for(SegmentGroup sg : morphology.getSegmentGroup())
 			{
-				somaGroup = sg;
-			}
-			else if(sg.getId().equals(AXON_GROUP))
-			{
-				axonGroup = sg;
-			}
-			else if(sg.getId().equals(DENDRITE_GROUP))
-			{
-				dendriteGroup = sg;
-			}
-			else
-			{
+				// three hardcoded groups :(
+				if(sg.getId().equals(SOMA_GROUP))
+				{
+					somaGroup = sg;
+				}
+				else if(sg.getId().equals(AXON_GROUP))
+				{
+					axonGroup = sg;
+				}
+				else if(sg.getId().equals(DENDRITE_GROUP))
+				{
+					dendriteGroup = sg;
+				}
+
 				if(!sg.getMember().isEmpty())
 				{
 					segmentGeometries.put(sg.getId(), getGeometriesForGroup(sg, allSegments));
 				}
+
 			}
-		}
 
-		if(somaGroup != null)
-		{
-			Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId, somaGroup.getId()));
-			entities.add(entity);
-		}
-		if(axonGroup != null)
-		{
-			Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId, axonGroup.getId()));
-			entities.add(entity);
-		}
-		if(dendriteGroup != null)
-		{
-			Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries);
-			entity.setId(getGroupId(cellId, dendriteGroup.getId()));
-			entities.add(entity);
-		}
+			if(somaGroup != null)
+			{
+				Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
+				entity.setId(getGroupId(cellId, somaGroup.getId()));
+				entities.add(entity);
+			}
+			if(axonGroup != null)
+			{
+				Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
+				entity.setId(getGroupId(cellId, axonGroup.getId()));
+				entities.add(entity);
+			}
+			if(dendriteGroup != null)
+			{
+				Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
+				entity.setId(getGroupId(cellId, dendriteGroup.getId()));
+				entities.add(entity);
+			}
 
-		// this adds all segment groups not contained in the macro groups if any
-		for(String sgId : segmentGeometries.keySet())
-		{
-			Entity entity = new Entity();
-			entity.getGeometries().addAll(segmentGeometries.get(sgId));
-			entity.setAdditionalProperties(GROUP_PROPERTY, sgId);
-			entity.setId(getGroupId(cellId, sgId));
-			entities.add(entity);
+			// this adds all segment groups not contained in the macro groups if any
+			for(String sgId : segmentGeometries.keySet())
+			{
+				Entity entity = new Entity();
+				entity.getGeometries().addAll(segmentGeometries.get(sgId));
+				entity.setAdditionalProperties(GROUP_PROPERTY, sgId);
+				entity.setId(getGroupId(cellId, sgId));
+				entities.add(entity);
+			}
 		}
 		return entities;
 	}
@@ -388,7 +395,7 @@ public class NeuroMLModelInterpreter
 	 * @param somaGroup
 	 * @param segmentGeometries
 	 */
-	private Entity createEntityForMacroGroup(SegmentGroup macroGroup, Map<String, List<AGeometry>> segmentGeometries)
+	private Entity createEntityForMacroGroup(SegmentGroup macroGroup, Map<String, List<AGeometry>> segmentGeometries, List<AGeometry> allSegments)
 	{
 		Entity entity = new Entity();
 		entity.setAdditionalProperties(GROUP_PROPERTY, macroGroup.getId());
@@ -397,9 +404,21 @@ public class NeuroMLModelInterpreter
 			if(segmentGeometries.containsKey(i.getSegmentGroup()))
 			{
 				entity.getGeometries().addAll(segmentGeometries.get(i.getSegmentGroup()));
-				segmentGeometries.remove(i.getSegmentGroup());
 			}
 		}
+		for(Member m : macroGroup.getMember())
+		{
+			for(AGeometry g : allSegments)
+			{
+				if(g.getId().equals(m.getSegment().toString()))
+				{
+					entity.getGeometries().add(g);
+					allSegments.remove(g);
+					break;
+				}
+			}
+		}
+		segmentGeometries.remove(macroGroup.getId());
 		return entity;
 	}
 
