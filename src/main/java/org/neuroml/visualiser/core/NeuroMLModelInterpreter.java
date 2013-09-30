@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.UnmarshalException;
 
 import org.geppetto.core.visualisation.model.AGeometry;
@@ -23,6 +24,7 @@ import org.geppetto.core.visualisation.model.Reference;
 import org.geppetto.core.visualisation.model.Scene;
 import org.geppetto.core.visualisation.model.Sphere;
 import org.neuroml.model.Cell;
+import org.neuroml.model.ChannelDensity;
 import org.neuroml.model.Include;
 import org.neuroml.model.Member;
 import org.neuroml.model.Morphology;
@@ -33,6 +35,7 @@ import org.neuroml.model.Population;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
 import org.neuroml.model.SynapticConnection;
+import org.neuroml.model.ValueAcrossSegOrSegGroup;
 import org.neuroml.model.util.NeuroMLConverter;
 
 /**
@@ -248,26 +251,21 @@ public class NeuroMLModelInterpreter
 				Metadata membraneProperties = new Metadata();
 				if(c.getBiophysicalProperties().getMembraneProperties() != null)
 				{
-					if(c.getBiophysicalProperties().getMembraneProperties().getChannelDensity() != null && c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().size() > 0)
+					List<JAXBElement<?>> membranePropertiesPart = c.getBiophysicalProperties().getMembraneProperties().getChannelPopulationOrChannelDensityOrChannelDensityNernst();
+					if(membranePropertiesPart != null)
 					{
-						membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), c.getBiophysicalProperties().getMembraneProperties().getChannelDensity().get(0).getCondDensity());
+						for(JAXBElement<?> e : membranePropertiesPart)
+						{
+							if(e.getName().getLocalPart().equals("channelDensity"))
+							{
+								membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), ((ChannelDensity)e.getValue()).getCondDensity());
+							}
+							else if(e.getName().getLocalPart().equals("specificCapacitance"))
+							{
+								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), ((ValueAcrossSegOrSegGroup)e.getValue()).getValue());
+							}
+						}
 					}
-					// if(c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh()!=null && c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().size()>0)
-					// {
-					// membraneProperties.setAdditionalProperties(Resources.SPIKE_THRESHOLD.get(), c.getBiophysicalProperties().getMembraneProperties().getSpikeThresh().get(0).getValue());
-					// }
-					if(c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance() != null
-							&& c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().size() > 0)
-					{
-						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance().get(0)
-								.getValue());
-					}
-					// if(c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential()!=null && c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().size()>0)
-					// {
-					// membraneProperties.setAdditionalProperties(Resources.INIT_MEMBRANE_POTENTIAL.get(),
-					// c.getBiophysicalProperties().getMembraneProperties().getInitMembPotential().get(0).getValue());
-					// }
-
 				}
 
 				Metadata intracellularProperties = new Metadata();
@@ -404,6 +402,7 @@ public class NeuroMLModelInterpreter
 			if(segmentGeometries.containsKey(i.getSegmentGroup()))
 			{
 				entity.getGeometries().addAll(segmentGeometries.get(i.getSegmentGroup()));
+				segmentGeometries.remove(i.getSegmentGroup());
 			}
 		}
 		for(Member m : macroGroup.getMember())
@@ -464,7 +463,7 @@ public class NeuroMLModelInterpreter
 				parentDistal = distalPoints.get(idSegmentParent);
 			}
 			entity.getGeometries().add(getCylinderFromSegment(s, parentDistal));
-			distalPoints.put(s.getId(), s.getDistal());
+			distalPoints.put(s.getId().toString(), s.getDistal());
 		}
 		return entity;
 	}
@@ -496,13 +495,13 @@ public class NeuroMLModelInterpreter
 			Sphere sphere = new Sphere();
 			sphere.setRadius(proximal.getDiameter() / 2);
 			sphere.setPosition(getPoint(proximal));
-			sphere.setId(s.getId());
+			sphere.setId(s.getId().toString());
 			return sphere;
 		}
 		else
 		{
 			Cylinder cyl = new Cylinder();
-			cyl.setId(s.getId());
+			cyl.setId(s.getId().toString());
 			if(proximal != null)
 			{
 				cyl.setPosition(getPoint(proximal));

@@ -2,10 +2,18 @@ iframe{
 	width:900px;
 	height:700px;
 }
+#content{
+	height:100%;
+}
+
+html{
+	height:100%;
+}
 
 body{
 	color: #777777;
 	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	height:100%;
 }
 
 .btn{

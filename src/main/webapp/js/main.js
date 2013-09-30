@@ -31,9 +31,19 @@ function get3DScene(neuromlurl)
 			else
 			{
 				preprocessMetadata(data);
-				if (GEPPETTO.init(createContainer(), data, update))
+				if (GEPPETTO.init(createContainer(), update))
 				{
-					GEPPETTO.renderer.setClearColor(0xFFFFFF, 1);
+					GEPPETTO.setBackground(0xFFFFFF, 1);
+					if (!GEPPETTO.isScenePopulated())
+					{				
+						// the first time we need to create the object.s
+						GEPPETTO.populateScene(data);
+					}
+					else
+					{					
+						// any other time we just update them
+						GEPPETTO.updateJSONScene(data);
+					}
 					GEPPETTO.animate();
 					document.addEventListener("keydown", keyPressed, false);
 					$("#controls").show();
@@ -253,7 +263,7 @@ var onClick = function(objectsClicked, button)
 								postIDs = Object.keys(entity.metadata["Connections"]["Output"]);
 							}
 
-							GEPPETTO.scene.traverse(function(child)
+							GEPPETTO.getScene().traverse(function(child)
 							{
 								if (child.hasOwnProperty("eid"))
 								{
@@ -484,11 +494,7 @@ function toggleNormalMode()
 		TOGGLE_Z = false;
 		TOGGLE_N = true;
 		GEPPETTO.removeMouseClickListener();
-		if (GEPPETTO.gui)
-		{
-			GEPPETTO.gui.domElement.parentNode.removeChild(GEPPETTO.gui.domElement);
-			GEPPETTO.gui = null;
-		}
+		GEPPETTO.removeGUI();
 		if (SELECTED.length > 0)
 		{
 			// if anything was selected we merge the geometries again
@@ -498,8 +504,8 @@ function toggleNormalMode()
 		}
 		GEPPETTO.metadata =
 		{};
-		GEPPETTO.renderer.setClearColor(0xffffff, 1);
-		GEPPETTO.scene.traverse(function(child)
+		GEPPETTO.setBackground(0xffffff, 1);
+		GEPPETTO.getScene().traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
@@ -525,13 +531,13 @@ function toggleSelectionMode()
 	{
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
-		GEPPETTO.renderer.setClearColor(0x000000, 1);
+		GEPPETTO.setBackground(0x000000, 1);
 
 		if (singleEntity())
 		{
-			GEPPETTO.scene.traverse(function(child)
+			GEPPETTO.getScene().traverse(function(child)
 			{
-				if (child.hasOwnProperty("eid") && child.eid == GEPPETTO.jsonscene.entities[0].id)
+				if (child.hasOwnProperty("eid") && child.eid == GEPPETTO.getJSONScene().entities[0].id)
 				{
 					SELECTED = GEPPETTO.divideEntity(child);
 					child.material.dispose();
@@ -560,7 +566,7 @@ function toggleSelectionMode()
 
 			GEPPETTO.setMouseClickListener(onClick);
 
-			GEPPETTO.scene.traverse(function(child)
+			GEPPETTO.getScene().traverse(function(child)
 			{
 				if (child.hasOwnProperty("material"))
 				{
@@ -578,7 +584,7 @@ function toggleHideDeselected()
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
 		TOGGLE_S = !TOGGLE_S;
-		GEPPETTO.scene.traverse(function(child)
+		GEPPETTO.getScene().traverse(function(child)
 		{
 			if (child.hasOwnProperty("material"))
 			{
@@ -804,7 +810,7 @@ function setupUI()
 
 function singleEntity()
 {
-	return GEPPETTO.jsonscene.entities.length == 1;
+	return GEPPETTO.getJSONScene().entities.length == 1;
 }
 
 function getUrlVars()
