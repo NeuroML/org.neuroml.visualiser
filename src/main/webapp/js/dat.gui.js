@@ -171,6 +171,10 @@ dat.utils.common = (function () {
     },
   
     isURL:function(obj){
+    	if(Object.prototype.toString.call(obj) === '[object Function]')
+		{
+    		return false;
+		}
     	return obj.startsWith("URL:");
     }
   };

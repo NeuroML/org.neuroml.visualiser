@@ -4,7 +4,6 @@
 package org.neuroml.visualiser.core;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,12 +25,15 @@ import org.geppetto.core.visualisation.model.Sphere;
 import org.neuroml.model.Cell;
 import org.neuroml.model.ChannelDensity;
 import org.neuroml.model.Include;
+import org.neuroml.model.Instance;
+import org.neuroml.model.Location;
 import org.neuroml.model.Member;
 import org.neuroml.model.Morphology;
 import org.neuroml.model.Network;
 import org.neuroml.model.NeuroMLDocument;
 import org.neuroml.model.Point3DWithDiam;
 import org.neuroml.model.Population;
+import org.neuroml.model.PopulationTypes;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
 import org.neuroml.model.SynapticConnection;
@@ -153,18 +155,15 @@ public class NeuroMLModelInterpreter
 				int attempts = 0;
 				NeuroMLDocument neuromlComponent = null;
 				String component = p.getComponent();
+				URL componentURL = new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".nml");
 				while(attemptConnection)
 				{
 					try
 					{
 						attemptConnection = false;
 						attempts++;
-						URL componentURL = new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".nml");
+
 						neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
-					}
-					catch(MalformedURLException e)
-					{
-						throw e;
 					}
 					catch(UnmarshalException e)
 					{
@@ -181,18 +180,44 @@ public class NeuroMLModelInterpreter
 						throw e;
 					}
 				}
-				int size = p.getSize().intValue();
-
-				for(int i = 0; i < size; i++)
+				if(neuromlComponent == null)
 				{
-					// FIXME the position of the population within the network needs to be specified in neuroml
-					List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
-					for(Entity e : localEntities)
+					continue;
+				}
+				if(p.getType() != null && p.getType().equals(PopulationTypes.POPULATION_LIST))
+				{
+					int i = 0;
+					for(Instance instance : p.getInstance())
 					{
-						e.setId(e.getId() + "[" + i + "]");
-						entities.put(e.getId(), e);
+						List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
+						for(Entity e : localEntities)
+						{
+							if(instance.getLocation() != null)
+							{
+								e.setPosition(getPoint(instance.getLocation()));
+							}
+							e.setId(e.getId() + "[" + i + "]");
+							entities.put(e.getId(), e);
+						}
+						i++;
 					}
 				}
+				else
+				{
+					int size = p.getSize().intValue();
+
+					for(int i = 0; i < size; i++)
+					{
+						// FIXME the position of the population within the network needs to be specified in neuroml
+						List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
+						for(Entity e : localEntities)
+						{
+							e.setId(e.getId() + "[" + i + "]");
+							entities.put(e.getId(), e);
+						}
+					}
+				}
+
 				// FIXME what's the purpose of the id here?
 				String id = p.getId();
 
@@ -254,17 +279,31 @@ public class NeuroMLModelInterpreter
 					List<JAXBElement<?>> membranePropertiesPart = c.getBiophysicalProperties().getMembraneProperties().getChannelPopulationOrChannelDensityOrChannelDensityNernst();
 					if(membranePropertiesPart != null)
 					{
+						Metadata channels = new Metadata();
 						for(JAXBElement<?> e : membranePropertiesPart)
 						{
 							if(e.getName().getLocalPart().equals("channelDensity"))
 							{
-								membraneProperties.setAdditionalProperties(Resources.COND_DENSITY.get(), ((ChannelDensity)e.getValue()).getCondDensity());
+								String ionChannel = ((ChannelDensity) e.getValue()).getIonChannel();
+								if(!channels.getAdditionalProperties().containsKey(ionChannel))
+								{
+									Metadata channelClass=new Metadata();
+									channels.setAdditionalProperties(ionChannel, channelClass);
+									channelClass.setAdditionalProperties("Highlight channel density", ionChannel);
+								}
+								Metadata specificChannel = new Metadata();
+								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(((ChannelDensity) e.getValue()).getId(), specificChannel);
+								specificChannel.setAdditionalProperties("Highlight", ((ChannelDensity) e.getValue()).getSegmentGroup());
+								specificChannel.setAdditionalProperties("Location", ((ChannelDensity) e.getValue()).getSegmentGroup());
+								specificChannel.setAdditionalProperties("Reverse potential", ((ChannelDensity) e.getValue()).getErev());
+								specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), ((ChannelDensity) e.getValue()).getCondDensity());
 							}
 							else if(e.getName().getLocalPart().equals("specificCapacitance"))
 							{
-								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), ((ValueAcrossSegOrSegGroup)e.getValue()).getValue());
+								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), ((ValueAcrossSegOrSegGroup) e.getValue()).getValue());
 							}
 						}
+						membraneProperties.setAdditionalProperties("Ion Channels", channels);
 					}
 				}
 
@@ -324,6 +363,7 @@ public class NeuroMLModelInterpreter
 		}
 		else
 		{
+			Map<String, List<String>> subgroupsMap = new HashMap<String, List<String>>();
 			for(SegmentGroup sg : morphology.getSegmentGroup())
 			{
 				// three hardcoded groups :(
@@ -340,31 +380,46 @@ public class NeuroMLModelInterpreter
 					dendriteGroup = sg;
 				}
 
+				for(Include include : sg.getInclude())
+				{
+					// the map is <containedGroup,containerGroup>
+					if(!subgroupsMap.containsKey(include.getSegmentGroup()))
+					{
+						subgroupsMap.put(include.getSegmentGroup(), new ArrayList<String>());
+					}
+					subgroupsMap.get(include.getSegmentGroup()).add(sg.getId());
+				}
 				if(!sg.getMember().isEmpty())
 				{
 					segmentGeometries.put(sg.getId(), getGeometriesForGroup(sg, allSegments));
 				}
+			}
+			for(String sg : segmentGeometries.keySet())
+			{
+				for(AGeometry g : segmentGeometries.get(sg))
+				{
+					g.setAdditionalProperties("segment_groups", getAllGroupsString(sg, subgroupsMap, ""));
+				}
+			}
 
-			}
-
-			if(somaGroup != null)
-			{
-				Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
-				entity.setId(getGroupId(cellId, somaGroup.getId()));
-				entities.add(entity);
-			}
-			if(axonGroup != null)
-			{
-				Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
-				entity.setId(getGroupId(cellId, axonGroup.getId()));
-				entities.add(entity);
-			}
-			if(dendriteGroup != null)
-			{
-				Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
-				entity.setId(getGroupId(cellId, dendriteGroup.getId()));
-				entities.add(entity);
-			}
+//			if(somaGroup != null)
+//			{
+//				Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
+//				entity.setId(getGroupId(cellId, somaGroup.getId()));
+//				entities.add(entity);
+//			}
+//			if(axonGroup != null)
+//			{
+//				Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
+//				entity.setId(getGroupId(cellId, axonGroup.getId()));
+//				entities.add(entity);
+//			}
+//			if(dendriteGroup != null)
+//			{
+//				Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
+//				entity.setId(getGroupId(cellId, dendriteGroup.getId()));
+//				entities.add(entity);
+//			}
 
 			// this adds all segment groups not contained in the macro groups if any
 			for(String sgId : segmentGeometries.keySet())
@@ -377,6 +432,27 @@ public class NeuroMLModelInterpreter
 			}
 		}
 		return entities;
+	}
+
+	/**
+	 * @param targetSg
+	 * @param subgroupsMap
+	 * @param allGroupsStringp
+	 * @return a semicolon separated string containing all the subgroups that contain a given subgroup
+	 */
+	private String getAllGroupsString(String targetSg, Map<String, List<String>> subgroupsMap, String allGroupsStringp)
+	{
+		if(subgroupsMap.containsKey(targetSg))
+		{
+			StringBuilder allGroupsString=new StringBuilder(allGroupsStringp);
+			for(String containerGroup:subgroupsMap.get(targetSg))
+			{
+				allGroupsString.append(containerGroup+"; ");
+				allGroupsString.append(getAllGroupsString(containerGroup, subgroupsMap, ""));
+			}
+			return allGroupsString.toString();
+		}
+		return allGroupsStringp.trim();
 	}
 
 	/**
@@ -529,6 +605,19 @@ public class NeuroMLModelInterpreter
 		point.setX(distal.getX());
 		point.setY(distal.getY());
 		point.setZ(distal.getZ());
+		return point;
+	}
+
+	/**
+	 * @param location
+	 * @return
+	 */
+	private Point getPoint(Location location)
+	{
+		Point point = new Point();
+		point.setX(location.getX().doubleValue());
+		point.setY(location.getY().doubleValue());
+		point.setZ(location.getZ().doubleValue());
 		return point;
 	}
 

@@ -31,18 +31,18 @@
  *******************************************************************************/
 
 /**
- * GEPPETTO Visualisation engine built on top of THREE.js. Displays
- * a scene as defined on org.geppetto.core
- *
+ * GEPPETTO Visualisation engine built on top of THREE.js. Displays a scene as defined on org.geppetto.core
+ * 
  * @author matteo@openworm.org (Matteo Cantarelli)
  */
 
 var GEPPETTO = GEPPETTO ||
 {
-	REVISION : '5'
+	REVISION : '5osb'
 };
 
-(function(){
+(function()
+{
 
 	/**
 	 * Local variables
@@ -66,8 +66,8 @@ var GEPPETTO = GEPPETTO ||
 	var rotationMode = false;
 	var mouse =
 	{
-			x : 0,
-			y : 0
+		x : 0,
+		y : 0
 	};
 	var geometriesMap = null;
 	var plots = new Array();
@@ -79,7 +79,7 @@ var GEPPETTO = GEPPETTO ||
 	/**
 	 * Initialize the engine
 	 */
-	GEPPETTO.init = function(containerp,updatep)
+	GEPPETTO.init = function(containerp, updatep)
 	{
 		if (!Detector.webgl)
 		{
@@ -142,10 +142,12 @@ var GEPPETTO = GEPPETTO ||
 			var lookAtV = new THREE.Vector3(g.distal.x, g.distal.y, g.distal.z);
 			var positionV = new THREE.Vector3(g.position.x, g.position.y, g.position.z);
 			threeObject = GEPPETTO.getCylinder(positionV, lookAtV, g.radiusTop, g.radiusBottom, material);
+			threeObject.segment_groups = g.segment_groups;
 			break;
 		case "Sphere":
 			threeObject = new THREE.Mesh(new THREE.SphereGeometry(g.radius, 20, 20), material);
 			threeObject.position.set(g.position.x, g.position.y, g.position.z);
+			threeObject.segment_groups = g.segment_groups;
 			break;
 		}
 		// add the geometry to a map indexed by the geometry id so we can find it
@@ -169,6 +171,7 @@ var GEPPETTO = GEPPETTO ||
 
 				for ( var gindex in geometries)
 				{
+					GEPPETTO.localGeometryToGlobalCoordinates(geometries[gindex], entities[eindex]);
 					GEPPETTO.updateGeometry(geometries[gindex]);
 				}
 
@@ -184,6 +187,61 @@ var GEPPETTO = GEPPETTO ||
 				}
 			}
 			needsUpdate = false;
+		}
+	};
+
+	/**
+	 * Translate the local coordiantes of a Geometry to where the entity is
+	 * 
+	 * @param geometry
+	 *            the geometry to update
+	 * @param entity
+	 *            the entity which contains the geometry
+	 */
+	GEPPETTO.localGeometryToGlobalCoordinates = function(geometry, entity)
+	{
+		if (!geometry.globalCoordinates)
+		{
+			if (entity.position)
+			{
+				geometry.position.x += entity.position.x;
+				geometry.position.y += entity.position.y;
+				geometry.position.z += entity.position.z;
+			}
+			geometry.globalCoordinates = true;
+		}
+	};
+
+	/**
+	 * Translate the local coordiantes of an Entity to where the parent entity is
+	 * 
+	 * @param childEntity
+	 *            the entity to update
+	 * @param parentEntity
+	 *            the parent entity which contains the child one
+	 */
+	GEPPETTO.localEntityToGlobalCoordinates = function(childEntity, parentEntity)
+	{
+		if (!childEntity.globalCoordinates)
+		{
+			if (parentEntity.position)
+			{
+				if (childEntity.location)
+				{
+					childEntity.position.x += parentEntity.position.x;
+					childEntity.position.y += parentEntity.position.y;
+					childEntity.position.z += parentEntity.position.z;
+				}
+				else
+				{
+					childEntity.position =
+					{};
+					childEntity.position.x = parentEntity.position.x;
+					childEntity.position.y = parentEntity.position.y;
+					childEntity.position.z = parentEntity.position.z;
+				}
+			}
+			childEntity.globalCoordinates = true;
 		}
 	};
 
@@ -288,23 +346,26 @@ var GEPPETTO = GEPPETTO ||
 	 * Compute the center of the scene.
 	 */
 	GEPPETTO.calculateSceneCenter = function()
-	{   
+	{
 		var aabbMin = null;
 		var aabbMax = null;
 
 		scene.traverse(function(child)
-				{
-			if(child instanceof THREE.Mesh || child instanceof THREE.ParticleSystem){
+		{
+			if (child instanceof THREE.Mesh || child instanceof THREE.ParticleSystem)
+			{
 				child.geometry.computeBoundingBox();
 
-				//If min and max vectors are null, first values become default min and max
-				if(aabbMin == null && aabbMax == null){
+				// If min and max vectors are null, first values become default min and max
+				if (aabbMin == null && aabbMax == null)
+				{
 					aabbMin = child.geometry.boundingBox.min;
 					aabbMax = child.geometry.boundingBox.max;
 				}
 
-				//Compare other meshes, particles BB's to find min and max
-				else{
+				// Compare other meshes, particles BB's to find min and max
+				else
+				{
 					aabbMin.x = Math.min(aabbMin.x, child.geometry.boundingBox.min.x);
 					aabbMin.y = Math.min(aabbMin.y, child.geometry.boundingBox.min.y);
 					aabbMin.z = Math.min(aabbMin.z, child.geometry.boundingBox.min.z);
@@ -313,7 +374,7 @@ var GEPPETTO = GEPPETTO ||
 					aabbMax.z = Math.max(aabbMax.z, child.geometry.boundingBox.max.z);
 				}
 			}
-				});
+		});
 
 		// Compute world AABB center
 		sceneCenter.x = (aabbMax.x + aabbMin.x) * 0.5;
@@ -325,14 +386,14 @@ var GEPPETTO = GEPPETTO ||
 		diag = diag.subVectors(aabbMax, aabbMin);
 		var radius = diag.length() * 0.5;
 
-		// Compute offset needed to move the camera back that much needed to center AABB 
+		// Compute offset needed to move the camera back that much needed to center AABB
 		var offset = radius / Math.tan(Math.PI / 180.0 * camera.fov * 0.25);
 
-		var camDir = new THREE.Vector3( 0, 0, 1.0 );
+		var camDir = new THREE.Vector3(0, 0, 1.0);
 
-		camDir.multiplyScalar(offset); 
+		camDir.multiplyScalar(offset);
 
-		//Store camera position
+		// Store camera position
 		cameraPosition = new THREE.Vector3();
 		cameraPosition.addVectors(sceneCenter, camDir);
 	};
@@ -342,11 +403,11 @@ var GEPPETTO = GEPPETTO ||
 	 */
 	GEPPETTO.updateCamera = function()
 	{
-		// Update camera 
+		// Update camera
 		camera.rotationAutoUpdate = false;
-		camera.position.set( cameraPosition.x, cameraPosition.y, cameraPosition.z );
-		camera.lookAt(sceneCenter); 
-		camera.up = new THREE.Vector3(0,1,0);
+		camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		camera.lookAt(sceneCenter);
+		camera.up = new THREE.Vector3(0, 1, 0);
 		camera.rotationAutoUpdate = true;
 		controls.target = sceneCenter;
 	};
@@ -365,7 +426,8 @@ var GEPPETTO = GEPPETTO ||
 
 	/**
 	 * 
-	 * @param entity - The entity to be divided
+	 * @param entity -
+	 *            The entity to be divided
 	 * @returns {Array}
 	 */
 	GEPPETTO.divideEntity = function(entity)
@@ -395,7 +457,8 @@ var GEPPETTO = GEPPETTO ||
 	};
 
 	/**
-	 * @param entities - the subentities
+	 * @param entities -
+	 *            the subentities
 	 * 
 	 * @returns {Array} the resulting parent entity in which the subentities were assembled
 	 */
@@ -439,16 +502,17 @@ var GEPPETTO = GEPPETTO ||
 				// created
 				// by merging all geometries of the different subentities together
 				var material = new THREE.MeshPhongMaterial(
-						{
-							opacity : 1,
-							ambient : 0x777777,
-							shininess : 2,
-							shading : THREE.SmoothShading
-						});
+				{
+					opacity : 1,
+					ambient : 0x777777,
+					shininess : 2,
+					shading : THREE.SmoothShading
+				});
 				material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 				var combined = new THREE.Geometry();
 				for ( var seindex in jsonEntity.subentities)
 				{
+					GEPPETTO.localEntityToGlobalCoordinates(jsonEntity.subentities[seindex], jsonEntity);
 					var threeObject = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 					THREE.GeometryUtils.merge(combined, threeObject);
 					threeObject.geometry.dispose();
@@ -463,7 +527,8 @@ var GEPPETTO = GEPPETTO ||
 				entityObject = [];
 				for ( var seindex in jsonEntity.subentities)
 				{
-					subentity = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], true);
+					// GEPPETTO.localEntityToGlobalCoordinates(jsonEntity.subentities[seindex],jsonEntity);
+					subentity = GEPPETTO.getThreeObjectFromJSONEntity(jsonEntity.subentities[seindex], mergeSubentities);
 					subentity.parentEntityIndex = eindex;
 					entityObject.push(subentity);
 				}
@@ -482,33 +547,33 @@ var GEPPETTO = GEPPETTO ||
 					// create the particle variables
 					var sprite1 = THREE.ImageUtils.loadTexture("images/particle.png");
 					var eMaterial = new THREE.ParticleBasicMaterial(
-							{
-								size : 5,
-								map : sprite1,
-								blending : THREE.AdditiveBlending,
-								depthTest : false,
-								transparent : true
-							});
+					{
+						size : 5,
+						map : sprite1,
+						blending : THREE.AdditiveBlending,
+						depthTest : false,
+						transparent : true
+					});
 					eMaterial.color = new THREE.Color(0xffffff);
 					THREE.ColorConverter.setHSV(eMaterial.color, Math.random(), 1.0, 1.0);
 					var bMaterial = new THREE.ParticleBasicMaterial(
-							{
-								size : 5,
-								map : sprite1,
-								blending : THREE.AdditiveBlending,
-								depthTest : false,
-								transparent : true
-							});
+					{
+						size : 5,
+						map : sprite1,
+						blending : THREE.AdditiveBlending,
+						depthTest : false,
+						transparent : true
+					});
 					bMaterial.color = new THREE.Color(0xffffff);
 					THREE.ColorConverter.setHSV(bMaterial.color, Math.random(), 1.0, 1.0);
 					var lMaterial = new THREE.ParticleBasicMaterial(
-							{
-								size : 5,
-								map : sprite1,
-								blending : THREE.AdditiveBlending,
-								depthTest : false,
-								transparent : true
-							});
+					{
+						size : 5,
+						map : sprite1,
+						blending : THREE.AdditiveBlending,
+						depthTest : false,
+						transparent : true
+					});
 					lMaterial.color = new THREE.Color(0xffffff);
 					THREE.ColorConverter.setHSV(lMaterial.color, Math.random(), 1.0, 1.0);
 					var pMaterial = lMaterial;
@@ -523,6 +588,7 @@ var GEPPETTO = GEPPETTO ||
 					geometry = new THREE.Geometry();
 					for ( var gindex in geometries)
 					{
+						GEPPETTO.localGeometryToGlobalCoordinates(geometries[gindex], jsonEntity);
 						var threeObject = GEPPETTO.getThreeObjectFromJSONGeometry(geometries[gindex], pMaterial);
 						geometry.vertices.push(threeObject);
 					}
@@ -537,24 +603,28 @@ var GEPPETTO = GEPPETTO ||
 				else
 				{
 					var material = new THREE.MeshPhongMaterial(
-							{
-								opacity : 1,
-								ambient : 0x777777,
-								shininess : 2,
-								shading : THREE.SmoothShading
-							});
+					{
+						opacity : 1,
+						ambient : 0x777777,
+						shininess : 2,
+						shading : THREE.SmoothShading
+					});
 					material.color.setHex('0x' + (Math.random() * 0xFFFFFF << 0).toString(16));
 					var combined = new THREE.Geometry();
+					var sg = "";
 					for ( var gindex in geometries)
 					{
+						GEPPETTO.localGeometryToGlobalCoordinates(geometries[gindex], jsonEntity);
 						var threeObject = GEPPETTO.getThreeObjectFromJSONGeometry(geometries[gindex], material);
 						THREE.GeometryUtils.merge(combined, threeObject);
 						threeObject.geometry.dispose();
+						sg += threeObject.segment_groups;
 					}
 					entityObject = new THREE.Mesh(combined, material);
 					entityObject.eindex = eindex;
 					entityObject.eid = jsonEntity.id;
 					entityObject.geometry.dynamic = false;
+					entityObject.segment_groups = sg;
 				}
 			}
 		}
@@ -571,7 +641,7 @@ var GEPPETTO = GEPPETTO ||
 		var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 		camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 		scene.add(camera);
-		camera.position.set( cameraPosition.x, cameraPosition.y, cameraPosition.z );
+		camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 		camera.lookAt(sceneCenter);
 		projector = new THREE.Projector();
 	};
@@ -589,7 +659,7 @@ var GEPPETTO = GEPPETTO ||
 	};
 
 	/**
-	 * Sets up the HUD display with the scene stat's fps. 
+	 * Sets up the HUD display with the scene stat's fps.
 	 */
 	GEPPETTO.setupStats = function()
 	{
@@ -613,15 +683,28 @@ var GEPPETTO = GEPPETTO ||
 	{
 		// Lights
 
-		light = new THREE.DirectionalLight(0xffffff);
-		light.position.set(100, 100, 100);
-		scene.add(light);
-		light = new THREE.DirectionalLight(0xffffff);
-		light.position.set(-100, -100, -100);
-		scene.add(light);
+		ambientLight = new THREE.AmbientLight( 0x000000 );
+		scene.add( ambientLight );
 
-		light = new THREE.AmbientLight(0x222222);
-		scene.add(light);
+		hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1.1);
+		scene.add( hemisphereLight );
+
+		directionalLight = new THREE.DirectionalLight(0xffffff, 0.09);
+		directionalLight.position.set( 0, 1, 0 );
+		directionalLight.castShadow = true;
+		scene.add( directionalLight );
+
+		spotLight1 = new THREE.SpotLight( 0xffffff, 0.1 );
+		spotLight1.position.set( 100, 1000, 100 );
+		spotLight1.castShadow = true;
+		spotLight1.shadowDarkness = 0.2;
+		scene.add( spotLight1 );
+
+		spotLight2 = new THREE.SpotLight( 0xffffff, 0.22 );
+		spotLight2.position.set( 100, 1000, 100 );
+		spotLight2.castShadow = true;
+		spotLight2.shadowDarkness = 0.2;
+		scene.add( spotLight2 );
 
 	};
 
@@ -641,9 +724,9 @@ var GEPPETTO = GEPPETTO ||
 		if (!gui && data)
 		{
 			gui = new dat.GUI(
-					{
-						width : 400
-					});
+			{
+				width : 400
+			});
 			GEPPETTO.addGUIControls(gui, metadata);
 		}
 		for (f in gui.__folders)
@@ -653,9 +736,9 @@ var GEPPETTO = GEPPETTO ||
 		}
 
 	};
-	
+
 	/**
-	 * Remove the GUI 
+	 * Remove the GUI
 	 * 
 	 */
 	GEPPETTO.removeGUI = function()
@@ -689,7 +772,36 @@ var GEPPETTO = GEPPETTO ||
 				}
 				else
 				{
-					parent.add(current_metadata, m).listen();
+					if (m == "Highlight")
+					{
+						L =
+						{};
+						L.Highlight = function(value)
+						{
+							return function()
+							{
+								selectGeometriesInSubgroup(value);
+							};
+						}(current_metadata[m]);
+						parent.add(L, m).listen();
+					}
+					else if (m == "Highlight channel density")
+					{
+						L =
+						{};
+						L["Highlight channel density"] = function(value)
+						{
+							return function()
+							{
+								highlightChannelDensity(value);
+							};
+						}(current_metadata[m]);
+						parent.add(L, "Highlight channel density").listen();
+					}
+					else
+					{
+						parent.add(current_metadata, m).listen();
+					}
 				}
 			}
 		}
@@ -701,9 +813,9 @@ var GEPPETTO = GEPPETTO ||
 	GEPPETTO.setupRenderer = function()
 	{
 		renderer = new THREE.WebGLRenderer(
-				{
-					antialias : true
-				});
+		{
+			antialias : true
+		});
 		renderer.setClearColor(0x000000, 1);
 		var width = $(container).width();
 		var height = $(container).height();
@@ -714,34 +826,37 @@ var GEPPETTO = GEPPETTO ||
 
 	/**
 	 * Set Geppetto background color
-	 * @param color the background color to set
-	 * @param opacity the background opacity
+	 * 
+	 * @param color
+	 *            the background color to set
+	 * @param opacity
+	 *            the background opacity
 	 */
 	GEPPETTO.setBackground = function(color, opacity)
 	{
 		renderer.setClearColor(color, opacity);
 	};
-	
+
 	/**
 	 * Returns the 3d scene
+	 * 
 	 * @returns the 3d scene
 	 */
 	GEPPETTO.getScene = function()
 	{
 		return scene;
 	};
-	
+
 	/**
 	 * Returns the json scene
+	 * 
 	 * @returns the json scene
 	 */
 	GEPPETTO.getJSONScene = function()
 	{
 		return jsonscene;
 	};
-	
-	
-	
+
 	/**
 	 * Adds debug axis to the scene
 	 */
@@ -768,7 +883,8 @@ var GEPPETTO = GEPPETTO ||
 	GEPPETTO.onWindowResize = function()
 	{
 
-		camera.aspect = ($(container).width())/($(container).height());;
+		camera.aspect = ($(container).width()) / ($(container).height());
+		;
 		camera.updateProjectionMatrix();
 
 		renderer.setSize($(container).width(), $(container).height());
@@ -832,12 +948,12 @@ var GEPPETTO = GEPPETTO ||
 
 		var visibleChildren = [];
 		scene.traverse(function(child)
-				{
+		{
 			if (child.visible)
 			{
 				visibleChildren.push(child);
 			}
-				});
+		});
 
 		// returns an array containing all objects in the scene with which the ray
 		// intersects
@@ -926,14 +1042,18 @@ var GEPPETTO = GEPPETTO ||
 			datal = [];
 			for (v in this.variables)
 			{
-				datal.push({label:this.variables[v], data:[]});
+				datal.push(
+				{
+					label : this.variables[v],
+					data : []
+				});
 			}
 			this.flot = $.plot("#plot" + this.id, datal,
-					{
+			{
 				series :
 				{
 					shadowSize : 0
-					// Drawing is faster without shadows
+				// Drawing is faster without shadows
 				},
 				yaxis :
 				{
@@ -946,7 +1066,7 @@ var GEPPETTO = GEPPETTO ||
 					max : 1600,
 					show : false
 				}
-					});
+			});
 		};
 		this.dispose = function()
 		{
@@ -966,16 +1086,15 @@ var GEPPETTO = GEPPETTO ||
 	GEPPETTO.createDialog = function(id, title)
 	{
 		return $("<div id=" + id + " class='dialog' title='" + title + "'></div>").dialog(
-				{
-					resizable : true,
-					draggable : true,
-					height : 370,
-					width : 430,
-					modal : false
-				});
+		{
+			resizable : true,
+			draggable : true,
+			height : 370,
+			width : 430,
+			modal : false
+		});
 	};
-	
-	
+
 	/**
 	 * Return plots
 	 */
@@ -1059,7 +1178,7 @@ var GEPPETTO = GEPPETTO ||
 	};
 
 	/**
-	 * Animate simulation 
+	 * Animate simulation
 	 */
 	GEPPETTO.animate = function()
 	{
@@ -1117,7 +1236,7 @@ var GEPPETTO = GEPPETTO ||
 		}
 
 		scene.traverse(function(child)
-				{
+		{
 			if (child.hasOwnProperty("eid"))
 			{
 				if (GEPPETTO.isIn(child.eid, referencedIDs))
@@ -1127,7 +1246,7 @@ var GEPPETTO = GEPPETTO ||
 					referencedIDs.splice(index, 1);
 				}
 			}
-				});
+		});
 
 		return threeObjects;
 	};
@@ -1185,90 +1304,90 @@ var GEPPETTO = GEPPETTO ||
 		}
 	};
 
-//	============================================================================
-//	Application logic.
-//	============================================================================
+	// ============================================================================
+	// Application logic.
+	// ============================================================================
 
 	$(document).ready(function()
-			{
+	{
 		// Toolbar controls
 
 		$("#w").click(function(event)
-				{
+		{
 			controls.incrementPanEnd(-0.01, 0);
-				}).mouseup(function(event)
-						{
-					controls.resetSTATE();
-						}).next().click(function(event)
-								{
-							controls.incrementPanEnd(0, -0.01);
-								}).mouseup(function(event)
-										{
-									controls.resetSTATE();
-										}).next().click(function(event)
-												{
-											controls.incrementPanEnd(0.01, 0);
-												}).mouseup(function(event)
-														{
-													controls.resetSTATE();
-														}).next().click(function(event)
-																{
-															controls.incrementPanEnd(0, 0.01);
-																}).mouseup(function(event)
-																		{
-																	controls.resetSTATE();
-																		}).next().click(function(event)
-																				{
-																			GEPPETTO.calculateSceneCenter();
-																			GEPPETTO.updateCamera();
-																				});
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementPanEnd(0, -0.01);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementPanEnd(0.01, 0);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementPanEnd(0, 0.01);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.calculateSceneCenter();
+			GEPPETTO.updateCamera();
+		});
 
 		$("#rw").click(function(event)
-				{
+		{
 			controls.incrementRotationEnd(-0.01, 0, 0);
-				}).mouseup(function(event)
-						{
-					controls.resetSTATE();
-						}).next().click(function(event)
-								{
-							controls.incrementRotationEnd(0, 0, 0.01);
-								}).mouseup(function(event)
-										{
-									controls.resetSTATE();
-										}).next().click(function(event)
-												{
-											controls.incrementRotationEnd(0.01, 0, 0);
-												}).mouseup(function(event)
-														{
-													controls.resetSTATE();
-														}).next().click(function(event)
-																{
-															controls.incrementRotationEnd(0, 0, -0.01);
-																}).mouseup(function(event)
-																		{
-																	controls.resetSTATE();
-																		}).next().click(function(event)
-																				{
-																			GEPPETTO.calculateSceneCenter();
-																			GEPPETTO.updateCamera();
-																				});
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementRotationEnd(0, 0, 0.01);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementRotationEnd(0.01, 0, 0);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			controls.incrementRotationEnd(0, 0, -0.01);
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		}).next().click(function(event)
+		{
+			GEPPETTO.calculateSceneCenter();
+			GEPPETTO.updateCamera();
+		});
 
 		$("#zo").click(function(event)
-				{
+		{
 			controls.incrementZoomEnd(+0.01);
 
-				}).mouseup(function(event)
-						{
-					controls.resetSTATE();
-						});
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		});
 
 		$("#zi").click(function(event)
-				{
+		{
 			controls.incrementZoomEnd(-0.01);
-				}).mouseup(function(event)
-						{
-					controls.resetSTATE();
-						});
+		}).mouseup(function(event)
+		{
+			controls.resetSTATE();
+		});
 
-			});
+	});
 })();
