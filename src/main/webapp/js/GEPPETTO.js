@@ -683,28 +683,28 @@ var GEPPETTO = GEPPETTO ||
 	{
 		// Lights
 
-		ambientLight = new THREE.AmbientLight( 0x000000 );
-		scene.add( ambientLight );
+		ambientLight = new THREE.AmbientLight(0x000000);
+		scene.add(ambientLight);
 
 		hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1.1);
-		scene.add( hemisphereLight );
+		scene.add(hemisphereLight);
 
 		directionalLight = new THREE.DirectionalLight(0xffffff, 0.09);
-		directionalLight.position.set( 0, 1, 0 );
+		directionalLight.position.set(0, 1, 0);
 		directionalLight.castShadow = true;
-		scene.add( directionalLight );
+		scene.add(directionalLight);
 
-		spotLight1 = new THREE.SpotLight( 0xffffff, 0.1 );
-		spotLight1.position.set( 100, 1000, 100 );
+		spotLight1 = new THREE.SpotLight(0xffffff, 0.1);
+		spotLight1.position.set(100, 1000, 100);
 		spotLight1.castShadow = true;
 		spotLight1.shadowDarkness = 0.2;
-		scene.add( spotLight1 );
+		scene.add(spotLight1);
 
-		spotLight2 = new THREE.SpotLight( 0xffffff, 0.22 );
-		spotLight2.position.set( 100, 1000, 100 );
+		spotLight2 = new THREE.SpotLight(0xffffff, 0.22);
+		spotLight2.position.set(100, 1000, 100);
 		spotLight2.castShadow = true;
 		spotLight2.shadowDarkness = 0.2;
-		scene.add( spotLight2 );
+		scene.add(spotLight2);
 
 	};
 
@@ -760,9 +760,40 @@ var GEPPETTO = GEPPETTO ||
 		{
 			parent.add(current_metadata, "ID").listen();
 		}
+
+		if (current_metadata.hasOwnProperty("Highlight"))
+		{
+			L =
+			{};
+			L.Highlight = function(value)
+			{
+				return function()
+				{
+					selectGeometriesInSubgroup(value);
+				};
+			}(current_metadata["Highlight"]);
+			parent.add(L, "Highlight").listen();
+
+		}
+
+		if (current_metadata.hasOwnProperty("Highlight channel density"))
+		{
+			L =
+			{};
+			L["Highlight channel density"] = function(value)
+			{
+				return function()
+				{
+					highlightChannelDensity(value);
+				};
+			}(current_metadata["Highlight channel density"]);
+			parent.add(L, "Highlight channel density").listen();
+
+		}
+
 		for ( var m in current_metadata)
 		{
-			if (m != "ID")
+			if (m != "ID" && m != "Highlight" && m != "Highlight channel density")
 			{
 				if (typeof current_metadata[m] == "object")
 				{
@@ -772,36 +803,7 @@ var GEPPETTO = GEPPETTO ||
 				}
 				else
 				{
-					if (m == "Highlight")
-					{
-						L =
-						{};
-						L.Highlight = function(value)
-						{
-							return function()
-							{
-								selectGeometriesInSubgroup(value);
-							};
-						}(current_metadata[m]);
-						parent.add(L, m).listen();
-					}
-					else if (m == "Highlight channel density")
-					{
-						L =
-						{};
-						L["Highlight channel density"] = function(value)
-						{
-							return function()
-							{
-								highlightChannelDensity(value);
-							};
-						}(current_metadata[m]);
-						parent.add(L, "Highlight channel density").listen();
-					}
-					else
-					{
-						parent.add(current_metadata, m).listen();
-					}
+					parent.add(current_metadata, m).listen();
 				}
 			}
 		}

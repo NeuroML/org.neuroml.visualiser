@@ -258,6 +258,8 @@ var onClick = function(objectsClicked, button)
 						// 3)show references and change their material
 						GEPPETTO.showMetadataForEntity(SELECTED[0].eindex);
 
+						$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
+						
 						var entity = GEPPETTO.getJSONEntityFromId(SELECTED[0].eid);
 						var preIDs = [];
 						var postIDs = [];
@@ -398,7 +400,7 @@ var highlightChannelDensity = function(value)
 			}
 		});
 		subGroupHighlighted = value;
-		$("li:contains(" + value + "_).title").css("text-decoration", "underline").css("color", "#e61d5f");
+		$("li:contains(" + value + "_).title").css("text-decoration", "underline").css("color", "#FF6600");
 	}
 };
 
@@ -437,7 +439,7 @@ var selectGeometriesInSubgroup = function(subGroup)
 				}
 			}
 		});
-		$("li:contains(" + subGroup + ").title").css("text-decoration", "underline").css("color", "#e61d5f");
+		$("li:contains(" + subGroup + ").title").css("text-decoration", "underline").css("color", "#FF6600");
 	}
 };
 
@@ -715,6 +717,12 @@ function toggleSelectionMode()
 						}
 					}
 					GEPPETTO.showMetadataForEntity(0);
+					
+					$("span:contains('Highlight')").prepend("<icon class='icon-screenshot'></icon> ");
+					$("span:contains('Highlight')").addClass("highlight");
+					
+					$("li:contains('Ion Channels').title").append(" <icon class='icon-exchange'></icon>");
+					$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
 				}
 			});
 		}

@@ -26,8 +26,144 @@ body{
 	position:absolute;
 	padding:0;
 }
-.dg {
 
+#geppettominilogo{
+	background-image: url("../images/geppettoLogo.png");
+	width: 125px;
+	height: 42px;
+	float:right;
+	cursor:pointer;
+	margin-top:-10px;
+}
+
+
+@media 
+(-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) { 
+#geppettominilogo {
+	background-image: url("../images/geppettoLogo@2x.png");
+	background-size: 125px 42px;
+}
+}
+.dg {
+	font-size:13px;
+}
+
+
+.dg .cr.function {
+	border-color: #FF6600;
+}
+
+
+background: #1a1a1a;
+border-bottom: 1px solid #2c2c2c;
+}
+.dg li:not(.folder) {
+cursor: auto;
+height: 27px;
+line-height: 27px;
+overflow: hidden;
+padding: 0 4px 0 5px;
+}
+.dg .cr {
+clear: both;
+padding-left: 3px;
+height: 27px;
+}
+.dg li {
+-webkit-transition: height 0.1s ease-out;
+-o-transition: height 0.1s ease-out;
+-moz-transition: height 0.1s ease-out;
+transition: height 0.1s ease-out;
+}
+li {
+line-height: 20px;
+}
+user agent stylesheetli {
+display: list-item;
+text-align: -webkit-match-parent;
+}
+Inherited from ul
+.dg ul {
+list-style: none;
+}
+user agent stylesheetul ul, ol ul {
+list-style-type: circle;
+}
+user agent stylesheetul, menu, dir {
+list-style-type: disc;
+}
+Inherited from div.dg
+.dg {
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-weight: 200;
+}
+.dg {
+font-size: 13px;
+}
+.dg {
+color: #eee;
+font: 11px 'Lucida Grande', sans-serif;
+text-shadow: 0 -1px 0 #111;
+}
+Inherited from li.folder
+li {
+line-height: 20px;
+}
+user agent stylesheetli {
+text-align: -webkit-match-parent;
+}
+Inherited from ul
+.dg ul {
+list-style: none;
+}
+user agent stylesheetul, menu, dir {
+list-style-type: disc;
+}
+Inherited from div.dg.main.a
+.dg {
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-weight: 200;
+}
+.dg {
+font-size: 13px;
+}
+.dg {
+color: #eee;
+font: 11px 'Lucida Grande', sans-serif;
+text-shadow: 0 -1px 0 #111;
+}
+Inherited from div.dg.ac
+.dg {
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-weight: 200;
+}
+.dg {
+font-size: 13px;
+}
+.dg {
+color: #eee;
+font: 11px 'Lucida Grande', sans-serif;
+text-shadow: 0 -1px 0 #111;
+}
+Inherited from body
+body {
+color: #777777;
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+body {
+font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+font-size: 14px;
+line-height: 20px;
+color: #333;
+}
+Inherited from html
+html {
+font-size: 100%;
+}
+
+.dg li:not(.folder){
+	background-color:rgba(26,26,26,0.7);
 }
 .dg .cr.string {
 	border-color: #43ccee;
@@ -69,7 +205,9 @@ body{
 	height: 100px;
 }
 
-
+.highlight:hover{
+	color:#FF6600;
+}
 .rotate90
 {
 transform: rotate(90deg);
@@ -183,6 +321,7 @@ input{
 	padding:10px;
 	width:700px;
 	font-weight:200;
+	font-size:13px;
 }
 .helptitle {
 	font-size:20px;
