@@ -9,15 +9,6 @@ function get3DScene(neuromlurl)
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
 		data :
 		{
-			// url:"http://www.opensourcebrain.org/projects/celegans/repository/revisions/master/raw/CElegans/generatedNeuroML2/RIGL.nml"
-			// url : "https://raw.github.com/openworm/CElegansNeuroML/master/CElegans/generatedNeuroML2/CElegans.net.nml"
-			// url : "file:///Users/matteocantarelli/Documents/Development/neuroConstruct/osb/invertebrate/celegans/CElegansNeuroML/CElegans/generatedNeuroML2/celegans.nml"
-			// url : "http://www.opensourcebrain.org/projects/cerebellarnucleusneuron/repository/revisions/master/show/NeuroML2"
-			// url : "https://www.dropbox.com/s/ak4kn5t3c2okzoo/RIGL.nml?dl=1"
-			// url : "http://www.opensourcebrain.org/projects/ca1pyramidalcell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/"
-			// url :"http://www.opensourcebrain.org/projects/thalamocortical/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/L23PyrRS.nml"
-			// url : "http://www.opensourcebrain.org/projects/purkinjecell/repository/revisions/master/raw/neuroConstruct/generatedNeuroML2/purk2.nml"
-			// url:"file:///Users/matteocantarelli/Desktop/sample.nml"
 			url : neuromlurl
 		},
 		timeout : 9000000,
@@ -30,6 +21,8 @@ function get3DScene(neuromlurl)
 			}
 			else
 			{
+				trackActivity("LoadModel");
+				trackActivity("LoadModel&url="+neuromlurl);
 				preprocessMetadata(data);
 				if (GEPPETTO.init(createContainer(), update))
 				{
@@ -89,8 +82,8 @@ var highlightMaterial = new THREE.MeshPhongMaterial(
 {
 	opacity : 1,
 	ambient : 0x777777,
-	specular : 0xff0000,
-	shininess : 20,
+	specular : 0xbbbb9b,
+	shininess : 50,
 	color : 0xff0000,
 	shading : THREE.SmoothShading
 });
@@ -252,6 +245,7 @@ var onClick = function(objectsClicked, button)
 							INPUT = [];
 							OUTPUT = [];
 						}
+						trackActivity("ClickOnCellInSelectionMode");
 						// process new selection
 						// 1)show metadata for what we clicked on
 						// 2)decompose selected entity in subentities
@@ -259,7 +253,7 @@ var onClick = function(objectsClicked, button)
 						GEPPETTO.showMetadataForEntity(SELECTED[0].eindex);
 
 						$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
-						
+
 						var entity = GEPPETTO.getJSONEntityFromId(SELECTED[0].eid);
 						var preIDs = [];
 						var postIDs = [];
@@ -333,14 +327,18 @@ var highlightChannelDensity = function(value)
 	}
 	else
 	{
+		clearSubgroup();
+		trackActivity("ShowIonChannelDensity");
 		var allDensities = [];
 		var allSubGroups = [];
+		var unit = "";
 		$("li:contains('" + value + "_').title ~ li.cr.string").each(function()
 		{
 			var that = $(this);
 			that.find("div:contains('Passive conductance') > div > input").each(function()
 			{
 				allDensities.push(jQuery(this).val().substring(0, jQuery(this).val().indexOf(" ")).trim());
+				unit = jQuery(this).val().substring(jQuery(this).val().indexOf(" ")).trim();
 			});
 			that.find("div > span:contains('Location')  ~ div > input").each(function()
 			{
@@ -362,11 +360,17 @@ var highlightChannelDensity = function(value)
 		}
 		if (alli != -1)
 		{
-			allDensities.splice(alli, 1);
-			allSubGroups.splice(alli, 1);
+			if (! $.isEmptyObject(densityMap))
+			{
+				//if we have more than one subgroup we can discard 'all'
+				allDensities.splice(alli, 1);
+				allSubGroups.splice(alli, 1);
+			}
+
 		}
 		var minDensity = Math.min.apply(null, allDensities);
 		var maxDensity = Math.max.apply(null, allDensities);
+		$("li:contains(" + value + ").title ~ li.cr.function > div > span:contains('Highlight channel density')").html('<icon class="icon-screenshot"></icon> Remove density highlight <span class="max">' + maxDensity + ' </span><span class="min">' + minDensity + '</span>' + unit);
 		GEPPETTO.getScene().traverse(function(child)
 		{
 			child.material = zeroDensityMaterial;
@@ -374,22 +378,26 @@ var highlightChannelDensity = function(value)
 			{
 				for ( var sg in allSubGroups)
 				{
-					if (allSubGroups[sg] != "all")
+					if (allSubGroups[sg] != "all" || maxDensity == minDensity)
 					{
-						//let's check if the cell is in the subgroup 
+						// let's check if the cell is in the subgroup
 						if (child.segment_groups.indexOf(allSubGroups[sg] + ";") != -1)
 						{
-							var intensity = (densityMap[allSubGroups[sg]] - minDensity) / (maxDensity - minDensity);
-							
+							var intensity = 1;
+							if (maxDensity != minDensity)
+							{
+								intensity = (densityMap[allSubGroups[sg]] - minDensity) / (maxDensity - minDensity);
+							}
+
 							var dMaterial = new THREE.MeshPhongMaterial(
-									{
-										opacity : 1,
-										ambient : 0x777777,
-										specular : 0xbbbb9b,
-										shininess : 50,
-										color : rgbToHex(255,Math.floor(255 - (255 * intensity)),0),
-										shading : THREE.SmoothShading
-									});
+							{
+								opacity : 1,
+								ambient : 0x777777,
+								specular : 0xbbbb9b,
+								shininess : 50,
+								color : rgbToHex(255, Math.floor(255 - (255 * intensity)), 0),
+								shading : THREE.SmoothShading
+							});
 
 							child.material = dMaterial;
 							child.visible = true;
@@ -404,13 +412,15 @@ var highlightChannelDensity = function(value)
 	}
 };
 
-function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+function componentToHex(c)
+{
+	var hex = c.toString(16);
+	return hex.length == 1 ? "0" + hex : hex;
 }
 
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+function rgbToHex(r, g, b)
+{
+	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 var selectGeometriesInSubgroup = function(subGroup)
@@ -422,6 +432,7 @@ var selectGeometriesInSubgroup = function(subGroup)
 	else
 	{
 		clearSubgroup();
+		trackActivity("ShowIonChannel");
 		GEPPETTO.getScene().traverse(function(child)
 		{
 			if (child.hasOwnProperty("segment_groups"))
@@ -439,6 +450,7 @@ var selectGeometriesInSubgroup = function(subGroup)
 				}
 			}
 		});
+		$("li:contains(" + subGroup + ").title ~ li.cr.function > div > span:contains('Highlight')").html('<icon class="icon-screenshot"></icon> Remove highlight');
 		$("li:contains(" + subGroup + ").title").css("text-decoration", "underline").css("color", "#FF6600");
 	}
 };
@@ -448,6 +460,8 @@ var clearSubgroup = function()
 	if (subGroupHighlighted != "")
 	{
 		$("li:contains(" + subGroupHighlighted + ").title").css("text-decoration", "none").css("color", "#ffffff");
+		$("span:contains('Remove density highlight')").html('<icon class="icon-screenshot"></icon> Highlight channel density');
+		$("span:contains('Remove highlight')").html('<icon class="icon-screenshot"></icon> Highlight ');
 		;
 		GEPPETTO.getScene().traverse(function(child)
 		{
@@ -571,6 +585,7 @@ function toggleHelp()
 {
 	TOGGLE_H = !TOGGLE_H;
 	$("#help").modal('toggle');
+	trackActivity("HelpModalToggled");
 }
 
 function toggleRotationMode()
@@ -585,11 +600,13 @@ function toggleRotationMode()
 		TOGGLE_R = true;
 		GEPPETTO.enterRotationMode(SELECTED);
 	}
+	trackActivity("RotationToggled");
 }
 
 function toggleOutputs()
 {
 	TOGGLE_O = !TOGGLE_O;
+	trackActivity("ShowHideOutputsToggled");
 	for (o in OUTPUT)
 	{
 		inputAndEnabled = TOGGLE_I && GEPPETTO.isIn(OUTPUT[o], INPUT);
@@ -620,6 +637,7 @@ function toggleOutputs()
 function toggleInputs()
 {
 	TOGGLE_I = !TOGGLE_I;
+	trackActivity("ShowHideInputsToggled");
 	for (i in INPUT)
 	{
 		outputAndEnabled = TOGGLE_O && GEPPETTO.isIn(INPUT[i], OUTPUT);
@@ -650,6 +668,7 @@ function toggleNormalMode()
 {
 	if (!TOGGLE_N)
 	{
+		trackActivity("SwitchToNormalMode");
 		TOGGLE_Z = false;
 		TOGGLE_N = true;
 		GEPPETTO.removeMouseClickListener();
@@ -688,6 +707,7 @@ function toggleSelectionMode()
 {
 	if (!TOGGLE_Z)
 	{
+		trackActivity("SwitchToSelectionMode");
 		TOGGLE_Z = true;
 		TOGGLE_N = false;
 		GEPPETTO.setBackground(0x000000, 1);
@@ -717,10 +737,10 @@ function toggleSelectionMode()
 						}
 					}
 					GEPPETTO.showMetadataForEntity(0);
-					
+
 					$("span:contains('Highlight')").prepend("<icon class='icon-screenshot'></icon> ");
-					$("span:contains('Highlight')").addClass("highlight");
-					
+					$("span:contains('Highlight')").addClass("highlight btn");
+
 					$("li:contains('Ion Channels').title").append(" <icon class='icon-exchange'></icon>");
 					$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
 				}
@@ -748,6 +768,7 @@ function toggleHideDeselected()
 {
 	if (!TOGGLE_N && SELECTED.length > 0)
 	{
+		trackActivity("ShowHideOnlySelectedCellToggled");
 		TOGGLE_S = !TOGGLE_S;
 		GEPPETTO.getScene().traverse(function(child)
 		{
@@ -973,6 +994,12 @@ function setupUI()
 function singleEntity()
 {
 	return GEPPETTO.getJSONScene().entities.length == 1;
+}
+
+function trackActivity(activity)
+{
+	var trackurl = '/?activity=' + activity;
+	_gaq.push(['_trackPageview', trackurl]);
 }
 
 function getUrlVars()
