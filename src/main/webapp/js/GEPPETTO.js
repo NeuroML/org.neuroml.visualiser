@@ -207,6 +207,12 @@ var GEPPETTO = GEPPETTO ||
 				geometry.position.x += entity.position.x;
 				geometry.position.y += entity.position.y;
 				geometry.position.z += entity.position.z;
+				if(geometry.distal)
+				{
+					geometry.distal.x += entity.position.x;
+					geometry.distal.y += entity.position.y;
+					geometry.distal.z += entity.position.z;	
+				}
 			}
 			geometry.globalCoordinates = true;
 		}

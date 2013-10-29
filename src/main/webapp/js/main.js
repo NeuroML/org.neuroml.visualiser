@@ -22,7 +22,7 @@ function get3DScene(neuromlurl)
 			else
 			{
 				trackActivity("LoadModel");
-				trackActivity("LoadModel&url="+neuromlurl);
+				trackActivity("LoadModel&url=" + neuromlurl);
 				preprocessMetadata(data);
 				if (GEPPETTO.init(createContainer(), update))
 				{
@@ -252,7 +252,7 @@ var onClick = function(objectsClicked, button)
 						// 3)show references and change their material
 						GEPPETTO.showMetadataForEntity(SELECTED[0].eindex);
 
-						$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
+						postProcessGUI();
 
 						var entity = GEPPETTO.getJSONEntityFromId(SELECTED[0].eid);
 						var preIDs = [];
@@ -319,6 +319,15 @@ var onClick = function(objectsClicked, button)
 	}
 };
 
+var postProcessGUI = function()
+{
+	$("span:contains('Highlight')").prepend("<icon class='icon-screenshot'></icon> ");
+	$("span:contains('Highlight')").addClass("highlight btn");
+
+	$("li:contains('Ion Channels').title").append(" <icon class='icon-exchange'></icon>");
+	$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
+};
+
 var highlightChannelDensity = function(value)
 {
 	if (subGroupHighlighted == value)
@@ -360,9 +369,9 @@ var highlightChannelDensity = function(value)
 		}
 		if (alli != -1)
 		{
-			if (! $.isEmptyObject(densityMap))
+			if (!$.isEmptyObject(densityMap))
 			{
-				//if we have more than one subgroup we can discard 'all'
+				// if we have more than one subgroup we can discard 'all'
 				allDensities.splice(alli, 1);
 				allSubGroups.splice(alli, 1);
 			}
@@ -541,6 +550,7 @@ var update = function()
 					INTERSECTED.material = highlightMaterial;
 
 					GEPPETTO.showMetadataForEntity(INTERSECTED.eindex);
+					postProcessGUI();
 				}
 			}
 			else
@@ -738,11 +748,7 @@ function toggleSelectionMode()
 					}
 					GEPPETTO.showMetadataForEntity(0);
 
-					$("span:contains('Highlight')").prepend("<icon class='icon-screenshot'></icon> ");
-					$("span:contains('Highlight')").addClass("highlight btn");
-
-					$("li:contains('Ion Channels').title").append(" <icon class='icon-exchange'></icon>");
-					$("li:contains('Connections').title").append(" <icon class='icon-signin'></icon> <icon class='icon-signout'></icon>");
+					postProcessGUI();
 				}
 			});
 		}
@@ -999,7 +1005,7 @@ function singleEntity()
 function trackActivity(activity)
 {
 	var trackurl = '/?activity=' + activity;
-	_gaq.push(['_trackPageview', trackurl]);
+	_gaq.push([ '_trackPageview', trackurl ]);
 }
 
 function getUrlVars()
