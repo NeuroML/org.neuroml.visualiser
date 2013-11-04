@@ -39,6 +39,7 @@ import org.neuroml.model.SegmentGroup;
 import org.neuroml.model.SynapticConnection;
 import org.neuroml.model.ValueAcrossSegOrSegGroup;
 import org.neuroml.model.util.NeuroMLConverter;
+import org.neuroml.model.util.UnitsFormatterUtils;
 
 /**
  * @author matteocantarelli
@@ -264,6 +265,17 @@ public class NeuroMLModelInterpreter
 	}
 
 	/**
+	 * @param value
+	 * @return
+	 */
+	private String processValue(String value)
+	{
+		String v=value.substring(0,value.indexOf(" "));
+		String u=value.substring(value.indexOf(" "));
+		return v+UnitsFormatterUtils.getFormattedUnits(u);
+	}
+	
+	/**
 	 * @param entity
 	 * @param c
 	 */
@@ -295,12 +307,12 @@ public class NeuroMLModelInterpreter
 								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(((ChannelDensity) e.getValue()).getId(), specificChannel);
 								specificChannel.setAdditionalProperties("Highlight", ((ChannelDensity) e.getValue()).getSegmentGroup());
 								specificChannel.setAdditionalProperties("Location", ((ChannelDensity) e.getValue()).getSegmentGroup());
-								specificChannel.setAdditionalProperties("Reverse potential", ((ChannelDensity) e.getValue()).getErev());
-								specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), ((ChannelDensity) e.getValue()).getCondDensity());
+								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties("Reverse potential", processValue(((ChannelDensity) e.getValue()).getErev()));
+								specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), processValue(((ChannelDensity) e.getValue()).getCondDensity()));
 							}
 							else if(e.getName().getLocalPart().equals("specificCapacitance"))
 							{
-								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), ((ValueAcrossSegOrSegGroup) e.getValue()).getValue());
+								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), processValue(((ValueAcrossSegOrSegGroup) e.getValue()).getValue()));
 							}
 						}
 						membraneProperties.setAdditionalProperties("Ion Channels", channels);
@@ -312,7 +324,7 @@ public class NeuroMLModelInterpreter
 				{
 					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity() != null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size() > 0)
 					{
-						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
+						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), processValue(c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue()));
 					}
 				}
 
