@@ -65,11 +65,18 @@ body{
 .max{
 	color:red;
 	margin-left:5px;
+	background-color:#333333;
+	text-shadow: none;
+	padding-left:5px;
 }
 .min{
-	color:#e3c000;
-	margin-left:5px;
+	color:yellow;
+	margin-left:1px;
+	padding-left:5px;
+	padding-right:5px;
 	margin-right:5px;
+	background-color:#333333;
+	text-shadow: none;
 }
 .dg .cr {
 clear: both;
