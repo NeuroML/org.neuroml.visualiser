@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.UnmarshalException;
 
 import org.geppetto.core.visualisation.model.AGeometry;
@@ -36,8 +35,8 @@ import org.neuroml.model.Population;
 import org.neuroml.model.PopulationTypes;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
+import org.neuroml.model.SpecificCapacitance;
 import org.neuroml.model.SynapticConnection;
-import org.neuroml.model.ValueAcrossSegOrSegGroup;
 import org.neuroml.model.util.NeuroMLConverter;
 import org.neuroml.model.util.UnitsFormatterUtils;
 
@@ -270,11 +269,11 @@ public class NeuroMLModelInterpreter
 	 */
 	private String processValue(String value)
 	{
-		String v=value.substring(0,value.indexOf(" "));
-		String u=value.substring(value.indexOf(" "));
-		return v+UnitsFormatterUtils.getFormattedUnits(u);
+		String v = value.substring(0, value.indexOf(" "));
+		String u = value.substring(value.indexOf(" "));
+		return v + UnitsFormatterUtils.getFormattedUnits(u);
 	}
-	
+
 	/**
 	 * @param entity
 	 * @param c
@@ -288,35 +287,28 @@ public class NeuroMLModelInterpreter
 				Metadata membraneProperties = new Metadata();
 				if(c.getBiophysicalProperties().getMembraneProperties() != null)
 				{
-					List<JAXBElement<?>> membranePropertiesPart = c.getBiophysicalProperties().getMembraneProperties().getChannelPopulationOrChannelDensityOrChannelDensityNernst();
-					if(membranePropertiesPart != null)
+					Metadata channels = new Metadata();
+					for(ChannelDensity e : c.getBiophysicalProperties().getMembraneProperties().getChannelDensity())
 					{
-						Metadata channels = new Metadata();
-						for(JAXBElement<?> e : membranePropertiesPart)
+						String ionChannel = e.getIonChannel();
+						if(!channels.getAdditionalProperties().containsKey(ionChannel))
 						{
-							if(e.getName().getLocalPart().equals("channelDensity"))
-							{
-								String ionChannel = ((ChannelDensity) e.getValue()).getIonChannel();
-								if(!channels.getAdditionalProperties().containsKey(ionChannel))
-								{
-									Metadata channelClass=new Metadata();
-									channels.setAdditionalProperties(ionChannel, channelClass);
-									channelClass.setAdditionalProperties("Highlight channel density", ionChannel);
-								}
-								Metadata specificChannel = new Metadata();
-								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(((ChannelDensity) e.getValue()).getId(), specificChannel);
-								specificChannel.setAdditionalProperties("Highlight", ((ChannelDensity) e.getValue()).getSegmentGroup());
-								specificChannel.setAdditionalProperties("Location", ((ChannelDensity) e.getValue()).getSegmentGroup());
-								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties("Reverse potential", processValue(((ChannelDensity) e.getValue()).getErev()));
-								specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), processValue(((ChannelDensity) e.getValue()).getCondDensity()));
-							}
-							else if(e.getName().getLocalPart().equals("specificCapacitance"))
-							{
-								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), processValue(((ValueAcrossSegOrSegGroup) e.getValue()).getValue()));
-							}
+							Metadata channelClass = new Metadata();
+							channels.setAdditionalProperties(ionChannel, channelClass);
+							channelClass.setAdditionalProperties("Highlight channel density", ionChannel);
 						}
-						membraneProperties.setAdditionalProperties("Ion Channels", channels);
+						Metadata specificChannel = new Metadata();
+						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(e.getId(), specificChannel);
+						specificChannel.setAdditionalProperties("Highlight", e.getSegmentGroup());
+						specificChannel.setAdditionalProperties("Location", e.getSegmentGroup());
+						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties("Reverse potential", processValue(e.getErev()));
+						specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), processValue(e.getCondDensity()));
 					}
+					for(SpecificCapacitance e : c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance())
+					{
+						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), processValue(e.getValue()));
+					}
+					membraneProperties.setAdditionalProperties("Ion Channels", channels);
 				}
 
 				Metadata intracellularProperties = new Metadata();
@@ -324,7 +316,8 @@ public class NeuroMLModelInterpreter
 				{
 					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity() != null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size() > 0)
 					{
-						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), processValue(c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue()));
+						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), processValue(c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0)
+								.getValue()));
 					}
 				}
 
@@ -414,24 +407,24 @@ public class NeuroMLModelInterpreter
 				}
 			}
 
-//			if(somaGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, somaGroup.getId()));
-//				entities.add(entity);
-//			}
-//			if(axonGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, axonGroup.getId()));
-//				entities.add(entity);
-//			}
-//			if(dendriteGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, dendriteGroup.getId()));
-//				entities.add(entity);
-//			}
+			// if(somaGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, somaGroup.getId()));
+			// entities.add(entity);
+			// }
+			// if(axonGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, axonGroup.getId()));
+			// entities.add(entity);
+			// }
+			// if(dendriteGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, dendriteGroup.getId()));
+			// entities.add(entity);
+			// }
 
 			// this adds all segment groups not contained in the macro groups if any
 			for(String sgId : segmentGeometries.keySet())
@@ -456,10 +449,10 @@ public class NeuroMLModelInterpreter
 	{
 		if(subgroupsMap.containsKey(targetSg))
 		{
-			StringBuilder allGroupsString=new StringBuilder(allGroupsStringp);
-			for(String containerGroup:subgroupsMap.get(targetSg))
+			StringBuilder allGroupsString = new StringBuilder(allGroupsStringp);
+			for(String containerGroup : subgroupsMap.get(targetSg))
 			{
-				allGroupsString.append(containerGroup+"; ");
+				allGroupsString.append(containerGroup + "; ");
 				allGroupsString.append(getAllGroupsString(containerGroup, subgroupsMap, ""));
 			}
 			return allGroupsString.toString();
