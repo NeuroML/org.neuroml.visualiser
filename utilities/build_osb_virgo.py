@@ -10,19 +10,29 @@ import os
 # * Make sure Fabric is installed:
 #   http://docs.fabfile.org/en/1.5/installation.html
 #######################################
+
+
 import urllib
 import tempfile, shutil, zipfile, re, sys
 from fabric.api import local, lcd, hide, settings
 import os.path as op
 
+import sys
+
+branch="master"
+
+if len(sys.argv) == 2:
+    if sys.argv[1]=="development":
+        branch="development"
+
    
 virgo_version = "3.6.2.RELEASE"
 
 urls = ["http://www.eclipse.org/downloads/download.php?file=/virgo/release/VP/%s/virgo-tomcat-server-%s.zip&r=1"%(virgo_version, virgo_version),
-"https://github.com/Openworm/org.geppetto.core/archive/master.zip",
-"https://github.com/NeuroML/org.neuroml.model.injectingplugin/archive/master.zip",
-"https://github.com/NeuroML/org.neuroml.model/archive/master.zip",
-"https://github.com/NeuroML/org.neuroml.visualiser/archive/master.zip",
+"https://github.com/Openworm/org.geppetto.core/archive/%s.zip"%branch,
+"https://github.com/NeuroML/org.neuroml.model.injectingplugin/archive/%s.zip"%branch,
+"https://github.com/NeuroML/org.neuroml.model/archive/%s.zip"%branch,
+"https://github.com/NeuroML/org.neuroml.visualiser/archive/%s.zip"%branch,
 ]
 
 
@@ -53,7 +63,7 @@ osbpackages = ['org.geppetto.core', 'org.neuroml.model.injectingplugin',
                'org.neuroml.model', 'org.neuroml.visualiser']
 for p in osbpackages:
     with lcd(tempdir):
-        print local('mv %s-master %s'%(p, p), capture=True)
+        print local('mv %s-%s %s'%(p, branch, p), capture=True)
     dirp = op.join(tempdir, p)
     print '**************************'
     print 'BUILDING ' + dirp
