@@ -36,7 +36,6 @@ public class Get3DSceneServlet extends HttpServlet
 	 */
 	public Get3DSceneServlet()
 	{
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -44,22 +43,19 @@ public class Get3DSceneServlet extends HttpServlet
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-
 		try
 		{
-
 			URL url = new URL(request.getParameter("url"));
 
-			//find all URLs if it's a folder 
+			// find all URLs if it's a folder
 			List<URL> neuroMLfiles = new ArrayList<URL>();
-			if (url.getFile().endsWith("nml"))
+			if(url.getFile().endsWith("nml"))
 			{
 				neuroMLfiles.add(url);
 			}
 			else
 			{
-
-				if (url.getProtocol().equals("http"))
+				if(url.getProtocol().equals("http"))
 				{
 					HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
@@ -67,19 +63,18 @@ public class Get3DSceneServlet extends HttpServlet
 					BufferedReader br = new BufferedReader(new InputStreamReader(in));
 					String line = null;
 
-					while ((line = br.readLine()) != null)
+					while((line = br.readLine()) != null)
 					{
 						addURLIfPresent(neuroMLfiles, line, request.getParameter("url"));
 					}
 
 				}
-				else if (url.getProtocol().equals("file"))
+				else if(url.getProtocol().equals("file"))
 				{
 					File f = new File(url.getPath());
 
-					if (f != null && f.isDirectory())
+					if(f != null && f.isDirectory())
 					{
-
 						List<File> files = Arrays.asList(f.listFiles(new FilenameFilter()
 						{
 							public boolean accept(File dir, String filename)
@@ -87,7 +82,7 @@ public class Get3DSceneServlet extends HttpServlet
 								return filename.endsWith(".nml");
 							}
 						}));
-						for (File file : files)
+						for(File file : files)
 						{
 							neuroMLfiles.add(new URL("file://" + file.getAbsolutePath()));
 						}
@@ -98,22 +93,25 @@ public class Get3DSceneServlet extends HttpServlet
 			NeuroMLModelInterpreter morphologyConverter = new NeuroMLModelInterpreter();
 			Scene scene = morphologyConverter.getSceneFromNeuroML(neuroMLfiles);
 			ObjectMapper mapper = new ObjectMapper();
-
 			response.setCharacterEncoding("UTF-8");
 			response.setContentType("application/json");
 			mapper.writeValue(response.getOutputStream(), scene);
-
 		}
-		catch (Exception e)
+		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * @param neuroMLfiles
+	 * @param line
+	 * @param folderURL
+	 */
 	private void addURLIfPresent(List<URL> neuroMLfiles, String line, String folderURL)
 	{
 		String pattern = ".nml?rev";
-		if (line.contains(pattern))
+		if(line.contains(pattern))
 		{
 			int startURLIndex = line.indexOf("\"");
 			int endURLIndex = line.indexOf("\"", startURLIndex + 1);
@@ -124,10 +122,9 @@ public class Get3DSceneServlet extends HttpServlet
 			{
 				neuroMLfiles.add(new URL(folderURL + fileName));
 			}
-			catch (MalformedURLException e)
+			catch(MalformedURLException e)
 			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 

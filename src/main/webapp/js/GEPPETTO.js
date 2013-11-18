@@ -207,11 +207,11 @@ var GEPPETTO = GEPPETTO ||
 				geometry.position.x += entity.position.x;
 				geometry.position.y += entity.position.y;
 				geometry.position.z += entity.position.z;
-				if(geometry.distal)
+				if (geometry.distal)
 				{
 					geometry.distal.x += entity.position.x;
 					geometry.distal.y += entity.position.y;
-					geometry.distal.z += entity.position.z;	
+					geometry.distal.z += entity.position.z;
 				}
 			}
 			geometry.globalCoordinates = true;
@@ -339,13 +339,21 @@ var GEPPETTO = GEPPETTO ||
 	{
 		jsonscene = jsonscenep;
 		var entities = jsonscene.entities;
+		var somethingHasAGeometry = false;
 		for ( var eindex in entities)
 		{
 			scene.add(GEPPETTO.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
+			if (entities[eindex].geometries.length > 0 || entities[eindex].subentities.length > 0)
+			{
+				somethingHasAGeometry = true;
+			}
 		}
 
-		GEPPETTO.calculateSceneCenter();
-		GEPPETTO.updateCamera();
+		if (somethingHasAGeometry)
+		{
+			GEPPETTO.calculateSceneCenter();
+			GEPPETTO.updateCamera();
+		}
 	};
 
 	/**
@@ -714,6 +722,11 @@ var GEPPETTO = GEPPETTO ||
 
 	};
 
+	GEPPETTO.getGUI=function()
+	{
+		return gui;
+	};
+	
 	/**
 	 * Create a GUI element based on the available metadata
 	 */
@@ -803,9 +816,21 @@ var GEPPETTO = GEPPETTO ||
 			{
 				if (typeof current_metadata[m] == "object")
 				{
-					folder = parent.addFolder(m);
-					// recursive call to populate the GUI with sub-metadata
-					GEPPETTO.addGUIControls(folder, current_metadata[m]);
+					
+					if(m.startsWith("$PLOT$"))
+					{
+						var plotTitle=m.substring(m.lastIndexOf("$")+1,m.length)
+						var p={};
+						p.plot=true;
+						folder = parent.addFolder(plotTitle);
+						folder.add(current_metadata,m,p);
+					}
+					else
+					{
+						folder = parent.addFolder(m);
+						// recursive call to populate the GUI with sub-metadata
+						GEPPETTO.addGUIControls(folder, current_metadata[m]);
+					}
 				}
 				else
 				{
@@ -814,7 +839,7 @@ var GEPPETTO = GEPPETTO ||
 			}
 		}
 	};
-
+	
 	/**
 	 * Set up the WebGL Renderer
 	 */

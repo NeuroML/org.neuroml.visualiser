@@ -1,3 +1,5 @@
+//This is the main controller for OSB Explorer.
+//OSB Explorer uses the frontend of geppetto(http://geppetto.org) for the 3D visualisation of the models. 
 function get3DScene(neuromlurl)
 {
 	$("#controls").hide();
@@ -23,29 +25,42 @@ function get3DScene(neuromlurl)
 			{
 				trackActivity("LoadModel");
 				trackActivity("LoadModel&url=" + neuromlurl);
-				preprocessMetadata(data);
-				if (GEPPETTO.init(createContainer(), update))
+				
+				if (data.entities.length == 1 && data.entities[0].geometries.length == 0 && data.entities[0].subentities.length == 0)
 				{
-					GEPPETTO.setBackground(0xFFFFFF, 1);
-					if (!GEPPETTO.isScenePopulated())
-					{
-						// the first time we need to create the object.s
-						GEPPETTO.populateScene(data);
-					}
-					else
-					{
-						// any other time we just update them
-						GEPPETTO.updateJSONScene(data);
-					}
-					GEPPETTO.animate();
-					document.addEventListener("keydown", keyPressed, false);
-					$("#controls").show();
+					GEPPETTO.init(createContainer(), update);
+					GEPPETTO.populateScene(data);
+					GEPPETTO.showMetadataForEntity(0);
 					$("#loadinglbl").hide();
+					GEPPETTO.getGUI().width=Math.floor(window.innerWidth*.97);
+					$(".plot").closest("li").addClass("plot");
 				}
 				else
 				{
-					// initialisation failed
-					$("#loadinglbl").hide();
+					preprocessMetadata(data);
+					if (GEPPETTO.init(createContainer(), update))
+					{
+						GEPPETTO.setBackground(0xFFFFFF, 1);
+						if (!GEPPETTO.isScenePopulated())
+						{
+							// the first time we need to create the object.s
+							GEPPETTO.populateScene(data);
+						}
+						else
+						{
+							// any other time we just update them
+							GEPPETTO.updateJSONScene(data);
+						}
+						GEPPETTO.animate();
+						document.addEventListener("keydown", keyPressed, false);
+						$("#controls").show();
+						$("#loadinglbl").hide();
+					}
+					else
+					{
+						// initialisation failed
+						$("#loadinglbl").hide();
+					}
 				}
 			}
 
