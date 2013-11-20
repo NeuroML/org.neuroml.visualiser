@@ -54,7 +54,7 @@ public class NeuroMLModelInterpreter
 
 	private NeuroMLConverter _neuromlConverter = null;
 	// The number of attempts when there's a network error
-	private static final int MAX_ATTEMPTS = 3;
+	private static final int MAX_ATTEMPTS = 6;
 
 	private static final String GROUP_PROPERTY = "group";
 
@@ -224,6 +224,10 @@ public class NeuroMLModelInterpreter
 							if(attempts < MAX_ATTEMPTS)
 							{
 								attemptConnection = true;
+							}
+							if(attempts==3)
+							{
+								componentURL=new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".cell.nml");
 							}
 						}
 					}
