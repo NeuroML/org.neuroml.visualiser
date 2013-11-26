@@ -20,6 +20,23 @@ body{
 	color: #777777;
 }
 
+#oldie {
+	text-align :center;
+	width:400px;
+	margin:0 auto;
+	margin-top:200px;
+}
+#oldie a{
+	text-decoration:none;
+	color:#49AFCD;
+
+}
+
+#oldie a:hover{
+	color:#3A87AD;
+}
+
+
 .squareB {
 	width:25px!important;
 	height:25px!important;

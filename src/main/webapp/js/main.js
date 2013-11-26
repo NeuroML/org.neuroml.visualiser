@@ -28,7 +28,7 @@ function get3DScene(neuromlurl)
 				
 				if (data.entities.length == 1 && data.entities[0].geometries.length == 0 && data.entities[0].subentities.length == 0)
 				{
-					GEPPETTO.init(createContainer(), update);
+					GEPPETTO.init(createContainer(), update,false);
 					GEPPETTO.populateScene(data);
 					GEPPETTO.showMetadataForEntity(0);
 					$("#loadinglbl").hide();
@@ -38,7 +38,7 @@ function get3DScene(neuromlurl)
 				else
 				{
 					preprocessMetadata(data);
-					if (GEPPETTO.init(createContainer(), update))
+					if (GEPPETTO.init(createContainer(), update,true))
 					{
 						GEPPETTO.setBackground(0xFFFFFF, 1);
 						if (!GEPPETTO.isScenePopulated())

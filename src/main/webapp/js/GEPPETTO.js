@@ -39,6 +39,9 @@
 var GEPPETTO = GEPPETTO ||
 {
 	REVISION : '5osb'
+	//version 5 of geppetto frontend has been modified to add some adhoc functionality for the osb explorer
+	//compare with version 5 (https://github.com/openworm/org.geppetto.frontend/blob/4698c6a0baf835152bd2d9f8f7c1b41fc4969b9c/src/main/webapp/js/GEPPETTO.js)
+	//tag to see what changed
 };
 
 (function()
@@ -79,24 +82,28 @@ var GEPPETTO = GEPPETTO ||
 	/**
 	 * Initialize the engine
 	 */
-	GEPPETTO.init = function(containerp, updatep)
+	GEPPETTO.init = function(containerp, updatep, requiresWebGL)
 	{
-		if (!Detector.webgl)
+		if (requiresWebGL && !Detector.webgl)
 		{
 			Detector.addGetWebGLMessage();
+			$("#content").hide();
 			return false;
 		}
 		else
 		{
 			container = containerp;
 			customUpdate = updatep;
-			GEPPETTO.setupRenderer();
-			GEPPETTO.setupScene();
-			GEPPETTO.setupCamera();
-			GEPPETTO.setupLights();
-			GEPPETTO.setupStats();
-			GEPPETTO.setupControls();
-			GEPPETTO.setupListeners();
+			if(requiresWebGL)
+			{
+				GEPPETTO.setupRenderer();
+				GEPPETTO.setupScene();
+				GEPPETTO.setupCamera();
+				GEPPETTO.setupLights();
+				GEPPETTO.setupStats();
+				GEPPETTO.setupControls();
+				GEPPETTO.setupListeners();
+			}
 			return true;
 		}
 	};
@@ -342,15 +349,17 @@ var GEPPETTO = GEPPETTO ||
 		var somethingHasAGeometry = false;
 		for ( var eindex in entities)
 		{
-			scene.add(GEPPETTO.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
 			if (entities[eindex].geometries.length > 0 || entities[eindex].subentities.length > 0)
 			{
 				somethingHasAGeometry = true;
 			}
 		}
-
 		if (somethingHasAGeometry)
 		{
+			for ( var eindex in entities)
+			{
+				scene.add(GEPPETTO.getThreeObjectFromJSONEntity(entities[eindex], eindex, true));
+			}
 			GEPPETTO.calculateSceneCenter();
 			GEPPETTO.updateCamera();
 		}
