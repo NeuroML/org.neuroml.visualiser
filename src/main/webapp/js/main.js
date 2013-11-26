@@ -25,20 +25,22 @@ function get3DScene(neuromlurl)
 			{
 				trackActivity("LoadModel");
 				trackActivity("LoadModel&url=" + neuromlurl);
-				
+
 				if (data.entities.length == 1 && data.entities[0].geometries.length == 0 && data.entities[0].subentities.length == 0)
 				{
-					GEPPETTO.init(createContainer(), update,false);
+					GEPPETTO.init(createContainer(), update, false);
 					GEPPETTO.populateScene(data);
 					GEPPETTO.showMetadataForEntity(0);
 					$("#loadinglbl").hide();
-					GEPPETTO.getGUI().width=Math.floor(window.innerWidth*.97);
+					GEPPETTO.getGUI().width = Math.floor(window.innerWidth * .97);
+					$(".dg .property-name:not(.btn)").width = GEPPETTO.getGUI().width * .15;
+					$(".dg .c").width = GEPPETTO.getGUI().width * .85;
 					$(".plot").closest("li").addClass("plot");
 				}
 				else
 				{
 					preprocessMetadata(data);
-					if (GEPPETTO.init(createContainer(), update,true))
+					if (GEPPETTO.init(createContainer(), update, true))
 					{
 						GEPPETTO.setBackground(0xFFFFFF, 1);
 						if (!GEPPETTO.isScenePopulated())
@@ -359,7 +361,7 @@ var highlightChannelDensity = function(value)
 		$("li:contains('" + value + "_').title ~ li.cr.string").each(function()
 		{
 			var that = $(this);
-			that.find("div:contains('Passive conductance') > div > input").each(function()
+			that.find("div:contains('Conductance density') > div > input").each(function()
 			{
 				allDensities.push(jQuery(this).val().substring(0, jQuery(this).val().indexOf(" ")).trim());
 				unit = jQuery(this).val().substring(jQuery(this).val().indexOf(" ")).trim();
@@ -394,7 +396,14 @@ var highlightChannelDensity = function(value)
 		}
 		var minDensity = Math.min.apply(null, allDensities);
 		var maxDensity = Math.max.apply(null, allDensities);
-		$("li:contains(" + value + ").title ~ li.cr.function > div > span:contains('Highlight channel density')").html('<icon class="icon-screenshot"></icon> Remove density highlight <span class="max">' + maxDensity + ' </span><span class="min">' + minDensity + '</span>' + unit);
+		if (minDensity != maxDensity)
+		{
+			$("li:contains(" + value + ").title ~ li.cr.function > div > span:contains('Highlight channel density')").html('<icon class="icon-screenshot"></icon> Remove density highlight <span class="max">' + maxDensity + ' </span><span class="min">' + minDensity + '</span>' + unit);
+		}
+		else
+		{
+			$("li:contains(" + value + ").title ~ li.cr.function > div > span:contains('Highlight channel density')").html('<icon class="icon-screenshot"></icon> Remove density highlight <span class="max">' + maxDensity + ' </span>' + unit);
+		}
 		GEPPETTO.getScene().traverse(function(child)
 		{
 			child.material = zeroDensityMaterial;

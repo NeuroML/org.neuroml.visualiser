@@ -7,8 +7,9 @@ package org.neuroml.visualiser.core;
  */
 public enum Resources
 {
-	COND_DENSITY("Passive conductance density"),
+	COND_DENSITY("Conductance density"),
 	SPIKE_THRESHOLD("Spike Threshold"),
+	REVERSAL_POTENTIAL("Reversal Potential"),
 	SPECIFIC_CAPACITANCE("Specific Capacitance"),
 	INIT_MEMBRANE_POTENTIAL("Initial Membrane Potential"),
 	RESISTIVITY("Resistivity"),
@@ -17,8 +18,11 @@ public enum Resources
 	SYNAPSE("Synapse Type"), 
 	CONNECTION_TYPE("Connection Type"),
 	PRE_SYNAPTIC("Input"),
-	POST_SYNAPTIC("Output");
-	
+	POST_SYNAPTIC("Output"), 
+	HIGHLIGHT("Highlight"), 
+	LOCATION("Location"), 
+	ION_CHANNELS("Ion Channels"), 
+	HIGHLIGHT_CHAN_DENSITY("Highlight channel density");
 	private String _value;
 	
 	private Resources(String value)

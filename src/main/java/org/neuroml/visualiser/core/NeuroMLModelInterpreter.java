@@ -350,20 +350,20 @@ public class NeuroMLModelInterpreter
 						{
 							Metadata channelClass = new Metadata();
 							channels.setAdditionalProperties(ionChannel, channelClass);
-							channelClass.setAdditionalProperties("Highlight channel density", ionChannel);
+							channelClass.setAdditionalProperties(Resources.HIGHLIGHT_CHAN_DENSITY.get(), ionChannel);
 						}
 						Metadata specificChannel = new Metadata();
 						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(e.getId(), specificChannel);
-						specificChannel.setAdditionalProperties("Highlight", e.getSegmentGroup());
-						specificChannel.setAdditionalProperties("Location", e.getSegmentGroup());
-						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties("Reverse potential", processValue(e.getErev()));
+						specificChannel.setAdditionalProperties(Resources.HIGHLIGHT.get(), e.getSegmentGroup());
+						specificChannel.setAdditionalProperties(Resources.LOCATION.get(), e.getSegmentGroup());
+						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(Resources.REVERSAL_POTENTIAL.get(), processValue(e.getErev()));
 						specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), processValue(e.getCondDensity()));
 					}
 					for(SpecificCapacitance e : c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance())
 					{
 						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), processValue(e.getValue()));
 					}
-					membraneProperties.setAdditionalProperties("Ion Channels", channels);
+					membraneProperties.setAdditionalProperties(Resources.ION_CHANNELS.get(), channels);
 				}
 
 				Metadata intracellularProperties = new Metadata();
@@ -376,15 +376,16 @@ public class NeuroMLModelInterpreter
 					}
 				}
 
-				// Sample code to add URL metadata
+				// Sample code showing how we could add URL metadata
 				// Metadata externalResources = new Metadata();
 				// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
 				// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
-
+				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+				
 				entity.setMetadata(new Metadata());
 				entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
 				entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
-				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+				
 			}
 		}
 		catch(NullPointerException ex)
