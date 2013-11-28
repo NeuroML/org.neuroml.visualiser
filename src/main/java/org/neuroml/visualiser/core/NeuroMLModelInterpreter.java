@@ -41,6 +41,7 @@ import org.neuroml.model.SegmentGroup;
 import org.neuroml.model.SpecificCapacitance;
 import org.neuroml.model.SynapticConnection;
 import org.neuroml.model.util.NeuroMLConverter;
+import org.neuroml.model.util.NeuroMLException;
 import org.neuroml.model.util.UnitsFormatterUtils;
 
 /**
@@ -107,8 +108,9 @@ public class NeuroMLModelInterpreter
 	 * @param neuroml
 	 * @param url
 	 * @return
+	 * @throws NeuroMLException 
 	 */
-	private List<Entity> getEntitiesFromInfoModule(NeuroMLDocument neuroml, URL url)
+	private List<Entity> getEntitiesFromInfoModule(NeuroMLDocument neuroml, URL url) throws NeuroMLException
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 		InfoNode infoRoot = InfoTreeCreator.createInfoTree(neuroml);
