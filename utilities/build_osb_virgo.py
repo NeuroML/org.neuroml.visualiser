@@ -32,6 +32,7 @@ urls = ["http://www.eclipse.org/downloads/download.php?file=/virgo/release/VP/%s
 "https://github.com/Openworm/org.geppetto.core/archive/%s.zip"%branch,
 "https://github.com/NeuroML/org.neuroml.model.injectingplugin/archive/%s.zip"%branch,
 "https://github.com/NeuroML/org.neuroml.model/archive/%s.zip"%branch,
+"https://github.com/LEMS/jLEMS/archive/master.zip",
 "https://github.com/NeuroML/org.neuroml.export/archive/%s.zip"%branch,
 "https://github.com/NeuroML/org.neuroml.visualiser/archive/%s.zip"%branch,
 ]
@@ -61,10 +62,13 @@ os.environ['SERVER_HOME'] = server_home
 #use Maven to build all the osbexplorer code bundles 
 #and place the contents in the Virgo installation
 osbpackages = ['org.geppetto.core', 'org.neuroml.model.injectingplugin',
-               'org.neuroml.model', 'org.neuroml.export','org.neuroml.visualiser']
+               'org.neuroml.model', 'jLEMS', 'org.neuroml.export','org.neuroml.visualiser']
 for p in osbpackages:
+    
+    package_branch = branch if p is not 'jLEMS' else 'master'
     with lcd(tempdir):
-        print local('mv %s-%s %s'%(p, branch, p), capture=True)
+        print local('mv %s-%s %s'%(p, package_branch, p), capture=True)
+        
     dirp = op.join(tempdir, p)
     print '**************************'
     print 'BUILDING ' + dirp
