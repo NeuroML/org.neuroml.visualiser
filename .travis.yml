@@ -26,8 +26,3 @@ install:
     - git checkout tags/v0.0.9-alpha
     - mvn install
     - cd ..
-    
-	
-    
-
-
