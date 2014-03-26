@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.neuroml.visualiser</groupId>
 	<artifactId>org.neuroml.visualiser</artifactId>
-	<version>1.5.2</version>
+	<version>1.5.3</version>
 	<name>NeuroML Visualiser</name>
 	<packaging>war</packaging>
 	<properties>

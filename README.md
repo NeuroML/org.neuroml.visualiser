@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/neuroml/org.neuroml.visualiser)](https://travis-ci.org/neuroml/org.neuroml.visualiser)
+
 NeuroML Visualiser
 ==================
 
