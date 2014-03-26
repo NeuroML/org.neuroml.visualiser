@@ -20,6 +20,7 @@ import os.path as op
 import sys
 
 branch="master"
+geppetto_tag="0.0.9-alpha"
 
 if len(sys.argv) == 2:
     if sys.argv[1]=="development":
@@ -29,7 +30,7 @@ if len(sys.argv) == 2:
 virgo_version = "3.6.2.RELEASE"
 
 urls = ["http://www.eclipse.org/downloads/download.php?file=/virgo/release/VP/%s/virgo-tomcat-server-%s.zip&r=1"%(virgo_version, virgo_version),
-"https://github.com/Openworm/org.geppetto.core/archive/%s.zip"%branch,
+"https://github.com/Openworm/org.geppetto.core/archive/v%s.zip"%geppetto_tag,
 "https://github.com/NeuroML/org.neuroml.model.injectingplugin/archive/%s.zip"%branch,
 "https://github.com/NeuroML/org.neuroml.model/archive/%s.zip"%branch,
 "https://github.com/LEMS/jLEMS/archive/master.zip",
@@ -66,6 +67,8 @@ osbpackages = ['org.geppetto.core', 'org.neuroml.model.injectingplugin',
 for p in osbpackages:
     
     package_branch = branch if p is not 'jLEMS' else 'master'
+    if p == 'org.geppetto.core': package_branch = geppetto_tag
+    
     with lcd(tempdir):
         print local('mv %s-%s %s'%(p, package_branch, p), capture=True)
         
