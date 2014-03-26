@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.UnmarshalException;
 
 import org.geppetto.core.visualisation.model.AGeometry;
@@ -22,6 +21,9 @@ import org.geppetto.core.visualisation.model.Point;
 import org.geppetto.core.visualisation.model.Reference;
 import org.geppetto.core.visualisation.model.Scene;
 import org.geppetto.core.visualisation.model.Sphere;
+import org.neuroml.export.info.InfoTreeCreator;
+import org.neuroml.export.info.model.InfoNode;
+import org.neuroml.export.info.model.PlotNode;
 import org.neuroml.model.Cell;
 import org.neuroml.model.ChannelDensity;
 import org.neuroml.model.Include;
@@ -36,11 +38,15 @@ import org.neuroml.model.Population;
 import org.neuroml.model.PopulationTypes;
 import org.neuroml.model.Segment;
 import org.neuroml.model.SegmentGroup;
+import org.neuroml.model.SpecificCapacitance;
 import org.neuroml.model.SynapticConnection;
-import org.neuroml.model.ValueAcrossSegOrSegGroup;
 import org.neuroml.model.util.NeuroMLConverter;
+import org.neuroml.model.util.NeuroMLException;
+import org.neuroml.model.util.UnitsFormatterUtils;
 
 /**
+ * This class is used to create a Geppetto compatible Scene from a NeuroML document
+ * 
  * @author matteocantarelli
  * 
  */
@@ -48,17 +54,15 @@ public class NeuroMLModelInterpreter
 {
 
 	private NeuroMLConverter _neuromlConverter = null;
-	private static final String GROUP_PROPERTY = "group";
+	// The number of attempts when there's a network error
+	private static final int MAX_ATTEMPTS = 6;
 
-	// neuroml hardcoded concepts
-	private static final String DENDRITE_GROUP = "dendrite_group";
-	private static final String AXON_GROUP = "axon_group";
-	private static final String SOMA_GROUP = "soma_group";
+	private static final String GROUP_PROPERTY = "group";
 
 	/**
 	 * 
 	 */
-	public NeuroMLModelInterpreter()
+	public NeuroMLModelInterpreter() throws RuntimeException
 	{
 		super();
 		try
@@ -67,7 +71,7 @@ public class NeuroMLModelInterpreter
 		}
 		catch(Exception e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -75,7 +79,7 @@ public class NeuroMLModelInterpreter
 	 * @param neuromls
 	 * @return
 	 */
-	public Scene getSceneFromNeuroML(List<URL> neuromlURLs)
+	public Scene getSceneFromNeuroML(List<URL> neuromlURLs) throws RuntimeException
 	{
 		Scene scene = new Scene();
 		for(URL url : neuromlURLs)
@@ -86,13 +90,66 @@ public class NeuroMLModelInterpreter
 				neuroml = _neuromlConverter.urlToNeuroML(url);
 				scene.getEntities().addAll(getEntitiesFromMorphologies(neuroml)); // if there's any morphology
 				scene.getEntities().addAll(getEntitiesFromNetwork(neuroml, url)); // if a population is described -> network
+				if(scene.getEntities().isEmpty())
+				{
+					//The ultimate weapon: if there's no cell or network morphology use the info module to pull off just metadata
+					scene.getEntities().addAll(getEntitiesFromInfoModule(neuroml, url)); 
+				}
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		return scene;
+	}
+
+	/**
+	 * @param neuroml
+	 * @param url
+	 * @return
+	 * @throws NeuroMLException 
+	 */
+	private List<Entity> getEntitiesFromInfoModule(NeuroMLDocument neuroml, URL url) throws NeuroMLException
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		InfoNode infoRoot = InfoTreeCreator.createInfoTree(neuroml);
+		Entity e = new Entity();
+		Metadata m = processNode(infoRoot);
+		e.setId(url.getFile());
+		e.setMetadata(m);
+		entities.add(e);
+		return entities;
+	}
+
+	/**
+	 * Process an InfoNode and returns a MetaData element which will be displayed by the frontend
+	 * 
+	 * @param infoRoot
+	 * @param entities
+	 */
+	private Metadata processNode(InfoNode infoRoot)
+	{
+		Metadata m = new Metadata();
+		for(String key : infoRoot.getProperties().keySet())
+		{
+			// Matteo: a tree model should implement a visitor pattern to avoid this
+			// ugly chain of ifs..
+			if(infoRoot.get(key) instanceof String)
+			{
+				m.setAdditionalProperties(key, infoRoot.get(key));
+			}
+			else if(infoRoot.get(key) instanceof InfoNode)
+			{
+				m.setAdditionalProperties(key, processNode((InfoNode) infoRoot.get(key)));
+			}
+			else if(infoRoot.get(key) instanceof PlotNode)
+			{
+				//$PLOT$ will inform the frontend that the object contained is a plot
+				m.setAdditionalProperties("$PLOT$"+key, infoRoot.get(key));
+			}
+		}
+		return m;
 	}
 
 	/**
@@ -130,8 +187,6 @@ public class NeuroMLModelInterpreter
 		return entities;
 	}
 
-	private static final int MAX_ATTEMPTS = 3;
-
 	/**
 	 * @param neuroml
 	 * @param scene
@@ -162,7 +217,6 @@ public class NeuroMLModelInterpreter
 					{
 						attemptConnection = false;
 						attempts++;
-
 						neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
 					}
 					catch(UnmarshalException e)
@@ -172,6 +226,10 @@ public class NeuroMLModelInterpreter
 							if(attempts < MAX_ATTEMPTS)
 							{
 								attemptConnection = true;
+							}
+							if(attempts==3)
+							{
+								componentURL=new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".cell.nml");
 							}
 						}
 					}
@@ -208,7 +266,6 @@ public class NeuroMLModelInterpreter
 
 					for(int i = 0; i < size; i++)
 					{
-						// FIXME the position of the population within the network needs to be specified in neuroml
 						List<Entity> localEntities = getEntitiesFromMorphologies(neuromlComponent);
 						for(Entity e : localEntities)
 						{
@@ -218,8 +275,8 @@ public class NeuroMLModelInterpreter
 					}
 				}
 
-				// FIXME what's the purpose of the id here?
-				String id = p.getId();
+				// Matteo: what's the purpose of the id here?
+				// String id = p.getId();
 
 			}
 			for(SynapticConnection c : n.getSynapticConnection())
@@ -264,6 +321,17 @@ public class NeuroMLModelInterpreter
 	}
 
 	/**
+	 * @param value
+	 * @return
+	 */
+	private String processValue(String value)
+	{
+		String v = value.substring(0, value.indexOf(" "));
+		String u = value.substring(value.indexOf(" "));
+		return v + UnitsFormatterUtils.getFormattedUnits(u);
+	}
+
+	/**
 	 * @param entity
 	 * @param c
 	 */
@@ -276,35 +344,28 @@ public class NeuroMLModelInterpreter
 				Metadata membraneProperties = new Metadata();
 				if(c.getBiophysicalProperties().getMembraneProperties() != null)
 				{
-					List<JAXBElement<?>> membranePropertiesPart = c.getBiophysicalProperties().getMembraneProperties().getChannelPopulationOrChannelDensityOrChannelDensityNernst();
-					if(membranePropertiesPart != null)
+					Metadata channels = new Metadata();
+					for(ChannelDensity e : c.getBiophysicalProperties().getMembraneProperties().getChannelDensity())
 					{
-						Metadata channels = new Metadata();
-						for(JAXBElement<?> e : membranePropertiesPart)
+						String ionChannel = e.getIonChannel();
+						if(!channels.getAdditionalProperties().containsKey(ionChannel))
 						{
-							if(e.getName().getLocalPart().equals("channelDensity"))
-							{
-								String ionChannel = ((ChannelDensity) e.getValue()).getIonChannel();
-								if(!channels.getAdditionalProperties().containsKey(ionChannel))
-								{
-									Metadata channelClass=new Metadata();
-									channels.setAdditionalProperties(ionChannel, channelClass);
-									channelClass.setAdditionalProperties("Highlight channel density", ionChannel);
-								}
-								Metadata specificChannel = new Metadata();
-								((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(((ChannelDensity) e.getValue()).getId(), specificChannel);
-								specificChannel.setAdditionalProperties("Highlight", ((ChannelDensity) e.getValue()).getSegmentGroup());
-								specificChannel.setAdditionalProperties("Location", ((ChannelDensity) e.getValue()).getSegmentGroup());
-								specificChannel.setAdditionalProperties("Reverse potential", ((ChannelDensity) e.getValue()).getErev());
-								specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), ((ChannelDensity) e.getValue()).getCondDensity());
-							}
-							else if(e.getName().getLocalPart().equals("specificCapacitance"))
-							{
-								membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), ((ValueAcrossSegOrSegGroup) e.getValue()).getValue());
-							}
+							Metadata channelClass = new Metadata();
+							channels.setAdditionalProperties(ionChannel, channelClass);
+							channelClass.setAdditionalProperties(Resources.HIGHLIGHT_CHAN_DENSITY.get(), ionChannel);
 						}
-						membraneProperties.setAdditionalProperties("Ion Channels", channels);
+						Metadata specificChannel = new Metadata();
+						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(e.getId(), specificChannel);
+						specificChannel.setAdditionalProperties(Resources.HIGHLIGHT.get(), e.getSegmentGroup());
+						specificChannel.setAdditionalProperties(Resources.LOCATION.get(), e.getSegmentGroup());
+						((Metadata) channels.getAdditionalProperties().get(ionChannel)).setAdditionalProperties(Resources.REVERSAL_POTENTIAL.get(), processValue(e.getErev()));
+						specificChannel.setAdditionalProperties(Resources.COND_DENSITY.get(), processValue(e.getCondDensity()));
 					}
+					for(SpecificCapacitance e : c.getBiophysicalProperties().getMembraneProperties().getSpecificCapacitance())
+					{
+						membraneProperties.setAdditionalProperties(Resources.SPECIFIC_CAPACITANCE.get(), processValue(e.getValue()));
+					}
+					membraneProperties.setAdditionalProperties(Resources.ION_CHANNELS.get(), channels);
 				}
 
 				Metadata intracellularProperties = new Metadata();
@@ -312,24 +373,26 @@ public class NeuroMLModelInterpreter
 				{
 					if(c.getBiophysicalProperties().getIntracellularProperties().getResistivity() != null && c.getBiophysicalProperties().getIntracellularProperties().getResistivity().size() > 0)
 					{
-						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0).getValue());
+						intracellularProperties.setAdditionalProperties(Resources.RESISTIVITY.get(), processValue(c.getBiophysicalProperties().getIntracellularProperties().getResistivity().get(0)
+								.getValue()));
 					}
 				}
 
-				// Sample code to add URL metadata
+				// Sample code showing how we could add URL metadata
 				// Metadata externalResources = new Metadata();
 				// externalResources.setAdditionalProperties("Worm Atlas", "URL:http://www.wormatlas.org/neurons/Individual%20Neurons/PVDmainframe.htm");
 				// externalResources.setAdditionalProperties("WormBase", "URL:https://www.wormbase.org/tools/tree/run?name=PVDR;class=Cell");
-
+				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+				
 				entity.setMetadata(new Metadata());
 				entity.getMetadata().setAdditionalProperties(Resources.MEMBRANE_P.get(), membraneProperties);
 				entity.getMetadata().setAdditionalProperties(Resources.INTRACELLULAR_P.get(), intracellularProperties);
-				// entity.getMetadata().setAdditionalProperties("External Resources", externalResources);
+				
 			}
 		}
 		catch(NullPointerException ex)
 		{
-
+			// Matteo: check why this is being silenced
 		}
 	}
 
@@ -352,9 +415,6 @@ public class NeuroMLModelInterpreter
 		Entity allSegments = getEntityFromListOfSegments(morphology.getSegment());
 		List<Entity> entities = new ArrayList<Entity>();
 		Map<String, List<AGeometry>> segmentGeometries = new HashMap<String, List<AGeometry>>();
-		SegmentGroup somaGroup = null;
-		SegmentGroup axonGroup = null;
-		SegmentGroup dendriteGroup = null;
 
 		if(morphology.getSegmentGroup().isEmpty())
 		{
@@ -366,20 +426,6 @@ public class NeuroMLModelInterpreter
 			Map<String, List<String>> subgroupsMap = new HashMap<String, List<String>>();
 			for(SegmentGroup sg : morphology.getSegmentGroup())
 			{
-				// three hardcoded groups :(
-				if(sg.getId().equals(SOMA_GROUP))
-				{
-					somaGroup = sg;
-				}
-				else if(sg.getId().equals(AXON_GROUP))
-				{
-					axonGroup = sg;
-				}
-				else if(sg.getId().equals(DENDRITE_GROUP))
-				{
-					dendriteGroup = sg;
-				}
-
 				for(Include include : sg.getInclude())
 				{
 					// the map is <containedGroup,containerGroup>
@@ -402,24 +448,24 @@ public class NeuroMLModelInterpreter
 				}
 			}
 
-//			if(somaGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, somaGroup.getId()));
-//				entities.add(entity);
-//			}
-//			if(axonGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, axonGroup.getId()));
-//				entities.add(entity);
-//			}
-//			if(dendriteGroup != null)
-//			{
-//				Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
-//				entity.setId(getGroupId(cellId, dendriteGroup.getId()));
-//				entities.add(entity);
-//			}
+			// if(somaGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(somaGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, somaGroup.getId()));
+			// entities.add(entity);
+			// }
+			// if(axonGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(axonGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, axonGroup.getId()));
+			// entities.add(entity);
+			// }
+			// if(dendriteGroup != null)
+			// {
+			// Entity entity = createEntityForMacroGroup(dendriteGroup, segmentGeometries, allSegments.getGeometries());
+			// entity.setId(getGroupId(cellId, dendriteGroup.getId()));
+			// entities.add(entity);
+			// }
 
 			// this adds all segment groups not contained in the macro groups if any
 			for(String sgId : segmentGeometries.keySet())
@@ -444,10 +490,10 @@ public class NeuroMLModelInterpreter
 	{
 		if(subgroupsMap.containsKey(targetSg))
 		{
-			StringBuilder allGroupsString=new StringBuilder(allGroupsStringp);
-			for(String containerGroup:subgroupsMap.get(targetSg))
+			StringBuilder allGroupsString = new StringBuilder(allGroupsStringp);
+			for(String containerGroup : subgroupsMap.get(targetSg))
 			{
-				allGroupsString.append(containerGroup+"; ");
+				allGroupsString.append(containerGroup + "; ");
 				allGroupsString.append(getAllGroupsString(containerGroup, subgroupsMap, ""));
 			}
 			return allGroupsString.toString();
@@ -463,38 +509,6 @@ public class NeuroMLModelInterpreter
 	private String getGroupId(String cellId, String segmentGroupId)
 	{
 		return cellId + " " + segmentGroupId;
-	}
-
-	/**
-	 * @param somaGroup
-	 * @param segmentGeometries
-	 */
-	private Entity createEntityForMacroGroup(SegmentGroup macroGroup, Map<String, List<AGeometry>> segmentGeometries, List<AGeometry> allSegments)
-	{
-		Entity entity = new Entity();
-		entity.setAdditionalProperties(GROUP_PROPERTY, macroGroup.getId());
-		for(Include i : macroGroup.getInclude())
-		{
-			if(segmentGeometries.containsKey(i.getSegmentGroup()))
-			{
-				entity.getGeometries().addAll(segmentGeometries.get(i.getSegmentGroup()));
-				segmentGeometries.remove(i.getSegmentGroup());
-			}
-		}
-		for(Member m : macroGroup.getMember())
-		{
-			for(AGeometry g : allSegments)
-			{
-				if(g.getId().equals(m.getSegment().toString()))
-				{
-					entity.getGeometries().add(g);
-					allSegments.remove(g);
-					break;
-				}
-			}
-		}
-		segmentGeometries.remove(macroGroup.getId());
-		return entity;
 	}
 
 	/**

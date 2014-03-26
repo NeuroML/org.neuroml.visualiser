@@ -20,6 +20,23 @@ body{
 	color: #777777;
 }
 
+#oldie {
+	text-align :center;
+	width:400px;
+	margin:0 auto;
+	margin-top:200px;
+}
+#oldie a{
+	text-decoration:none;
+	color:#49AFCD;
+
+}
+
+#oldie a:hover{
+	color:#3A87AD;
+}
+
+
 .squareB {
 	width:25px!important;
 	height:25px!important;
@@ -36,6 +53,42 @@ body{
 	margin-top:-10px;
 }
 
+.axisLabel {
+	position: absolute;
+	text-align: center;
+	font-size: 12px;
+}
+
+.yaxisLabel {
+	top: 50%;
+	left: -35px;
+	transform: rotate(-90deg);
+	-o-transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg);
+	-moz-transform: rotate(-90deg);
+	-webkit-transform:  rotate(-90deg);
+	transform-origin: 0 0;
+	-o-transform-origin: 0 0;
+	-ms-transform-origin: 0 0;
+	-moz-transform-origin: 0 0;
+	-webkit-transform-origin: 0 0;
+}
+
+.xaxisLabel{
+	bottom: -30px;
+	left: 0px;
+	width:380px;
+}
+.plotTitle{
+	color:white;
+	position: absolute;
+	text-align: center;
+	font-size: 12px;
+	left:0px;
+	width:380px;
+	top:-20px;
+	
+}
 
 @media 
 (-webkit-min-device-pixel-ratio: 2), 
@@ -65,11 +118,18 @@ body{
 .max{
 	color:red;
 	margin-left:5px;
+	background-color:#333333;
+	text-shadow: none;
+	padding-left:5px;
 }
 .min{
-	color:#e3c000;
-	margin-left:5px;
+	color:yellow;
+	margin-left:1px;
+	padding-left:5px;
+	padding-right:5px;
 	margin-right:5px;
+	background-color:#333333;
+	text-shadow: none;
 }
 .dg .cr {
 clear: both;
