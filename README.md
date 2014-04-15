@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/neuroml/org.neuroml.visualiser)](https://travis-ci.org/neuroml/org.neuroml.visualiser)
+[![Build Status](https://travis-ci.org/NeuroML/org.neuroml.visualiser.svg?branch=master)](https://travis-ci.org/NeuroML/org.neuroml.visualiser)
 
 NeuroML Visualiser
 ==================
