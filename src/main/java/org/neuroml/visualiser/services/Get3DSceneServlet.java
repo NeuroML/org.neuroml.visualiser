@@ -45,8 +45,11 @@ public class Get3DSceneServlet extends HttpServlet
 	{
 		try
 		{
-		
-			if (request.getParameterMap().containsKey("url")) {
+			if (request.getParameterMap().containsKey("engine") && !request.getParameter("engine").toString().equals("undefined")) {
+				URL engine = new URL(request.getParameter("engine"));
+				
+			}
+			else{
 				URL url = new URL(request.getParameter("url"));
 			
 			
@@ -101,10 +104,6 @@ public class Get3DSceneServlet extends HttpServlet
 				response.setCharacterEncoding("UTF-8");
 				response.setContentType("application/json");
 				mapper.writeValue(response.getOutputStream(), scene);
-			}
-			else if (request.getParameterMap().containsKey("engine")) {
-				URL engine = new URL(request.getParameter("engine"));
-				
 			}
 		}
 		catch(Exception e)

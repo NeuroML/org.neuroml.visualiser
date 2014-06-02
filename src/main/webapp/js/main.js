@@ -1,6 +1,6 @@
 //This is the main controller for OSB Explorer.
 //OSB Explorer uses the frontend of geppetto(http://geppetto.org) for the 3D visualisation of the models. 
-function get3DScene(neuromlurl)
+function get3DScene(neuromlurl, engine)
 {
 	$("#controls").hide();
 	$("#error").hide();
@@ -11,13 +11,17 @@ function get3DScene(neuromlurl)
 		url : '/org.neuroml.visualiser/Get3DSceneServlet',
 		data :
 		{
-			url : neuromlurl
+			url : neuromlurl,
+			engine: engine
 		},
 		timeout : 9000000,
 		success : function(data, textStatus)
 		{
 			if (data.length === 0 || data.entities.length === 0)
 			{
+				linkFile = neuromlurl.replace("raw.github.com","github.com").replace("master","blob/master")
+				$("#viewFileContents").attr("href", linkFile);
+				
 				$("#loadinglbl").hide();
 				$("#error").modal();
 			}
@@ -92,7 +96,7 @@ $(document).ready(function()
 	}
 	setupUI();
 	vars = getUrlVars();
-	get3DScene(decodeURIComponent(vars.url));
+	get3DScene(decodeURIComponent(vars.url), decodeURIComponent(vars.engine));
 });
 
 var highlightMaterial = new THREE.MeshPhongMaterial(
