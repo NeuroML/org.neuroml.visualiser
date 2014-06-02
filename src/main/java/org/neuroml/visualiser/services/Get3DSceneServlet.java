@@ -45,57 +45,67 @@ public class Get3DSceneServlet extends HttpServlet
 	{
 		try
 		{
-			URL url = new URL(request.getParameter("url"));
-
-			// find all URLs if it's a folder
-			List<URL> neuroMLfiles = new ArrayList<URL>();
-			if(url.getFile().endsWith("nml"))
-			{
-				neuroMLfiles.add(url);
-			}
-			else
-			{
-				if(url.getProtocol().equals("http"))
+		
+			if (request.getParameterMap().containsKey("url")) {
+				URL url = new URL(request.getParameter("url"));
+			
+			
+			
+			
+				// find all URLs if it's a folder
+				List<URL> neuroMLfiles = new ArrayList<URL>();
+				if(url.getFile().endsWith("nml"))
 				{
-					HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-					InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-					BufferedReader br = new BufferedReader(new InputStreamReader(in));
-					String line = null;
-
-					while((line = br.readLine()) != null)
-					{
-						addURLIfPresent(neuroMLfiles, line, request.getParameter("url"));
-					}
-
+					neuroMLfiles.add(url);
 				}
-				else if(url.getProtocol().equals("file"))
+				else
 				{
-					File f = new File(url.getPath());
-
-					if(f != null && f.isDirectory())
+					if(url.getProtocol().equals("http"))
 					{
-						List<File> files = Arrays.asList(f.listFiles(new FilenameFilter()
+						HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+	
+						InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+						BufferedReader br = new BufferedReader(new InputStreamReader(in));
+						String line = null;
+	
+						while((line = br.readLine()) != null)
 						{
-							public boolean accept(File dir, String filename)
+							addURLIfPresent(neuroMLfiles, line, request.getParameter("url"));
+						}
+	
+					}
+					else if(url.getProtocol().equals("file"))
+					{
+						File f = new File(url.getPath());
+	
+						if(f != null && f.isDirectory())
+						{
+							List<File> files = Arrays.asList(f.listFiles(new FilenameFilter()
 							{
-								return filename.endsWith(".nml");
+								public boolean accept(File dir, String filename)
+								{
+									return filename.endsWith(".nml");
+								}
+							}));
+							for(File file : files)
+							{
+								neuroMLfiles.add(new URL("file://" + file.getAbsolutePath()));
 							}
-						}));
-						for(File file : files)
-						{
-							neuroMLfiles.add(new URL("file://" + file.getAbsolutePath()));
 						}
 					}
 				}
+	
+				NeuroMLModelInterpreter morphologyConverter = new NeuroMLModelInterpreter();
+				Scene scene = morphologyConverter.getSceneFromNeuroML(neuroMLfiles);
+				ObjectMapper mapper = new ObjectMapper();
+				response.setCharacterEncoding("UTF-8");
+				response.setContentType("application/json");
+				mapper.writeValue(response.getOutputStream(), scene);
 			}
-
-			NeuroMLModelInterpreter morphologyConverter = new NeuroMLModelInterpreter();
-			Scene scene = morphologyConverter.getSceneFromNeuroML(neuroMLfiles);
-			ObjectMapper mapper = new ObjectMapper();
-			response.setCharacterEncoding("UTF-8");
-			response.setContentType("application/json");
-			mapper.writeValue(response.getOutputStream(), scene);
+			else if (request.getParameterMap().containsKey("engine")) {
+				URL engine = new URL(request.getParameter("engine"));
+				
+			}
 		}
 		catch(Exception e)
 		{
