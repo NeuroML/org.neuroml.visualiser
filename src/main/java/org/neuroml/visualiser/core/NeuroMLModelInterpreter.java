@@ -219,7 +219,7 @@ public class NeuroMLModelInterpreter
 						attempts++;
 						neuromlComponent = _neuromlConverter.urlToNeuroML(componentURL);
 					}
-					catch(UnmarshalException e)
+					/*catch(UnmarshalException e)
 					{
 						if(e.getLinkedException() instanceof IOException)
 						{
@@ -232,7 +232,7 @@ public class NeuroMLModelInterpreter
 								componentURL=new URL(url.getProtocol() + "://" + url.getAuthority() + baseURL + component + ".cell.nml");
 							}
 						}
-					}
+					}*/
 					catch(Exception e)
 					{
 						throw e;
