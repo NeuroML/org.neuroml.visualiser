@@ -415,7 +415,11 @@ input{
 	color: white;
 }
 
-
 #helpbutton {
 	left: 130px;
+}
+.loading-image{
+	width:100px !important;
+	margin-top: 50px !important;
+	margin: 0 auto;
 }
